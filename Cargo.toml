@@ -1,0 +1,7 @@
+[package]
+name = "coat"
+version = "0.0.0"
+authors = ["Leopold Luley <git@leopoldluley.de>"]
+edition = "2018"
+
+[dependencies]
