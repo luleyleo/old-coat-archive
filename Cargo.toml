@@ -1,7 +1,10 @@
 [package]
 name = "coat"
+description = "Nothing yet"
 version = "0.0.0"
 authors = ["Leopold Luley <git@leopoldluley.de>"]
 edition = "2018"
+readme = "README.md"
+license = "MIT"
 
 [dependencies]
