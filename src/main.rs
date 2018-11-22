@@ -1,3 +1,7 @@
+
+include!("lib.rs");
+
 fn main() {
-    println!("Hello, world!");
+    ids!(TEST, FOO, BAR);
+    println!("Hello {}, {}, {}", TEST, FOO, BAR);
 }

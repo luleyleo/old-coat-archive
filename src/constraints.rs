@@ -1,0 +1,130 @@
+use crate::{Scalar, bounds::Size};
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct BoxConstraints {
+    pub min_width: Scalar,
+    pub min_height: Scalar,
+    pub max_width: Option<Scalar>,
+    pub max_height: Option<Scalar>,
+}
+
+impl BoxConstraints {
+    pub fn zero() -> Self {
+        BoxConstraints {
+            min_width: 0.0,
+            min_height: 0.0,
+            max_width: None,
+            max_height: None,
+        }
+    }
+
+    pub fn min(size: Size) -> Self {
+        BoxConstraints {
+            min_width: size.w,
+            min_height: size.h,
+            max_width: None,
+            max_height: None,
+        }
+    }
+
+    pub fn tight(size: Size) -> Self {
+        BoxConstraints {
+            min_width: size.w,
+            min_height: size.h,
+            max_width: Some(size.w),
+            max_height: Some(size.h),
+        }
+    }
+
+    pub fn min_width(mut self, width: Scalar) -> Self {
+        self.min_width = width;
+        self
+    }
+
+    pub fn min_height(mut self, height: Scalar) -> Self {
+        self.min_height = height;
+        self
+    }
+
+    pub fn max_width(mut self, width: Scalar) -> Self {
+        self.max_width = Some(width);
+        self
+    }
+
+    pub fn max_height(mut self, height: Scalar) -> Self {
+        self.max_height = Some(height);
+        self
+    }
+
+    pub fn grow_to_max(mut self) -> Self {
+        if let Some(max_width) = self.max_width {
+            self.min_width = max_width;
+        }
+        if let Some(max_height) = self.max_height {
+            self.min_height = max_height;
+        }
+        self
+    }
+
+    pub fn check_width(&self, width: Scalar) -> Scalar {
+        if width < self.min_width {
+            self.min_width
+        } else if let Some(max_width) = self.max_width {
+            if width > max_width {
+                max_width
+            } else {
+                width
+            }
+        } else {
+            width
+        }
+    }
+
+    pub fn check_height(&self, height: Scalar) -> Scalar {
+        if height < self.min_height {
+            self.min_height
+        } else if let Some(max_height) = self.max_height {
+            if height > max_height {
+                max_height
+            } else {
+                height
+            }
+        } else {
+            height
+        }
+    }
+
+    pub fn check_size(&self, size: Size) -> Size {
+        Size {
+            w: self.check_width(size.w),
+            h: self.check_height(size.h),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_check_width() {
+        let width = 10.0;
+
+        let larger = BoxConstraints::tight(Size::new(20.0, 0.0));
+        assert_eq!(larger.check_width(width), 20.0);
+
+        let smaller = BoxConstraints::tight(Size::new(5.0, 0.0));
+        assert_eq!(smaller.check_width(width), 5.0);
+    }
+
+    #[test]
+    fn test_check_height() {
+        let height = 10.0;
+
+        let larger = BoxConstraints::tight(Size::new(0.0, 20.0));
+        assert_eq!(larger.check_height(height), 20.0);
+
+        let smaller = BoxConstraints::tight(Size::new(0.0, 5.0));
+        assert_eq!(smaller.check_height(height), 5.0);
+    }
+}
