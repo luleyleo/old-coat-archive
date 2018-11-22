@@ -11,6 +11,14 @@ where
     C: Component,
     T: Component,
 {
+    pub fn new(props: C::Props) -> Self {
+        PropsBuilder {
+            props,
+            handler: None,
+            parent: 0,
+        }
+    }
+
     pub fn handle(mut self, handler: fn(C::Event) -> T::Msg) -> Self {
         self.handler = Some(handler);
         self
