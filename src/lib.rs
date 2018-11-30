@@ -15,3 +15,6 @@ pub use self::constraints::BoxConstraints;
 
 mod ui;
 pub use self::ui::{Ui, WidgetId};
+
+mod mutable;
+pub use self::mutable::Mut;

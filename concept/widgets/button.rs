@@ -38,7 +38,7 @@ impl Component for Button {
         State { hovered: false }
     }
 
-    fn update(msg: Msg, props: Props, state: &mut State) -> Option<Event> {
+    fn update(msg: Msg, state: Mut<State>) -> Option<Event> {
         match msg {
             Msg::TouchMoved { inside } => {
                 state.hovered = inside;
