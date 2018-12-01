@@ -12,19 +12,22 @@ impl WidgetId {
 }
 
 #[macro_export]
-macro_rules! ids_next {
-    ($val:expr, $id:ident) => {
-        const $id: u32 = $val + 1;
-    };
-    ($val:expr, $id:ident, $($ids:ident),+) => {
-        const $id: u32 = $val + 1;
-        ids_next!($val + 1, $($ids),+);
-    };
-}
-
-#[macro_export]
 macro_rules! ids {
-    ($($ids:ident),*) => {
-        ids_next!((line!() * 1000000), $($ids),+);
+    ($id:ident, $($ids:ident),*) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        enum Ids {
+            $id = line!() as isize * 1000000,
+            $($ids),*
+        }
+        impl Into<isize> for Ids {
+            fn into(self) -> isize {
+                self as isize
+            }
+        }
+        // because `use Ids::*` is not possible:
+        const $id: Ids = Ids::$id;
+        $(
+        const $ids: Ids = Ids::$ids;
+        )*
     };
 }
