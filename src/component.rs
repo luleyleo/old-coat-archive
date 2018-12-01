@@ -1,5 +1,4 @@
-use std::any::Any;
-use crate::{Ui, BoxConstraints, WidgetId, Size, PropsBuilder, MsgVec, Mut};
+use crate::{Ui, BoxConstraints, WidgetId, Size, PropsBuilder, MsgVec, Mut, Renderer};
 
 pub struct UpdateArgs<'a, Comp: Component> {
     pub msg: Comp::Msg,
@@ -21,12 +20,13 @@ pub trait Component: Sized {
 
     fn new<T: Component>() -> PropsBuilder<Self, T>;
 
-    fn init_state(props: Self::Props) -> Self::State;
+    fn init_state(props: &Self::Props) -> Self::State;
 
     fn update(args: UpdateArgs<Self>) -> Option<Self::Event>;
 
     fn view(args: ViewArgs<Self>);
 
+    #[allow(unused_variables)]
     fn layout(constraints: BoxConstraints, children: &[WidgetId], ui: &mut Ui) -> Size {
         if children.is_empty() {
             Size::default()
@@ -38,5 +38,10 @@ pub trait Component: Sized {
         }
     }
 
-    fn input(ui: &Ui) -> MsgVec<Self::Msg>;
+    fn input(ui: &Ui) -> MsgVec<Self::Msg> { MsgVec::default() }
+
+    fn derive_state(props: &Self::Props, state: Mut<Self::State>) {}
+
+    #[allow(unused_variables)]
+    fn render(state: &Self::State, renderer: Renderer) {}
 }

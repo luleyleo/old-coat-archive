@@ -10,3 +10,11 @@ license = "MIT"
 [dependencies]
 fnv = "1.0.6"
 smallvec = "0.6.6"
+winit = "0.18.0"
+gleam = "0.6.8"
+glutin = "0.19.0"
+euclid = "0.19.3"
+
+[dependencies.webrender]
+git = "https://github.com/servo/webrender.git"
+rev = "1ad9b79c3d19dec310077206002d09f5c7fb14cd"
