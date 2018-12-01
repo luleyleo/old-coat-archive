@@ -470,65 +470,108 @@ impl Component for Counter {
         }
     }
 
-    #[cfg(pure_human_macro_extended_split)]
+    /**
+     * Instead of using a `parent` function, you can call `add` after
+     * `set`ing a `Component`. All Components that are set afterwards
+     * are considered children of the last Component that `add` was called on.
+     * The only problem is that `add` has to borrow `Ui` which means it would
+     * be unavailable in the closure. The two solutions to this are:
+     * - Make the `Ui` an argument to the closure passed to `add`
+     * - Provide `add` with an `Rc<Cell<?>>` to tell the `Ui` about the indentation
+     */
+    #[cfg(pure_human_macro_indented)]
     fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
-        ids!{ui,
-            ROOT {
-                LABEL,
-            }
-        }
+        ids!(ROOT, LABEL, BOX, PLUS, CLEAR, MINUS);
 
         VBox::new()
-            .set(ROOT, ui);
-        {
-            Label::new()
-                .text(format!("{}", state.count))
-                .set(LABEL, ui);
+            .set(ROOT, ui)
+            .add(|ui|{
+                Label::new()
+                    .text(format!("{}", state.count))
+                    .set(LABEL, ui);
 
-            buttons(ROOT, state, ui);
-        }
+                HBox::new()
+                    .spacing(10.0)
+                    .set(BOX, ui)
+                    .add(||{
+                        Button::new()
+                            .label("+")
+                            .handle(|t| match t {
+                                Button::Event::Action(e) => Msg::Increment,
+                                _ => (),
+                            })
+                            .set(PLUS, ui);
+
+                        if state.count > 0 {
+                            Button::new()
+                                .label("C")
+                                .handle(|t| match t {
+                                    Button::Event::Action(e) => Msg::Set(0),
+                                    _ => (),
+                                })
+                                .set(CLEAR, ui);
+                        }
+
+                        Button::new()
+                            .label("-")
+                            .handle(|t| match t {
+                                Button::Event::Action(e) => Msg::Decrement,
+                                _ => (),
+                            })
+                            .set(MINUS, ui);
+                    });
+            });
+    }
+
+    /**
+     * This style makes it really easy to split the `view` function
+     */
+    #[cfg(pure_human_macro_indented_split)]
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+        ids!(ROOT, LABEL, BOX);
+
+        VBox::new()
+            .set(ROOT, ui)
+            .add(||{
+                Label::new()
+                    .text(format!("{}", state.count))
+                    .set(LABEL, ui);
+
+                HBox::new()
+                    .spacing(10.0)
+                    .set(BOX, ui)
+                    .add(|| buttons(state, ui));
+            });
     }
 }
 
 #[cfg(pure_human_macro_extended_split)]
-fn buttons(parent: usize, state: &State, ui: &mut Ui) {
-    ids! {ui,
-        BOX {
-            PLUS,
-            CLEAR,
-            MINUS,
-        }
-    }
+fn buttons(state: &State, ui: &mut Ui) {
+    ids!(PLUS, CLEAR, MINUS);
 
-    HBox::new()
-        .spacing(10.0)
-        .parent(parent)
-        .set(BOX, ui);
-    {
+    Button::new()
+        .label("+")
+        .handle(|t| match t {
+            Button::Event::Action(e) => Msg::Increment,
+            _ => (),
+        })
+        .set(PLUS, ui);
+
+    if state.count > 0 {
         Button::new()
-            .label("+")
+            .label("C")
             .handle(|t| match t {
-                Button::Event::Action(e) => Msg::Increment,
+                Button::Event::Action(e) => Msg::Set(0),
                 _ => (),
             })
-            .set(PLUS, ui);
-
-        if state.count > 0 {
-            Button::new()
-                .label("C")
-                .handle(|t| match t {
-                    Button::Event::Action(e) => Msg::Set(0),
-                    _ => (),
-                })
-                .set(CLEAR, ui);
-        }
-
-        Button::new()
-            .label("-")
-            .handle(|t| match t {
-                Button::Event::Action(e) => Msg::Decrement,
-                _ => (),
-            })
-            .set(MINUS, ui);
+            .set(CLEAR, ui);
     }
+
+    Button::new()
+        .label("-")
+        .handle(|t| match t {
+            Button::Event::Action(e) => Msg::Decrement,
+            _ => (),
+        })
+        .set(MINUS, ui);
 }
