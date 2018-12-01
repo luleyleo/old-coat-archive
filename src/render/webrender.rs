@@ -4,15 +4,11 @@ use winit;
 use euclid;
 
 use webrender::{self, api::*};
-use crate::{Ui, Component, WidgetId, Size, Window};
+use crate::{WidgetData, Component, WidgetId, Size, Window, AppEvent, AppProps};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
-pub fn run<State, Msg>(window: Window<State, Msg>)
-where
-    State: 'static,
-    Msg: 'static,
-{
+pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Window<Comp::State, Comp::Msg, Comp>) {
     let mut eventloop = EventLoop::new();
     let context_builder = glutin::ContextBuilder::new()
         .with_gl(glutin::GlRequest::GlThenGles {
@@ -55,7 +51,7 @@ where
             .get_inner_size()
             .unwrap()
             .to_physical(device_pixel_ratio as f64);
-        DeviceUintSize::new(size.width as u32, size.height as u32)
+        DeviceIntSize::new(size.width as i32, size.height as i32)
     };
     let notifier = Box::new(Notifier::new(eventloop.create_proxy()));
     let (mut renderer, sender) = webrender::Renderer::new(gl.clone(), notifier, opts, None).unwrap();
@@ -70,9 +66,9 @@ where
     txn.set_root_pipeline(pipeline_id);
     api.send_transaction(document_id, txn);
 
-    let mut ui = Ui::new();
-    ui.window_size = Size::new(600.0, 400.0);
-    let app_id = ui.new_widget();
+    let mut data = WidgetData::default();
+    let app_id = data.fresh_id();
+    data.typeid[app_id.get()] = std::any::TypeId::of::<Comp>();
 
     'main: loop {
         let events = eventloop.next();
@@ -101,33 +97,12 @@ where
             };
         }
 
-        let root_widget = ui.root_widget;
-        app(app_id, &mut UpdateContext::new(&mut ui, root_widget));
-
         {
             let mut builder = DisplayListBuilder::new(pipeline_id, layout_size);
             let mut txn = Transaction::new();
-            ui.update(|primitive, ui| {
-                use visage::primitive::{Rectangle, PrimitiveKind};
-                match primitive.kind {
-                    PrimitiveKind::Rectangle => {
-                        let position = ui.position[*primitive.id];
-                        let size = ui.size[*primitive.id];
-                        let style: <Rectangle as Widget>::Style = *ui.styles.get(primitive.id).unwrap().downcast_ref().unwrap();
-                        let color = style.color;
 
-                        let mut info = LayoutPrimitiveInfo::new(LayoutRect::new(
-                            LayoutPoint::new(position.x, position.y),
-                            LayoutSize::new(size.w, size.h)
-                        ));
-                        info.tag = Some((0, 1));
-                        builder.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
-                    }
-                    PrimitiveKind::Text => {
+            // Render here
 
-                    }
-                }
-            });
             txn.set_display_list(
                 epoch,
                 None,

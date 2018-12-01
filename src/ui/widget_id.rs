@@ -1,12 +1,12 @@
 #[derive(Clone, Copy, Debug)]
-pub struct WidgetId(u32);
+pub struct WidgetId(usize);
 
 impl WidgetId {
-    pub(crate) fn new(id: u32) -> Self {
+    pub(crate) fn new(id: usize) -> Self {
         WidgetId(id)
     }
 
-    pub fn get(&self) -> u32 {
+    pub fn get(&self) -> usize {
         self.0
     }
 }
