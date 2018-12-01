@@ -1,4 +1,4 @@
-use crate::{Ui, BoxConstraints, WidgetId, Size, PropsBuilder, MsgVec, Mut, Renderer};
+use crate::{Ui, BoxConstraints, WidgetId, Size, PropsBuilder, MsgVec, Mut, Renderer, Bounds};
 
 pub struct UpdateArgs<'a, Comp: Component> {
     pub msg: Comp::Msg,
@@ -38,10 +38,12 @@ pub trait Component: Sized {
         }
     }
 
+    #[allow(unused_variables)]
     fn input(ui: &Ui) -> MsgVec<Self::Msg> { MsgVec::default() }
 
+    #[allow(unused_variables)]
     fn derive_state(props: &Self::Props, state: Mut<Self::State>) {}
 
     #[allow(unused_variables)]
-    fn render(state: &Self::State, renderer: Renderer) {}
+    fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}
 }

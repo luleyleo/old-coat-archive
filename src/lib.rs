@@ -2,7 +2,7 @@ mod types;
 pub use self::types::{Scalar, MsgVec, Renderer};
 
 mod bounds;
-pub use self::bounds::{Position, Size};
+pub use self::bounds::{Position, Size, Bounds};
 
 mod builder;
 pub use self::builder::PropsBuilder;

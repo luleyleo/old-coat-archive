@@ -1,4 +1,4 @@
-use crate::{Component, PropsBuilder, ViewArgs, UpdateArgs, Color};
+use crate::{Component, PropsBuilder, ViewArgs, UpdateArgs, Color, Renderer, Bounds};
 
 pub struct Rectangle;
 
@@ -23,7 +23,21 @@ impl Component for Rectangle {
         *props
     }
 
-    fn update(args: UpdateArgs<Self>) -> Option<Self::Event> { None }
+    fn update(_: UpdateArgs<Self>) -> Option<Self::Event> { None }
 
-    fn view(args: ViewArgs<Self>) {}
+    fn view(_: ViewArgs<Self>) {}
+
+    fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
+        use webrender::api::*;
+
+        let position = bounds.position;
+        let size = bounds.size;
+        let color = state.color;
+
+        let info = LayoutPrimitiveInfo::new(LayoutRect::new(
+            LayoutPoint::new(position.x, position.y),
+            LayoutSize::new(size.w, size.h)
+        ));
+        renderer.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
+    }
 }

@@ -1,5 +1,10 @@
 use crate::Scalar;
 
+pub struct Bounds {
+    pub position: Position,
+    pub size: Size,
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Position {
     pub x: Scalar,
