@@ -1,4 +1,4 @@
-use crate::{Component, Ui};
+use crate::{Component, UiView};
 
 pub struct PropsBuilder<C: Component, T: Component> {
     props: C::Props,
@@ -29,8 +29,8 @@ where
         self
     }
 
-    pub fn set(self, id: usize, ui: &mut Ui) {
-        // Update the Ui
+    pub fn set(self, id: usize, ui: &mut UiView) {
+        // Update the UiView
     }
 }
 

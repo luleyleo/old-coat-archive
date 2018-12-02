@@ -1,22 +1,22 @@
 use std::any::{Any, TypeId};
 use fnv::FnvHashMap;
-use crate::{WidgetId, Position, Size};
+use crate::{Cid, Position, Size};
 
 #[derive(Default)]
-pub struct WidgetData {
+pub struct UiData {
     pub(crate) typeid: Vec<TypeId>,
-    pub(crate) parent: Vec<Option<WidgetId>>,
-    pub(crate) children: Vec<Vec<WidgetId>>,
-    pub(crate) creations: Vec<FnvHashMap<usize, WidgetId>>,
+    pub(crate) parent: Vec<Option<Cid>>,
+    pub(crate) children: Vec<Vec<Cid>>,
+    pub(crate) creations: Vec<FnvHashMap<usize, Cid>>,
     pub(crate) position: Vec<Position>,
     pub(crate) size: Vec<Size>,
     pub(crate) state: Vec<Option<Box<Any>>>,
     pub(crate) id_count: usize,
 }
 
-impl WidgetData {
-    pub fn fresh_id(&mut self) -> WidgetId {
-        let id = WidgetId::new(self.id_count);
+impl UiData {
+    pub fn fresh_id(&mut self) -> Cid {
+        let id = Cid::new(self.id_count);
         self.id_count += 1;
 
         self.typeid.push(TypeId::of::<()>());

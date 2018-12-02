@@ -1,15 +1,15 @@
-use crate::{Ui, BoxConstraints, WidgetId, Size, PropsBuilder, MsgVec, Mut, Renderer, Bounds};
+use crate::{UiView, UiUpdate, UiLayout, UiInput, BoxConstraints, Cid, Size, PropsBuilder, MsgVec, Mut, Renderer, Bounds};
 
 pub struct UpdateArgs<'a, Comp: Component> {
     pub msg: Comp::Msg,
     pub state: Mut<'a, Comp::State>,
-    pub ui: &'a mut Ui,
+    pub ui: &'a mut UiUpdate,
 }
 
 pub struct ViewArgs<'a, Comp: Component> {
     pub props: &'a Comp::Props,
     pub state: &'a Comp::State,
-    pub ui: &'a mut Ui,
+    pub ui: &'a mut UiView,
 }
 
 pub trait Component: Sized {
@@ -27,7 +27,7 @@ pub trait Component: Sized {
     fn view(args: ViewArgs<Self>);
 
     #[allow(unused_variables)]
-    fn layout(constraints: BoxConstraints, children: &[WidgetId], ui: &mut Ui) -> Size {
+    fn layout(constraints: BoxConstraints, children: &[Cid], ui: &mut UiLayout) -> Size {
         if children.is_empty() {
             Size::default()
         } else {
@@ -39,7 +39,7 @@ pub trait Component: Sized {
     }
 
     #[allow(unused_variables)]
-    fn input(ui: &Ui) -> MsgVec<Self::Msg> { MsgVec::default() }
+    fn input(ui: &UiInput) -> MsgVec<Self::Msg> { MsgVec::default() }
 
     #[allow(unused_variables)]
     fn derive_state(props: &Self::Props, state: Mut<Self::State>) {}

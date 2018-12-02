@@ -4,7 +4,7 @@ use winit;
 use euclid;
 
 use webrender::{self, api::*};
-use crate::{WidgetData, Component, WidgetId, Size, Window, AppEvent, AppProps};
+use crate::{UiData, Component, Cid, Size, Window, AppEvent, AppProps};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -66,7 +66,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
     txn.set_root_pipeline(pipeline_id);
     api.send_transaction(document_id, txn);
 
-    let mut data = WidgetData::default();
+    let mut data = UiData::default();
     let app_id = data.fresh_id();
     data.typeid[app_id.get()] = std::any::TypeId::of::<Comp>();
 

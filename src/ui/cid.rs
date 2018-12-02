@@ -1,9 +1,9 @@
 #[derive(Clone, Copy, Debug)]
-pub struct WidgetId(usize);
+pub struct Cid(usize);
 
-impl WidgetId {
+impl Cid {
     pub(crate) fn new(id: usize) -> Self {
-        WidgetId(id)
+        Cid(id)
     }
 
     pub fn get(&self) -> usize {

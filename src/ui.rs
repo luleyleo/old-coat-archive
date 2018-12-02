@@ -1,13 +1,18 @@
-use crate::Size;
 
-mod widget_data;
-pub use self::widget_data::WidgetData;
+mod data;
+pub use self::data::UiData;
 
-mod widget_id;
-pub use self::widget_id::WidgetId;
+mod cid;
+pub use self::cid::Cid;
 
-pub struct Ui {
-    data: WidgetData,
-    root: WidgetId,
-    window_size: Size,
-}
+mod view;
+pub use self::view::UiView;
+
+mod update;
+pub use self::update::UiUpdate;
+
+mod layout;
+pub use self::layout::UiLayout;
+
+mod input;
+pub use self::input::UiInput;
