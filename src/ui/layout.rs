@@ -1,13 +1,15 @@
-use crate::UiData;
+use crate::{BoxConstraints, Cid, Size, UiData};
 
-pub struct UiLayout(UiData);
+pub struct UiLayout<'a> {
+    data: &'a mut UiData,
+}
 
-impl UiLayout {
-    pub(crate) fn new(data: UiData) -> Self {
-        UiLayout(data)
+impl<'a> UiLayout<'a> {
+    pub(crate) fn new(data: &'a mut UiData) -> Self {
+        UiLayout { data }
     }
 
-    pub(crate) fn unwrap(self) -> UiData {
-        self.0
+    pub fn size(&mut self, child: Cid, constraints: BoxConstraints) -> Size {
+        Size::default()
     }
 }

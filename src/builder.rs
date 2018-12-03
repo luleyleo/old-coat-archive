@@ -30,7 +30,7 @@ where
     }
 
     pub fn set(self, id: usize, ui: &mut UiView) {
-        // Update the UiView
+        ui.set(id, self);
     }
 }
 
