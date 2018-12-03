@@ -1,4 +1,5 @@
 use crate::{Cid, Position, Size};
+use crate::component::ComponentPointer;
 use fnv::FnvHashMap;
 use std::any::{Any, TypeId};
 
@@ -7,6 +8,8 @@ use std::any::{Any, TypeId};
 pub struct UiData {
     /// The `TypeId` of the `Component` behind a `Cid`.
     pub(crate) typeid: Vec<TypeId>,
+    /// A "pointer" to dynamic versions of a `Component`s functions
+    pub(crate) pointer: Vec<ComponentPointer>,
     /// The parent of a `Component` might be None if it is
     /// the ui root or something went wrong.
     pub(crate) parent: Vec<Option<Cid>>,
@@ -39,6 +42,7 @@ impl UiData {
         self.id_count += 1;
 
         self.typeid.push(TypeId::of::<()>());
+        self.pointer.push(ComponentPointer::default());
         self.parent.push(None);
         self.children.push(Vec::new());
         self.creations.push(FnvHashMap::default());

@@ -1,4 +1,5 @@
 use crate::{Cid, Component, PropsBuilder, UiData, ViewArgs};
+use crate::component::ComponentPointerTrait;
 use std::any::TypeId;
 
 pub struct UiView<'a> {
@@ -25,9 +26,12 @@ impl<'a> UiView<'a> {
             .unwrap_or_else(|| {
                 let cid = self.data.fresh_id();
                 self.data.creations[self.current.get()].insert(id, cid);
+
                 self.data.typeid[cid.get()] = TypeId::of::<C>();
+                self.data.pointer[cid.get()] = C::pointer();
                 self.data.parent[cid.get()] = Some(self.current);
                 self.data.state[cid.get()] = Some(Box::new(C::init_state(&*builder)));
+
                 cid
             });
         let state = self.data.state[cid.get()].take().unwrap();

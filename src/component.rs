@@ -2,6 +2,7 @@ use crate::{
     Bounds, BoxConstraints, Cid, MsgVec, Mut, PropsBuilder, Renderer, Size, UiInput, UiLayout,
     UiUpdate, UiView,
 };
+use std::any::Any;
 
 pub struct UpdateArgs<'a, 'b: 'a, Comp: Component> {
     pub msg: Comp::Msg,
@@ -53,4 +54,26 @@ pub trait Component: Sized + 'static {
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}
 }
 
-pub struct ComponentPointer {}
+pub(crate) trait ComponentPointerTrait: Component {
+    fn pointer() -> ComponentPointer;
+}
+
+impl<C> ComponentPointerTrait for C where C: Component {
+    fn pointer() -> ComponentPointer {
+        ComponentPointer {
+            layout: Self::layout,
+        }
+    }
+}
+
+pub(crate) struct ComponentPointer {
+    pub layout: fn(constraints: BoxConstraints, children: &[Cid], ui: &mut UiLayout) -> Size,
+}
+
+impl Default for ComponentPointer {
+    fn default() -> Self {
+        ComponentPointer {
+            layout: |_, _, _| panic!("Called `layout` on default `ComponentPointer`"),
+        }
+    }
+}
