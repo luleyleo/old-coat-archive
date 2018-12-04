@@ -1,4 +1,4 @@
-use crate::{Cid, Component, PropsBuilder, UiData, ViewArgs};
+use crate::{Cid, Component, AppProps, AppEvent, PropsBuilder, UiData, ViewArgs};
 use crate::component::ComponentPointerTrait;
 use std::any::TypeId;
 
@@ -13,6 +13,26 @@ impl<'a> UiView<'a> {
             data,
             current: start,
         }
+    }
+
+    pub(crate) fn start<Root>(&mut self, props: AppProps) where Root: Component<Props=AppProps, Event=AppEvent> {
+        let root = self.current;
+        if self.data.typeid[root.get()] == TypeId::of::<()>() {
+            self.data.typeid[root.get()] = TypeId::of::<Root>();
+            self.data.pointer[root.get()] = Root::pointer();
+            self.data.parent[root.get()] = Some(self.current);
+            self.data.state[root.get()] = Some(Box::new(Root::init_state(&props)));
+        }
+
+        let state = self.data.state[root.get()].take().unwrap();
+
+        Root::view(ViewArgs {
+            props: &props,
+            state: state.downcast_ref().unwrap(),
+            ui: self,
+        });
+
+        self.data.state[root.get()] = Some(state);
     }
 
     pub fn set<C, T>(&mut self, id: usize, builder: PropsBuilder<C, T>)
