@@ -4,7 +4,7 @@ use winit;
 use euclid;
 
 use webrender::{self, api::*};
-use crate::{UiData, Component, Cid, Size, Window, AppEvent, AppProps};
+use crate::{UiData, UiView, UiLayout, Component, Cid, Size, Window, AppEvent, AppProps, BoxConstraints};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -68,7 +68,6 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
 
     let mut data = UiData::default();
     let app_id = data.fresh_id();
-    data.typeid[app_id.get()] = std::any::TypeId::of::<Comp>();
 
     'main: loop {
         let events = eventloop.next();
@@ -101,7 +100,11 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
             let mut builder = DisplayListBuilder::new(pipeline_id, layout_size);
             let mut txn = Transaction::new();
 
-            // Render here
+            UiView::new(&mut data, app_id)
+                .start::<Comp>(AppProps::default());
+
+            UiLayout::new(&mut data)
+                .size(app_id, BoxConstraints::tight(Size::new(600.0, 400.0)));
 
             txn.set_display_list(
                 epoch,
