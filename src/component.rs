@@ -2,7 +2,6 @@ use crate::{
     Bounds, BoxConstraints, Cid, MsgVec, Mut, PropsBuilder, Renderer, Size, UiInput, UiLayout,
     UiUpdate, UiView,
 };
-use std::any::Any;
 
 pub struct UpdateArgs<'a, 'b: 'a, Comp: Component> {
     pub msg: Comp::Msg,
@@ -22,7 +21,7 @@ pub trait Component: Sized + 'static {
     type Msg: Sized + 'static;
     type Event: Sized + 'static;
 
-    fn new<T: Component>() -> PropsBuilder<Self, T>;
+    fn new() -> PropsBuilder<Self>;
 
     fn init_state(props: &Self::Props) -> Self::State;
 

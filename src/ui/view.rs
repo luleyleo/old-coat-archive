@@ -1,4 +1,4 @@
-use crate::{Cid, Component, AppProps, AppEvent, PropsBuilder, UiData, ViewArgs};
+use crate::{Cid, Component, AppProps, AppEvent, PropsBuilder, ReactivePropsBuilder, UiData, ViewArgs};
 use crate::component::ComponentPointerTrait;
 use std::any::TypeId;
 
@@ -35,11 +35,15 @@ impl<'a> UiView<'a> {
         self.data.state[root.get()] = Some(state);
     }
 
-    pub fn set<C, T>(&mut self, id: usize, builder: PropsBuilder<C, T>)
+    pub fn set_reactive<C, T>(&mut self, id: usize, builder: ReactivePropsBuilder<C, T>)
     where
         C: Component,
         T: Component,
     {
+        self.set(id, builder.base);
+    }
+
+    pub fn set<C>(&mut self, id: usize, builder: PropsBuilder<C>) where C: Component {
         let cid = self.data.creations[self.current.get()]
             .get(&id)
             .cloned()

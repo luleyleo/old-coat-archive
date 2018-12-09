@@ -9,7 +9,7 @@ impl Component for DevApp {
     type Msg = ();
     type Event = AppEvent;
 
-    fn new<T: Component>() -> PropsBuilder<Self, T> {
+    fn new() -> PropsBuilder<Self> {
         PropsBuilder::new(AppProps::default())
     }
 
@@ -17,7 +17,11 @@ impl Component for DevApp {
 
     fn update(args: UpdateArgs<Self>) -> Option<Self::Event> { None }
 
-    fn view(args: ViewArgs<Self>) {}
+    fn view(args: ViewArgs<Self>) {
+        Rectangle::new()
+            .color(Color::rgb(0.1, 0.4, 0.1))
+            .set(0, args.ui);
+    }
 }
 
 fn main() {

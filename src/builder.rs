@@ -1,32 +1,26 @@
-use crate::{Component, UiView};
+use crate::{Component, UiView, Rectangle};
 
-pub struct PropsBuilder<C: Component, T: Component> {
-    props: C::Props,
-    handler: Option<fn(C::Event) -> T::Msg>,
-    parent: usize,
+pub struct PropsBuilder<C: Component> {
+    pub(crate) props: C::Props,
 }
 
-impl<C, T> PropsBuilder<C, T>
-where
-    C: Component,
-    T: Component,
-{
+pub struct ReactivePropsBuilder<C: Component, T: Component> {
+    pub(crate) base: PropsBuilder<C>,
+    pub(crate) handler: fn(C::Event) -> T::Msg,
+}
+
+impl<C> PropsBuilder<C> where C: Component {
     pub fn new(props: C::Props) -> Self {
         PropsBuilder {
             props,
-            handler: None,
-            parent: 0,
         }
     }
 
-    pub fn handle(mut self, handler: fn(C::Event) -> T::Msg) -> Self {
-        self.handler = Some(handler);
-        self
-    }
-
-    pub fn parent(mut self, parent: usize) -> Self {
-        self.parent = parent;
-        self
+    pub fn handle<T>(self, handler: fn(C::Event) -> T::Msg) -> ReactivePropsBuilder<C, T> where T: Component {
+        ReactivePropsBuilder {
+            base: self,
+            handler,
+        }
     }
 
     pub fn set(self, id: usize, ui: &mut UiView) {
@@ -34,14 +28,20 @@ where
     }
 }
 
-impl<C: Component, T: Component> std::ops::Deref for PropsBuilder<C, T> {
+impl<C, T> ReactivePropsBuilder<C, T> where C: Component, T: Component {
+    pub fn set(self, id: usize, ui: &mut UiView) {
+        ui.set_reactive(id, self);
+    }
+}
+
+impl<C: Component> std::ops::Deref for PropsBuilder<C> {
     type Target = C::Props;
     fn deref(&self) -> &Self::Target {
         &self.props
     }
 }
 
-impl<C: Component, T: Component> std::ops::DerefMut for PropsBuilder<C, T> {
+impl<C: Component> std::ops::DerefMut for PropsBuilder<C> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.props
     }

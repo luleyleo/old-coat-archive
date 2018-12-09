@@ -1,4 +1,4 @@
-use crate::{Component, PropsBuilder, ViewArgs, UpdateArgs, Color, Renderer, Bounds};
+use crate::{Component, PropsBuilder, ViewArgs, UpdateArgs, Color, Renderer, Bounds, BoxConstraints, Cid, UiLayout, Size};
 
 pub struct Rectangle;
 
@@ -7,13 +7,20 @@ pub struct Props {
     color: Color,
 }
 
+impl PropsBuilder<Rectangle> {
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+}
+
 impl Component for Rectangle {
     type Props = Props;
     type State = Props;
     type Msg = ();
     type Event = ();
 
-    fn new<T: Component>() -> PropsBuilder<Self, T> {
+    fn new() -> PropsBuilder<Self> {
         PropsBuilder::new(Props {
             color: Color::default()
         })
@@ -26,6 +33,21 @@ impl Component for Rectangle {
     fn update(_: UpdateArgs<Self>) -> Option<Self::Event> { None }
 
     fn view(_: ViewArgs<Self>) {}
+
+    fn layout(constraints: BoxConstraints, children: &[Cid], _ui: &mut UiLayout) -> Size {
+        assert_eq!(children.len(), 0);
+
+        if let Some(width) = constraints.max_width {
+            if let Some(height) = constraints.max_height {
+                return Size {
+                    w: width,
+                    h: height,
+                }
+            }
+        }
+
+        Size::default()
+    }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
         use webrender::api::*;
