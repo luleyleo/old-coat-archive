@@ -18,9 +18,11 @@ impl Component for DevApp {
     fn update(args: UpdateArgs<Self>) -> Option<Self::Event> { None }
 
     fn view(args: ViewArgs<Self>) {
+        ids!(Background);
+
         Rectangle::new()
             .color(Color::rgb(0.1, 0.4, 0.1))
-            .set(0, args.ui);
+            .set(Background, args.ui);
     }
 }
 

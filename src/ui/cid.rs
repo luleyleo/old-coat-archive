@@ -13,21 +13,13 @@ impl Cid {
 
 #[macro_export]
 macro_rules! ids {
-    ($id:ident, $($ids:ident),*) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        enum Ids {
-            $id = line!() as isize * 1000000,
-            $($ids),*
-        }
-        impl Into<isize> for Ids {
-            fn into(self) -> isize {
-                self as isize
-            }
-        }
-        // because `use Ids::*` is not possible:
-        const $id: Ids = Ids::$id;
+    ($($id:ident),*,) => {
+        ids!($($id),*);
+    };
+    ($($id:ident),*) => {
         $(
-        const $ids: Ids = Ids::$ids;
+            #[derive(Debug, Clone, Copy)]
+            struct $id;
         )*
     };
 }

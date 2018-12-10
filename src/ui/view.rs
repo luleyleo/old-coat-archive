@@ -35,7 +35,7 @@ impl<'a> UiView<'a> {
         self.data.state[root.get()] = Some(state);
     }
 
-    pub fn set_reactive<C, T>(&mut self, id: usize, builder: ReactivePropsBuilder<C, T>)
+    pub fn set_reactive<C, T>(&mut self, id: TypeId, builder: ReactivePropsBuilder<C, T>)
     where
         C: Component,
         T: Component,
@@ -43,7 +43,7 @@ impl<'a> UiView<'a> {
         self.set(id, builder.base);
     }
 
-    pub fn set<C>(&mut self, id: usize, builder: PropsBuilder<C>) where C: Component {
+    pub fn set<C>(&mut self, id: TypeId, builder: PropsBuilder<C>) where C: Component {
         let cid = self.data.creations[self.current.get()]
             .get(&id)
             .cloned()

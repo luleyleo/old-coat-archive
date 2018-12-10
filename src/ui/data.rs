@@ -17,8 +17,8 @@ pub struct UiData {
     /// is being used to render and layout the comps like a graph.
     pub(crate) children: Vec<Vec<Cid>>,
     /// Similar to `UiData::children` but maps the per-component
-    /// usize id to the "more global" `Cid` used outside of it.
-    pub(crate) creations: Vec<FnvHashMap<usize, Cid>>,
+    /// child identifier to the associated `Cid` used to index the `UiData`.
+    pub(crate) creations: Vec<FnvHashMap<TypeId, Cid>>,
     /// Stores a `Component`s `Position` relative to its parent
     pub(crate) position: Vec<Position>,
     /// Stores the `Component`s final `Size` that fits its `BoxConstraints`
