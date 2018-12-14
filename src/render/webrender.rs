@@ -10,6 +10,7 @@ use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
 pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Window<Comp::State, Comp::Msg, Comp>) {
+    let mut wsize = Size::new(600.0, 400.0);
     let mut eventloop = EventLoop::new();
     let context_builder = glutin::ContextBuilder::new()
         .with_gl(glutin::GlRequest::GlThenGles {
@@ -19,7 +20,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
     let window_builder = winit::WindowBuilder::new()
         .with_title(window.title)
         .with_multitouch()
-        .with_dimensions(winit::dpi::LogicalSize::new(600.0, 400.0));
+        .with_dimensions(winit::dpi::LogicalSize::new(wsize.w as f64, wsize.h as f64));
     let window = glutin::GlWindow::new(window_builder, context_builder, eventloop.events_loop())
         .unwrap();
 
@@ -74,37 +75,30 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
 
         for event in events {
             match event {
-                winit::Event::WindowEvent {
-                    event: winit::WindowEvent::CloseRequested,
-                    ..
-                } => break 'main,
-                winit::Event::WindowEvent {
-                    event: winit::WindowEvent::KeyboardInput {
-                        input: winit::KeyboardInput {
-                            state: winit::ElementState::Pressed,
-                            virtual_keycode: Some(key),
-                            ..
-                        },
-                        ..
-                    },
-                    ..
-                } => match key {
-                    winit::VirtualKeyCode::Escape => break 'main,
-                    _ => ()
+                winit::Event::WindowEvent { event, .. } => {
+                    match event {
+                        winit::WindowEvent::CloseRequested => {
+                            break 'main;
+                        }
+                        winit::WindowEvent::Resized(lsize) => {
+                            wsize = Size::new(lsize.width as f32, lsize.height as f32);
+                        }
+                        _ => ()
+                    }
                 }
                 _ => ()
-            };
+            }
         }
 
         {
-            let mut builder = DisplayListBuilder::new(pipeline_id, layout_size);
+            let mut builder = DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
             let mut txn = Transaction::new();
 
             UiView::new(&mut data, app_id)
                 .start::<Comp>(AppProps::default());
 
             UiLayout::new(&mut data)
-                .size(app_id, BoxConstraints::tight(Size::new(600.0, 400.0)));
+                .size(app_id, BoxConstraints::tight(wsize));
 
             UiRender::new(&data, app_id)
                 .render(&mut builder);
@@ -121,7 +115,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
         }
 
         renderer.update();
-        renderer.render(framebuffer_size).unwrap();
+        renderer.render(DeviceIntSize::new(wsize.w as i32, wsize.h as i32)).unwrap();
         let _ = renderer.flush_pipeline_info();
         window.swap_buffers().ok();
     }
