@@ -4,7 +4,8 @@ use winit;
 use euclid;
 
 use webrender::{self, api::*};
-use crate::{UiData, UiView, UiLayout, Component, Cid, Size, Window, AppEvent, AppProps, BoxConstraints};
+use crate::{UiData, UiView, UiLayout, Component, Size, Window, AppEvent, AppProps, BoxConstraints};
+use crate::ui::UiRender;
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -41,7 +42,6 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
     let opts = webrender::RendererOptions {
         device_pixel_ratio,
         clear_color: Some(ColorF::new(0.1, 0.1, 0.1, 1.0)),
-        //scatter_gpu_cache_updates: false,
         debug_flags: webrender::DebugFlags::ECHO_DRIVER_MESSAGES,
         ..webrender::RendererOptions::default()
     };
@@ -105,6 +105,9 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
 
             UiLayout::new(&mut data)
                 .size(app_id, BoxConstraints::tight(Size::new(600.0, 400.0)));
+
+            UiRender::new(&data, app_id)
+                .render(&mut builder);
 
             txn.set_display_list(
                 epoch,

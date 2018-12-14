@@ -1,4 +1,3 @@
-
 include!("lib.rs");
 
 struct DevApp;

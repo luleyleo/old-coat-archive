@@ -20,7 +20,6 @@ impl<'a> UiView<'a> {
         if self.data.typeid[root.get()] == TypeId::of::<()>() {
             self.data.typeid[root.get()] = TypeId::of::<Root>();
             self.data.pointer[root.get()] = Root::pointer();
-            self.data.parent[root.get()] = Some(self.current);
             self.data.state[root.get()] = Some(Box::new(Root::init_state(&props)));
         }
 
@@ -54,6 +53,7 @@ impl<'a> UiView<'a> {
                 self.data.typeid[cid.get()] = TypeId::of::<C>();
                 self.data.pointer[cid.get()] = C::pointer();
                 self.data.parent[cid.get()] = Some(self.current);
+                self.data.children[self.current.get()].push(cid);
                 self.data.state[cid.get()] = Some(Box::new(C::init_state(&*builder)));
 
                 cid

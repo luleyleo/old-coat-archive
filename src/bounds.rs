@@ -5,6 +5,12 @@ pub struct Bounds {
     pub size: Size,
 }
 
+impl Bounds {
+    pub fn new(position: Position, size: Size) -> Self {
+        Bounds { position, size }
+    }
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Position {
     pub x: Scalar,

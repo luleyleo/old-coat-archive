@@ -20,6 +20,10 @@ impl<'a> UiLayout<'a> {
 
         let proposed = layout(constraints, unsafe { &*children }, self);
 
-        constraints.check_size(proposed)
+        let size = constraints.check_size(proposed);
+
+        self.data.size[child.get()] = size;
+
+        size
     }
 }

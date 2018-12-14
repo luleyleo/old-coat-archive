@@ -16,3 +16,6 @@ pub use self::layout::UiLayout;
 
 mod input;
 pub use self::input::UiInput;
+
+mod render;
+pub use self::render::UiRender;
