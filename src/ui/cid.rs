@@ -6,6 +6,10 @@ impl Cid {
         Cid(id)
     }
 
+    pub(crate) fn invalid() -> Self {
+        Cid(std::usize::MAX)
+    }
+
     pub fn get(&self) -> usize {
         self.0
     }
@@ -20,6 +24,11 @@ macro_rules! ids {
         $(
             #[derive(Debug, Clone, Copy)]
             struct $id;
+            impl crate::Named for $id {
+                fn name() -> &'static str {
+                    stringify!($id)
+                }
+            }
         )*
     };
 }

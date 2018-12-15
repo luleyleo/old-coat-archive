@@ -1,5 +1,4 @@
-use crate::{Component, UiView};
-use std::any::TypeId;
+use crate::{Component, UiView, Named};
 
 pub struct PropsBuilder<C: Component> {
     pub(crate) props: C::Props,
@@ -24,14 +23,14 @@ impl<C> PropsBuilder<C> where C: Component {
         }
     }
 
-    pub fn set<ID>(self, _id: ID, ui: &mut UiView) where ID: 'static {
-        ui.set(TypeId::of::<ID>(), self);
+    pub fn set<ID>(self, id: ID, ui: &mut UiView) where ID: Named + 'static {
+        ui.set(id, self);
     }
 }
 
 impl<C, T> ReactivePropsBuilder<C, T> where C: Component, T: Component {
-    pub fn set<ID>(self, _id: ID, ui: &mut UiView) where ID: 'static {
-        ui.set_reactive(TypeId::of::<ID>(), self);
+    pub fn set<ID>(self, id: ID, ui: &mut UiView) where ID: Named + 'static {
+        ui.set_reactive(id, self);
     }
 }
 

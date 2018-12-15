@@ -2,19 +2,23 @@ use crate::{Cid, Position, Size};
 use crate::component::ComponentPointer;
 use fnv::FnvHashMap;
 use std::any::{Any, TypeId};
+use smallvec::SmallVec;
+use log::trace;
 
 /// Contains all data that is necessary for the ui
 #[derive(Default)]
 pub struct UiData {
-    /// The `TypeId` of the `Component` behind a `Cid`.
+    /// The `TypeId` of the `Component` behind a `Cid`
     pub(crate) typeid: Vec<TypeId>,
+    /// A `stringify!()`ed version of the `creations` id
+    pub(crate) name: Vec<&'static str>,
     /// A "pointer" to dynamic versions of a `Component`s functions
     pub(crate) pointer: Vec<ComponentPointer>,
     /// The parent of a `Component` might be None if it is
     /// the ui root or something went wrong.
     pub(crate) parent: Vec<Option<Cid>>,
     /// Lists all children of a `Component` as `Cid`s and
-    /// is being used to render and layout the comps like a graph.
+    /// is being used to render and layout the comps like a graph
     pub(crate) children: Vec<Vec<Cid>>,
     /// Similar to `UiData::children` but maps the per-component
     /// child identifier to the associated `Cid` used to index the `UiData`.
@@ -29,19 +33,21 @@ pub struct UiData {
     pub(crate) state: Vec<Option<Box<Any>>>,
     /// Holds all messages of the `Component`s.
     /// The `Vec<Box<Any>>` is the alternative to a `Vec<Vec<Box<Any>>>`
-    /// to avoid allocating for every message in exchange for a more confusing type.
+    /// to avoid allocating for every message in exchange for a more confusing type
     pub(crate) messages: Vec<Option<Box<Any>>>,
 
-    /// The next `Cid` that will be allocated when needed.
+    /// The next `Cid` that will be allocated when needed
     id_count: usize,
 }
 
 impl UiData {
     pub(crate) fn fresh_id(&mut self) -> Cid {
         let id = Cid::new(self.id_count);
+        trace!("Allocated {:?}", id);
         self.id_count += 1;
 
         self.typeid.push(TypeId::of::<()>());
+        self.name.push("");
         self.pointer.push(ComponentPointer::default());
         self.parent.push(None);
         self.children.push(Vec::new());
@@ -52,5 +58,16 @@ impl UiData {
         self.messages.push(Some(Box::new(Vec::<()>::new())));
 
         id
+    }
+
+    pub fn full_debug_name_of(&self, id: Cid) -> String {
+        let mut names: SmallVec<[&'static str; 10]> = SmallVec::new();
+        names.push(self.name[id.get()]);
+        let mut current = id;
+        while let Some(parent) = self.parent[current.get()] {
+            current = parent;
+            names.push(self.name[parent.get()]);
+        }
+        names.iter().rev().fold(String::new(),  |acc, n| acc + "/" + n)
     }
 }

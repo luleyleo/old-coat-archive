@@ -4,8 +4,8 @@ use winit;
 use euclid;
 
 use webrender::{self, api::*};
-use crate::{UiData, UiView, UiLayout, Component, Size, Window, AppEvent, AppProps, BoxConstraints};
-use crate::ui::UiRender;
+use log::trace;
+use crate::{UiData, UiView, UiLayout, UiRender, Component, Size, Window, AppEvent, AppProps, BoxConstraints};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -94,12 +94,15 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
             let mut builder = DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
             let mut txn = Transaction::new();
 
+            trace!("Running `UiView`");
             UiView::new(&mut data, app_id)
                 .start::<Comp>(AppProps::default());
 
+            trace!("Running `UiLayout`");
             UiLayout::new(&mut data)
                 .size(app_id, BoxConstraints::tight(wsize));
 
+            trace!("Running `UiRender`");
             UiRender::new(&data, app_id)
                 .render(&mut builder);
 

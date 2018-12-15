@@ -1,5 +1,6 @@
 use crate::{Cid, Component, UiData};
 use std::any::TypeId;
+use log::error;
 
 pub struct UiUpdate<'a> {
     data: &'a mut UiData,
@@ -22,7 +23,8 @@ impl<'a> UiUpdate<'a> {
                     let messages: &mut Vec<C::Msg> = messages.downcast_mut().unwrap();
                     messages.push(msg);
                 } else {
-                    // TODO: This should log an error
+                    let name = self.data.full_debug_name_of(parent);
+                    error!("Tried to bubble a message to {} but its message Vec is not available", name);
                 }
                 return;
             }

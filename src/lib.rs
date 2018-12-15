@@ -14,7 +14,8 @@ mod constraints;
 pub use self::constraints::BoxConstraints;
 
 mod ui;
-pub use self::ui::{Cid, UiData, UiView, UiUpdate, UiLayout, UiInput};
+use self::ui::{UiData, UiRender};
+pub use self::ui::{Cid, UiView, UiUpdate, UiLayout, UiInput};
 
 mod mutable;
 pub use self::mutable::Mut;
@@ -27,3 +28,6 @@ pub use self::primitives::{Rectangle};
 
 mod color;
 pub use self::color::Color;
+
+mod name;
+pub use self::name::Named;

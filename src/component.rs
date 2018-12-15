@@ -2,6 +2,7 @@ use crate::{
     Bounds, BoxConstraints, Cid, MsgVec, Mut, PropsBuilder, Renderer, Size, UiInput, UiLayout,
     UiUpdate, UiView,
 };
+use log::warn;
 use std::any::Any;
 use smallvec::SmallVec;
 
@@ -36,10 +37,12 @@ pub trait Component: Sized + 'static {
         if children.is_empty() {
             Size::default()
         } else {
-            assert_eq!(children.len(), 1);
+            if children.len() > 1 {
+                let name = ui.full_debug_name();
+                warn!("The default layout function is beeing applied to {} which hosts multiple children while this layout function only considers the first one", name);
+            }
             let child = children[0];
-            ui.size(child, constraints);
-            Size::default()
+            ui.size(child, constraints)
         }
     }
 

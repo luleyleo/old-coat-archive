@@ -2,11 +2,15 @@ use crate::{BoxConstraints, Cid, Size, UiData};
 
 pub struct UiLayout<'a> {
     data: &'a mut UiData,
+    current: Cid,
 }
 
 impl<'a> UiLayout<'a> {
     pub(crate) fn new(data: &'a mut UiData) -> Self {
-        UiLayout { data }
+        UiLayout {
+            data,
+            current: Cid::invalid(),
+        }
     }
 
     pub fn size(&mut self, child: Cid, constraints: BoxConstraints) -> Size {
@@ -18,12 +22,19 @@ impl<'a> UiLayout<'a> {
         // reference `self` to the layout function
         let children = &self.data.children[child.get()] as *const Vec<Cid>;
 
+        let previous = self.current;
+        self.current = child;
         let proposed = layout(constraints, unsafe { &*children }, self);
+        self.current = previous;
 
         let size = constraints.check_size(proposed);
 
         self.data.size[child.get()] = size;
 
         size
+    }
+
+    pub fn full_debug_name(&self) -> String {
+        self.data.full_debug_name_of(self.current)
     }
 }
