@@ -95,8 +95,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
             let mut txn = Transaction::new();
 
             trace!("Running `UiView`");
-            UiView::new(&mut data, app_id)
-                .start::<Comp>(AppProps::default());
+            UiView::<Comp>::run(&mut data, app_id, AppProps::default());
 
             trace!("Running `UiLayout`");
             UiLayout::new(&mut data)

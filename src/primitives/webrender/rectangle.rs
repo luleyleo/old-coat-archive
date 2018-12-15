@@ -1,4 +1,4 @@
-use crate::{Component, PropsBuilder, ViewArgs, UpdateArgs, Color, Renderer, Bounds, BoxConstraints, Cid, UiLayout, Size};
+use crate::{Component, PropsBuilder, UpdateArgs, Color, Renderer, Bounds, BoxConstraints, Cid, UiLayout, UiView, Size};
 
 pub struct Rectangle;
 
@@ -32,7 +32,7 @@ impl Component for Rectangle {
 
     fn update(_: UpdateArgs<Self>) -> Option<Self::Event> { None }
 
-    fn view(_: ViewArgs<Self>) {}
+    fn view(_: &Self::Props, _: &Self::State, _: &mut UiView<Self>) {}
 
     fn layout(constraints: BoxConstraints, children: &[Cid], _ui: &mut UiLayout) -> Size {
         assert_eq!(children.len(), 0);

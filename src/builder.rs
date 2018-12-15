@@ -23,13 +23,17 @@ impl<C> PropsBuilder<C> where C: Component {
         }
     }
 
-    pub fn set<ID>(self, id: ID, ui: &mut UiView) where ID: Named + 'static {
+    pub fn set<ID, T>(self, id: ID, ui: &mut UiView<T>)
+    where
+        ID: Named + 'static,
+        T: Component,
+    {
         ui.set(id, self);
     }
 }
 
 impl<C, T> ReactivePropsBuilder<C, T> where C: Component, T: Component {
-    pub fn set<ID>(self, id: ID, ui: &mut UiView) where ID: Named + 'static {
+    pub fn set<ID>(self, id: ID, ui: &mut UiView<T>) where ID: Named + 'static {
         ui.set_reactive(id, self);
     }
 }

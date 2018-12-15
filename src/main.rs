@@ -16,12 +16,12 @@ impl Component for DevApp {
 
     fn update(args: UpdateArgs<Self>) -> Option<Self::Event> { None }
 
-    fn view(args: ViewArgs<Self>) {
+    fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
         ids!(Background);
 
         Rectangle::new()
             .color(Color::rgb(0.1, 0.4, 0.1))
-            .set(Background, args.ui);
+            .set(Background, ui);
     }
 }
 

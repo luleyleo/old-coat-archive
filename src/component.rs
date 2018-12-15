@@ -12,12 +12,6 @@ pub struct UpdateArgs<'a, 'b: 'a, 'c: 'a, Comp: Component> {
     pub ui: &'a mut UiUpdate<'c>,
 }
 
-pub struct ViewArgs<'a, 'b: 'a, Comp: Component> {
-    pub props: &'a Comp::Props,
-    pub state: &'a Comp::State,
-    pub ui: &'a mut UiView<'b>,
-}
-
 pub trait Component: Sized + 'static {
     type Props: Sized;
     type State: Sized + 'static;
@@ -30,7 +24,7 @@ pub trait Component: Sized + 'static {
 
     fn update(args: UpdateArgs<Self>) -> Option<Self::Event>;
 
-    fn view(args: ViewArgs<Self>);
+    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>);
 
     #[allow(unused_variables)]
     fn layout(constraints: BoxConstraints, children: &[Cid], ui: &mut UiLayout) -> Size {

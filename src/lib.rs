@@ -8,7 +8,7 @@ mod builder;
 pub use self::builder::{PropsBuilder, ReactivePropsBuilder};
 
 mod component;
-pub use self::component::{Component, ViewArgs, UpdateArgs};
+pub use self::component::{Component, UpdateArgs};
 
 mod constraints;
 pub use self::constraints::BoxConstraints;
