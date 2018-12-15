@@ -18,9 +18,12 @@ impl<'a> UiUpdate<'a> {
     {
         while let Some(parent) = self.data.parent[self.cid.get()] {
             if self.data.typeid[parent.get()] == TypeId::of::<C>() {
-                let messages: &mut Vec<C::Msg> =
-                    self.data.messages[parent.get()].downcast_mut().unwrap();
-                messages.push(msg);
+                if let Some(ref mut messages) = self.data.messages[parent.get()] {
+                    let messages: &mut Vec<C::Msg> = messages.downcast_mut().unwrap();
+                    messages.push(msg);
+                } else {
+                    // TODO: This should log an error
+                }
                 return;
             }
         }

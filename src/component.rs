@@ -3,11 +3,12 @@ use crate::{
     UiUpdate, UiView,
 };
 use std::any::Any;
+use smallvec::SmallVec;
 
-pub struct UpdateArgs<'a, 'b: 'a, Comp: Component> {
+pub struct UpdateArgs<'a, 'b: 'a, 'c: 'a, Comp: Component> {
     pub msg: Comp::Msg,
-    pub state: Mut<'a, Comp::State>,
-    pub ui: &'a mut UiUpdate<'b>,
+    pub state: &'a mut Mut<'b, Comp::State>,
+    pub ui: &'a mut UiUpdate<'c>,
 }
 
 pub struct ViewArgs<'a, 'b: 'a, Comp: Component> {
@@ -57,6 +58,7 @@ pub trait Component: Sized + 'static {
 pub(crate) trait ComponentPointerTrait: Component {
     fn pointer() -> ComponentPointer;
     fn dyn_render(state: &Box<Any>, bounds: Bounds, renderer: &mut Renderer);
+    fn dyn_update(messages: &mut Box<Any>, state: &mut Box<Any>, ui: &mut UiUpdate);
 }
 
 impl<C> ComponentPointerTrait for C where C: Component {
@@ -70,6 +72,26 @@ impl<C> ComponentPointerTrait for C where C: Component {
     fn dyn_render(state: &Box<Any>, bounds: Bounds, renderer: &mut Renderer) {
         let state: &Self::State = state.downcast_ref().unwrap();
         Self::render(state, bounds, renderer);
+    }
+
+    fn dyn_update(messages: &mut Box<Any>, state: &mut Box<Any>, ui: &mut UiUpdate) {
+        let messages: &mut Vec<Self::Msg> = messages.downcast_mut().unwrap();
+        let state: &mut Self::State = state.downcast_mut().unwrap();
+        let mut state = Mut::new(state);
+        let mut events: SmallVec<[Self::Event; 5]> = SmallVec::new();
+        for msg in messages.drain(..) {
+            if let Some(event) = Self::update(UpdateArgs {
+                msg,
+                state: &mut state,
+                ui,
+            }) {
+                events.push(event);
+            }
+        }
+        // TODO: Do something with `events`
+        if state.mutated() {
+            // TODO: Update UI
+        }
     }
 }
 

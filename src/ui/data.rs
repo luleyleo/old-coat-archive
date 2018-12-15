@@ -28,9 +28,9 @@ pub struct UiData {
     /// This and to delay initialization are the reasons why it is a `Option`
     pub(crate) state: Vec<Option<Box<Any>>>,
     /// Holds all messages of the `Component`s.
-    /// The `Vec<Box<Any>>` is the alternative to a `Vec<Vec<Box<Any>`
+    /// The `Vec<Box<Any>>` is the alternative to a `Vec<Vec<Box<Any>>>`
     /// to avoid allocating for every message in exchange for a more confusing type.
-    pub(crate) messages: Vec<Box<Any>>,
+    pub(crate) messages: Vec<Option<Box<Any>>>,
 
     /// The next `Cid` that will be allocated when needed.
     id_count: usize,
@@ -49,7 +49,7 @@ impl UiData {
         self.position.push(Position::default());
         self.size.push(Size::default());
         self.state.push(None);
-        self.messages.push(Box::new(Vec::<()>::new()));
+        self.messages.push(Some(Box::new(Vec::<()>::new())));
 
         id
     }
