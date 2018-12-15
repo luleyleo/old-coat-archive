@@ -14,7 +14,7 @@ impl Component for DevApp {
 
     fn init_state(props: &Self::Props) -> Self::State {}
 
-    fn update(args: UpdateArgs<Self>) -> Option<Self::Event> { None }
+    fn update(_: Self::Msg, _: &mut Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> { None }
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
         ids!(Background);

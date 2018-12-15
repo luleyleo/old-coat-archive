@@ -1,4 +1,7 @@
-use crate::{Component, PropsBuilder, UpdateArgs, Color, Renderer, Bounds, BoxConstraints, Cid, UiLayout, UiView, Size};
+use crate::{
+    Bounds, BoxConstraints, Cid, Color, Component, Mut, PropsBuilder, Renderer, Size, UiLayout,
+    UiUpdate, UiView,
+};
 
 pub struct Rectangle;
 
@@ -22,7 +25,7 @@ impl Component for Rectangle {
 
     fn new() -> PropsBuilder<Self> {
         PropsBuilder::new(Props {
-            color: Color::default()
+            color: Color::default(),
         })
     }
 
@@ -30,7 +33,9 @@ impl Component for Rectangle {
         *props
     }
 
-    fn update(_: UpdateArgs<Self>) -> Option<Self::Event> { None }
+    fn update(_: Self::Msg, _: &mut Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> {
+        None
+    }
 
     fn view(_: &Self::Props, _: &Self::State, _: &mut UiView<Self>) {}
 
@@ -42,7 +47,7 @@ impl Component for Rectangle {
                 return Size {
                     w: width,
                     h: height,
-                }
+                };
             }
         }
 
@@ -58,7 +63,7 @@ impl Component for Rectangle {
 
         let info = LayoutPrimitiveInfo::new(LayoutRect::new(
             LayoutPoint::new(position.x, position.y),
-            LayoutSize::new(size.w, size.h)
+            LayoutSize::new(size.w, size.h),
         ));
         renderer.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
     }

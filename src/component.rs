@@ -3,14 +3,8 @@ use crate::{
     UiUpdate, UiView,
 };
 use log::warn;
-use std::any::Any;
 use smallvec::SmallVec;
-
-pub struct UpdateArgs<'a, 'b: 'a, 'c: 'a, Comp: Component> {
-    pub msg: Comp::Msg,
-    pub state: &'a mut Mut<'b, Comp::State>,
-    pub ui: &'a mut UiUpdate<'c>,
-}
+use std::any::Any;
 
 pub trait Component: Sized + 'static {
     type Props: Sized;
@@ -22,7 +16,11 @@ pub trait Component: Sized + 'static {
 
     fn init_state(props: &Self::Props) -> Self::State;
 
-    fn update(args: UpdateArgs<Self>) -> Option<Self::Event>;
+    fn update(
+        msg: Self::Msg,
+        state: &mut Mut<Self::State>,
+        ui: &mut UiUpdate,
+    ) -> Option<Self::Event>;
 
     fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>);
 
@@ -58,7 +56,10 @@ pub(crate) trait ComponentPointerTrait: Component {
     fn dyn_update(messages: &mut Box<Any>, state: &mut Box<Any>, ui: &mut UiUpdate);
 }
 
-impl<C> ComponentPointerTrait for C where C: Component {
+impl<C> ComponentPointerTrait for C
+where
+    C: Component,
+{
     fn pointer() -> ComponentPointer {
         ComponentPointer {
             layout: Self::layout,
@@ -77,11 +78,7 @@ impl<C> ComponentPointerTrait for C where C: Component {
         let mut state = Mut::new(state);
         let mut events: SmallVec<[Self::Event; 5]> = SmallVec::new();
         for msg in messages.drain(..) {
-            if let Some(event) = Self::update(UpdateArgs {
-                msg,
-                state: &mut state,
-                ui,
-            }) {
+            if let Some(event) = Self::update(msg, &mut state, ui) {
                 events.push(event);
             }
         }
