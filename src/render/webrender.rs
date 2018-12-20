@@ -5,7 +5,7 @@ use euclid;
 
 use webrender::{self, api::*};
 use log::trace;
-use crate::{UiData, UiView, UiLayout, UiRender, Component, Size, Window, AppEvent, AppProps, BoxConstraints};
+use crate::{UiData, UiView, UiLayout, UiRender, UiInput, Component, Size, Window, AppEvent, AppProps, BoxConstraints, Input};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -67,6 +67,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
     txn.set_root_pipeline(pipeline_id);
     api.send_transaction(document_id, txn);
 
+    let mut input = Input::new();
     let mut data = UiData::default();
     let app_id = data.fresh_id();
 
@@ -75,7 +76,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
 
         for event in events {
             match event {
-                winit::Event::WindowEvent { event, .. } => {
+                winit::Event::WindowEvent { ref event, .. } => {
                     match event {
                         winit::WindowEvent::CloseRequested => {
                             break 'main;
@@ -88,11 +89,15 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
                 }
                 _ => ()
             }
+            input.events.push((event, false));
         }
 
         {
             let mut builder = DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
             let mut txn = Transaction::new();
+
+            trace!("Running `UiInput`");
+            UiInput::<Comp>::run(&mut data, &mut input, app_id);
 
             trace!("Running `UiView`");
             UiView::<Comp>::run(&mut data, app_id, AppProps::default());

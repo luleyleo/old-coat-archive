@@ -1,6 +1,6 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, MsgVec, Mut, PropsBuilder, Renderer, Size, UiInput, UiLayout,
-    UiUpdate, UiView,
+    Bounds, BoxConstraints, Cid, Mut, PropsBuilder, Renderer, Size, UiInput, UiLayout,
+    UiUpdate, UiView, UiInputBase,
 };
 use log::warn;
 use smallvec::SmallVec;
@@ -39,9 +39,7 @@ pub trait Component: Sized + 'static {
     }
 
     #[allow(unused_variables)]
-    fn input(ui: &UiInput) -> MsgVec<Self::Msg> {
-        MsgVec::default()
-    }
+    fn input(input: &mut UiInput<Self>) {}
 
     #[allow(unused_variables)]
     fn derive_state(props: &Self::Props, state: Mut<Self::State>) {}
@@ -54,6 +52,7 @@ pub(crate) trait ComponentPointerTrait: Component {
     fn pointer() -> ComponentPointer;
     fn dyn_render(state: &Box<Any>, bounds: Bounds, renderer: &mut Renderer);
     fn dyn_update(messages: &mut Box<Any>, state: &mut Box<Any>, ui: &mut UiUpdate);
+    fn dyn_input(input: &mut UiInputBase);
 }
 
 impl<C> ComponentPointerTrait for C
@@ -64,6 +63,7 @@ where
         ComponentPointer {
             layout: Self::layout,
             render: Self::dyn_render,
+            input: Self::dyn_input,
         }
     }
 
@@ -87,12 +87,18 @@ where
             // TODO: Update UI
         }
     }
+
+    fn dyn_input(input: &mut UiInputBase) {
+        let mut input = UiInput::new(input);
+        Self::input(&mut input);
+    }
 }
 
 #[derive(Clone, Copy)]
 pub(crate) struct ComponentPointer {
     pub layout: fn(constraints: BoxConstraints, children: &[Cid], ui: &mut UiLayout) -> Size,
     pub render: fn(state: &Box<Any>, bounds: Bounds, renderer: &mut Renderer),
+    pub input: fn(input: &mut UiInputBase),
 }
 
 impl Default for ComponentPointer {
@@ -100,6 +106,7 @@ impl Default for ComponentPointer {
         ComponentPointer {
             layout: |_, _, _| panic!("Called `layout` on default `ComponentPointer`"),
             render: |_, _, _| panic!("Called `render` on default `ComponentPointer`"),
+            input: |_| panic!("Called `input` on default `ComponentPointer`"),
         }
     }
 }

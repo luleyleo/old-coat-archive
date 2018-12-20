@@ -14,7 +14,7 @@ mod constraints;
 pub use self::constraints::BoxConstraints;
 
 mod ui;
-use self::ui::{UiData, UiRender};
+use self::ui::{UiData, UiRender, UiInputBase};
 pub use self::ui::{Cid, UiView, UiUpdate, UiLayout, UiInput};
 
 mod mutable;
@@ -31,3 +31,6 @@ pub use self::color::Color;
 
 mod name;
 pub use self::name::Named;
+
+mod input;
+pub use self::input::{Input, Event};

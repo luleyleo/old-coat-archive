@@ -16,6 +16,7 @@ pub use self::layout::UiLayout;
 
 mod input;
 pub use self::input::UiInput;
+pub(crate) use self::input::UiInputBase;
 
 mod render;
 pub use self::render::UiRender;
