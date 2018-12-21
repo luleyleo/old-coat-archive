@@ -1,4 +1,4 @@
-include!("lib.rs");
+use coat::*;
 
 struct DevApp;
 
@@ -12,7 +12,7 @@ impl Component for DevApp {
         PropsBuilder::new(AppProps::default())
     }
 
-    fn init_state(props: &Self::Props) -> Self::State {}
+    fn init_state(_props: &Self::Props) -> Self::State {}
 
     fn update(_: Self::Msg, _: &mut Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> { None }
 
@@ -26,6 +26,8 @@ impl Component for DevApp {
 }
 
 fn main() {
+    env_logger::init();
+
     Window::new(DevApp)
         .title("Dev App")
         .run();

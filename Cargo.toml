@@ -19,3 +19,6 @@ euclid = "0.19.4"
 [dependencies.webrender]
 git = "https://github.com/servo/webrender.git"
 rev = "fab59ceef070c11aba2a86c4ddf6ddc3c4e8f97d"
+
+[dev-dependencies]
+env_logger = "0.6.0"
