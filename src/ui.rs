@@ -1,6 +1,6 @@
 
 mod data;
-pub use self::data::UiData;
+pub(crate) use self::data::UiData;
 
 mod cid;
 pub use self::cid::Cid;

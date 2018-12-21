@@ -64,6 +64,7 @@ where
             layout: Self::layout,
             render: Self::dyn_render,
             input: Self::dyn_input,
+            update: Self::dyn_update,
         }
     }
 
@@ -76,15 +77,13 @@ where
         let messages: &mut Vec<Self::Msg> = messages.downcast_mut().unwrap();
         let state: &mut Self::State = state.downcast_mut().unwrap();
         let mut state = Mut::new(state);
-        let mut events: SmallVec<[Self::Event; 5]> = SmallVec::new();
         for msg in messages.drain(..) {
             if let Some(event) = Self::update(msg, &mut state, ui) {
-                events.push(event);
+                ui.emit(event);
             }
         }
-        // TODO: Do something with `events`
         if state.mutated() {
-            // TODO: Update UI
+            ui.needs_update();
         }
     }
 
@@ -99,6 +98,7 @@ pub(crate) struct ComponentPointer {
     pub layout: fn(constraints: BoxConstraints, children: &[Cid], ui: &mut UiLayout) -> Size,
     pub render: fn(state: &Box<Any>, bounds: Bounds, renderer: &mut Renderer),
     pub input: fn(input: &mut UiInputBase),
+    pub update: fn(messages: &mut Box<Any>, state: &mut Box<Any>, ui: &mut UiUpdate),
 }
 
 impl Default for ComponentPointer {
@@ -107,6 +107,7 @@ impl Default for ComponentPointer {
             layout: |_, _, _| panic!("Called `layout` on default `ComponentPointer`"),
             render: |_, _, _| panic!("Called `render` on default `ComponentPointer`"),
             input: |_| panic!("Called `input` on default `ComponentPointer`"),
+            update: |_, _, _| panic!("Called `update` on default `ComponentPointer`"),
         }
     }
 }

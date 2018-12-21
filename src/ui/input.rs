@@ -1,5 +1,6 @@
 use crate::{component::ComponentPointer, Cid, Component, Input, UiData, Event};
 use std::any::Any;
+use log::trace;
 
 pub struct UiInput<'a, C: Component> {
     messages: &'a mut Vec<C::Msg>,
@@ -11,6 +12,12 @@ where
     C: Component,
 {
     pub(crate) fn run(data: &'a mut UiData, input: &'a mut Input, root: Cid) {
+        if data.is_fresh(root) {
+            trace!("Skipping `UiInput`");
+            return
+        }
+        trace!("Running `UiInput`");
+
         let mut ui = UiInputBase::new(data, input);
         ui.visit(root);
     }
@@ -18,7 +25,7 @@ where
     pub(crate) fn new(base: &'a mut UiInputBase) -> Self {
         let messages: &mut Vec<C::Msg> = base.messages[base.cid.get()]
             .as_mut()
-            .unwrap() // TODO: This `Option` can be probably removed
+            .unwrap()
             .downcast_mut()
             .unwrap();
         

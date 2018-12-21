@@ -6,7 +6,7 @@ pub struct PropsBuilder<C: Component> {
 
 pub struct ReactivePropsBuilder<C: Component, T: Component> {
     pub(crate) base: PropsBuilder<C>,
-    pub(crate) handler: fn(C::Event) -> T::Msg,
+    pub(crate) handler: fn(C::Event) -> Option<T::Msg>,
 }
 
 impl<C> PropsBuilder<C> where C: Component {
@@ -16,7 +16,7 @@ impl<C> PropsBuilder<C> where C: Component {
         }
     }
 
-    pub fn handle<T>(self, handler: fn(C::Event) -> T::Msg) -> ReactivePropsBuilder<C, T> where T: Component {
+    pub fn handle<T>(self, handler: fn(C::Event) -> Option<T::Msg>) -> ReactivePropsBuilder<C, T> where T: Component {
         ReactivePropsBuilder {
             base: self,
             handler,

@@ -1,4 +1,5 @@
 use crate::{BoxConstraints, Cid, Size, UiData};
+use log::trace;
 
 pub struct UiLayout<'a> {
     data: &'a mut UiData,
@@ -6,11 +7,16 @@ pub struct UiLayout<'a> {
 }
 
 impl<'a> UiLayout<'a> {
-    pub(crate) fn new(data: &'a mut UiData) -> Self {
-        UiLayout {
+
+    pub(crate) fn run(data: &'a mut UiData, root: Cid, window_size: Size) {
+        trace!("Running `UiLayout`");
+
+        let mut ui = UiLayout {
             data,
             current: Cid::invalid(),
-        }
+        };
+        
+        ui.size(root, BoxConstraints::tight(window_size));
     }
 
     pub fn size(&mut self, child: Cid, constraints: BoxConstraints) -> Size {

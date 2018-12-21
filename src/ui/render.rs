@@ -1,37 +1,33 @@
 use crate::{UiData, Cid, Renderer, Bounds};
+use log::trace;
 
 pub struct UiRender<'a> {
     data: &'a UiData,
-    current: Cid,
+    renderer: &'a mut Renderer,
 }
 
 impl<'a> UiRender<'a> {
-    pub(crate) fn new(data: &'a UiData, root: Cid) -> Self {
-        UiRender {
-            data,
-            current: root,
-        }
+    pub(crate) fn run(data: &'a UiData, renderer: &mut Renderer, root: Cid) {
+        trace!("Running `UiRender`");
+        let mut ui = UiRender { data, renderer };
+        ui.render(root);
     }
 
-    pub fn render(&mut self, renderer: &mut Renderer) {
-        let current = self.current;
-
+    pub fn render(&mut self, cid: Cid) {
         {
-            let pointer = self.data.pointer[self.current.get()];
-            let state = self.data.state[self.current.get()].as_ref().unwrap();
-            let position = self.data.position[self.current.get()];
-            let size = self.data.size[self.current.get()];
+            let pointer = self.data.pointer[cid.get()];
+            let state = self.data.state[cid.get()].as_ref().unwrap();
+            let position = self.data.position[cid.get()];
+            let size = self.data.size[cid.get()];
             let bounds = Bounds::new(position, size);
 
-            (pointer.render)(state, bounds, renderer);
+            (pointer.render)(state, bounds, self.renderer);
         }
 
-        let children = &self.data.children[self.current.get()];
+        let children = &self.data.children[cid.get()];
 
         for child in children {
-            self.current = *child;
-            self.render(renderer);
+            self.render(*child);
         }
-        self.current = current;
     }
 }

@@ -1,5 +1,4 @@
-use crate::{Cid, Position, Size};
-use crate::component::ComponentPointer;
+use crate::{Cid, Position, Size, ComponentPointer};
 use fnv::FnvHashMap;
 use std::any::{Any, TypeId};
 use smallvec::SmallVec;
@@ -7,7 +6,7 @@ use log::trace;
 
 /// Contains all data that is necessary for the ui
 #[derive(Default)]
-pub struct UiData {
+pub(crate) struct UiData {
     /// The `TypeId` of the `Component` behind a `Cid`
     pub(crate) typeid: Vec<TypeId>,
     /// A `stringify!()`ed version of the `creations` id
@@ -35,6 +34,7 @@ pub struct UiData {
     /// The `Vec<Box<Any>>` is the alternative to a `Vec<Vec<Box<Any>>>`
     /// to avoid allocating for every message in exchange for a more confusing type
     pub(crate) messages: Vec<Option<Box<Any>>>,
+    pub(crate) events: Vec<Box<Any>>,
 
     /// The next `Cid` that will be allocated when needed
     id_count: usize,
@@ -56,8 +56,13 @@ impl UiData {
         self.size.push(Size::default());
         self.state.push(None);
         self.messages.push(Some(Box::new(Vec::<()>::new())));
+        self.events.push(Box::new(Vec::<()>::new()));
 
         id
+    }
+
+    pub(crate) fn is_fresh(&self, id: Cid) -> bool {
+        self.typeid[id.get()] == TypeId::of::<()>()
     }
 
     pub fn full_debug_name_of(&self, id: Cid) -> String {

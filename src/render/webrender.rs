@@ -5,7 +5,7 @@ use euclid;
 
 use webrender::{self, api::*};
 use log::trace;
-use crate::{UiData, UiView, UiLayout, UiRender, UiInput, Component, Size, Window, AppEvent, AppProps, BoxConstraints, Input};
+use crate::{UiData, UiView, UiLayout, UiRender, UiInput, UiUpdate, Component, Size, Window, AppEvent, AppProps, BoxConstraints, Input};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -67,6 +67,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
     txn.set_root_pipeline(pipeline_id);
     api.send_transaction(document_id, txn);
 
+    let mut fresh = true;
     let mut input = Input::new();
     let mut data = UiData::default();
     let app_id = data.fresh_id();
@@ -83,6 +84,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
                         }
                         winit::WindowEvent::Resized(lsize) => {
                             wsize = Size::new(lsize.width as f32, lsize.height as f32);
+                            fresh = true;
                         }
                         _ => ()
                     }
@@ -93,32 +95,31 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
         }
 
         {
-            let mut builder = DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
-            let mut txn = Transaction::new();
 
-            trace!("Running `UiInput`");
             UiInput::<Comp>::run(&mut data, &mut input, app_id);
 
-            trace!("Running `UiView`");
-            UiView::<Comp>::run(&mut data, app_id, AppProps::default());
+            if fresh | UiUpdate::run(&mut data, app_id) {
+                fresh = false;
 
-            trace!("Running `UiLayout`");
-            UiLayout::new(&mut data)
-                .size(app_id, BoxConstraints::tight(wsize));
+                UiView::<Comp>::run(&mut data, app_id, AppProps::default());
 
-            trace!("Running `UiRender`");
-            UiRender::new(&data, app_id)
-                .render(&mut builder);
+                UiLayout::run(&mut data, app_id, wsize);
 
-            txn.set_display_list(
-                epoch,
-                None,
-                layout_size,
-                builder.finalize(),
-                true,
-            );
-            txn.generate_frame();
-            api.send_transaction(document_id, txn);
+                let mut builder = DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
+                let mut txn = Transaction::new();
+
+                UiRender::run(&data, &mut builder, app_id);
+
+                txn.set_display_list(
+                    epoch,
+                    None,
+                    layout_size,
+                    builder.finalize(),
+                    true,
+                );
+                txn.generate_frame();
+                api.send_transaction(document_id, txn);
+            }
         }
 
         renderer.update();

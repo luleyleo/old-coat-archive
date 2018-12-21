@@ -8,6 +8,7 @@ mod builder;
 pub use self::builder::{PropsBuilder, ReactivePropsBuilder};
 
 mod component;
+use self::component::ComponentPointer;
 pub use self::component::Component;
 
 mod constraints;
