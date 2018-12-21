@@ -4,8 +4,7 @@ use winit;
 use euclid;
 
 use webrender::{self, api::*};
-use log::trace;
-use crate::{UiData, UiView, UiLayout, UiRender, UiInput, UiUpdate, Component, Size, Window, AppEvent, AppProps, BoxConstraints, Input};
+use crate::{UiData, UiView, UiLayout, UiRender, UiInput, UiUpdate, Component, Size, Window, AppEvent, AppProps, Input};
 use super::eventloop::EventLoop;
 use super::notifier::Notifier;
 
@@ -91,7 +90,7 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
                 }
                 _ => ()
             }
-            input.events.push((event, false));
+            input.push_event(event);
         }
 
         {

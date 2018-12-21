@@ -3,7 +3,6 @@ use crate::{
     UiUpdate, UiView, UiInputBase,
 };
 use log::warn;
-use smallvec::SmallVec;
 use std::any::Any;
 
 pub trait Component: Sized + 'static {

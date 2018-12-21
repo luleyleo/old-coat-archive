@@ -59,13 +59,4 @@ impl EventLoop {
         events
     }
 
-    /// Notifies the event loop that the `Ui` requires another update whether or not there are any
-    /// pending events.
-    ///
-    /// This is primarily used on the occasion that some part of the `Ui` is still animating and
-    /// requires further updates to do so.
-    pub fn needs_update(&mut self) {
-        self.ui_needs_update = true;
-    }
-
 }
