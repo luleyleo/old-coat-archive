@@ -2,7 +2,6 @@ use crate::{
     Bounds, BoxConstraints, Cid, Mut, PropsBuilder, Renderer, Size, UiInput, UiLayout,
     UiUpdate, UiView, UiInputBase,
 };
-use log::warn;
 use std::any::Any;
 
 pub trait Component: Sized + 'static {
@@ -33,7 +32,7 @@ pub trait Component: Sized + 'static {
         } else {
             if children.len() > 1 {
                 let name = ui.full_debug_name();
-                warn!("The default layout function is beeing applied to {} which hosts multiple children while this layout function only considers the first one", name);
+                log::error!("The default layout function is beeing applied to {} which hosts multiple children while this layout function only considers the first one", name);
             }
             let child = children[0];
             ui.size(child, constraints)
