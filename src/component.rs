@@ -15,11 +15,14 @@ pub trait Component: Sized + 'static {
 
     fn init_state(props: &Self::Props) -> Self::State;
 
+    #[allow(unused_variables)]
     fn update(
         msg: Self::Msg,
-        state: &mut Mut<Self::State>,
+        state: Mut<Self::State>,
         ui: &mut UiUpdate,
-    ) -> Option<Self::Event>;
+    ) -> Option<Self::Event> {
+        None
+    }
 
     fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>);
 
@@ -75,13 +78,14 @@ where
     fn dyn_update(messages: &mut Box<Any>, state: &mut Box<Any>, ui: &mut UiUpdate) {
         let messages: &mut Vec<Self::Msg> = messages.downcast_mut().unwrap();
         let state: &mut Self::State = state.downcast_mut().unwrap();
-        let mut state = Mut::new(state);
+        let mut mutated = false;
         for msg in messages.drain(..) {
-            if let Some(event) = Self::update(msg, &mut state, ui) {
+            let state = Mut::new(state, &mut mutated);
+            if let Some(event) = Self::update(msg, state, ui) {
                 ui.emit(event);
             }
         }
-        if state.mutated() {
+        if mutated {
             ui.needs_update();
         }
     }

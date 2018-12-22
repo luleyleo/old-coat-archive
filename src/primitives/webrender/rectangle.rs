@@ -33,7 +33,7 @@ impl Component for Rectangle {
         *props
     }
 
-    fn update(_: Self::Msg, _: &mut Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> {
+    fn update(_: Self::Msg, _: Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> {
         None
     }
 
