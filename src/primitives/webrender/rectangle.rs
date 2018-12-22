@@ -39,8 +39,11 @@ impl Component for Rectangle {
 
     fn view(_: &Self::Props, _: &Self::State, _: &mut UiView<Self>) {}
 
-    fn layout(constraints: BoxConstraints, children: &[Cid], _ui: &mut UiLayout) -> Size {
-        assert_eq!(children.len(), 0);
+    fn layout(constraints: BoxConstraints, children: &[Cid], ui: &mut UiLayout) -> Size {
+        if children.len() != 0 {
+            let name = ui.full_debug_name();
+            log::error!("The primitive Component {} has content attached to it but it will be ignored", name);
+        }
 
         if let Some(width) = constraints.max_width {
             if let Some(height) = constraints.max_height {

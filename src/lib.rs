@@ -5,7 +5,7 @@ mod bounds;
 pub use self::bounds::{Position, Size, Bounds};
 
 mod builder;
-pub use self::builder::{PropsBuilder, ReactivePropsBuilder};
+pub use self::builder::{PropsBuilder, ReactivePropsBuilder, ContentBuilder};
 
 mod component;
 use self::component::ComponentPointer;

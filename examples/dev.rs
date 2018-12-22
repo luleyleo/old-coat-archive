@@ -17,11 +17,16 @@ impl Component for DevApp {
     fn update(_: Self::Msg, _: Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> { None }
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
-        ids!(Background);
+        ids!(Background, Test);
 
         Rectangle::new()
             .color(Color::rgb(0.1, 0.4, 0.1))
-            .set(Background, ui);
+            .set(Background, ui)
+            .add(|| {
+                Rectangle::new()
+                    .color(Color::rgb(0.4, 0.1, 0.1))
+                    .set(Test, ui);
+            });
     }
 }
 

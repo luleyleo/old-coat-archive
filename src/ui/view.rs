@@ -1,21 +1,26 @@
 use crate::component::ComponentPointerTrait;
 use crate::{
-    AppEvent, AppProps, Cid, Component, Named, PropsBuilder, ReactivePropsBuilder, UiData,
+    AppEvent, AppProps, Cid, Component, Named, PropsBuilder, ReactivePropsBuilder, UiData, ContentBuilder
 };
 use log::trace;
 use std::any::TypeId;
 use std::marker::PhantomData;
+use std::rc::Rc;
+use std::cell::Cell;
 
 pub struct UiView<'a, C: Component> {
     data: &'a mut UiData,
+    parent: Rc<Cell<Option<Cid>>>,
     cid: Cid,
     marker: PhantomData<C>,
 }
 
 impl<'a, Comp: Component> UiView<'a, Comp> {
     pub(crate) fn new(data: &'a mut UiData, cid: Cid) -> Self {
+        let parent = Rc::new(Cell::new(None));
         UiView {
             data,
+            parent,
             cid,
             marker: PhantomData,
         }
@@ -54,13 +59,17 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         data.state[app_id.get()] = Some(state);
     }
 
-    pub fn set_reactive<ID, C, T>(&mut self, id: ID, builder: ReactivePropsBuilder<C, T>)
+    pub(crate) fn parent_pointer(&self) -> Rc<Cell<Option<Cid>>> {
+        self.parent.clone()
+    }
+
+    pub fn set_reactive<ID, C, T>(&mut self, id: ID, builder: ReactivePropsBuilder<C, T>) -> ContentBuilder
     where
         ID: Named + 'static,
         C: Component,
         T: Component,
     {
-        self.set(id, builder.base);
+        let content_builder = self.set(id, builder.base);
 
         let tid = TypeId::of::<ID>();
         let handler = builder.handler;
@@ -80,9 +89,11 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
                 messages.push(msg);
             }
         }
+
+        content_builder
     }
 
-    pub fn set<ID, C>(&mut self, _id: ID, builder: PropsBuilder<C>)
+    pub fn set<ID, C>(&mut self, _id: ID, builder: PropsBuilder<C>) -> ContentBuilder
     where
         ID: Named + 'static,
         C: Component,
@@ -97,10 +108,12 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
                 trace!("Initializing {} Component with {:?}", name, cid);
                 self.data.creations[self.cid.get()].insert(tid, cid);
 
+                let parent = self.parent.get().or(Some(self.cid));
+
                 self.data.typeid[cid.get()] = TypeId::of::<C>();
                 self.data.name[cid.get()] = name;
                 self.data.pointer[cid.get()] = C::pointer();
-                self.data.parent[cid.get()] = Some(self.cid);
+                self.data.parent[cid.get()] = parent;
                 self.data.children[self.cid.get()].push(cid);
                 self.data.state[cid.get()] = Some(Box::new(C::init_state(&*builder)));
                 self.data.messages[cid.get()] = Some(Box::new(Vec::<C::Msg>::new()));
@@ -112,8 +125,14 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         let state = self.data.state[cid.get()].take().unwrap();
 
         {
+            let current_parent = self.parent.get();
+            self.parent.set(Some(self.cid));
+            self.cid = cid;
+
             let mut ui = UiView::new(self.data, cid);
             C::view(&*builder, state.downcast_ref().unwrap(), &mut ui);
+
+            self.parent.set(current_parent);
         }
 
         trace!(
@@ -121,5 +140,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             cid
         );
         self.data.state[cid.get()] = Some(state);
+
+        ContentBuilder {
+            cid,
+            parent: self.parent_pointer()
+        }
     }
 }
