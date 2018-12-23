@@ -1,6 +1,6 @@
 
 mod data;
-pub(crate) use self::data::UiData;
+pub(crate) use self::data::{UiData, full_debug_name_of};
 
 mod cid;
 pub use self::cid::Cid;

@@ -1,46 +1,63 @@
-use crate::{BoxConstraints, Cid, Size, UiData};
-use log::trace;
+use crate::{BoxConstraints, Cid, ComponentPointer, Position, Size, UiData};
+use std::any::Any;
 
 pub struct UiLayout<'a> {
-    data: &'a mut UiData,
+    name: &'a Vec<&'static str>,
+    pointer: &'a Vec<ComponentPointer>,
+    parent: &'a Vec<Option<Cid>>,
+    children: &'a Vec<Vec<Cid>>,
+    position: &'a mut Vec<Position>,
+    size: &'a mut Vec<Size>,
+    state: &'a Vec<Option<Box<Any>>>,
     current: Cid,
 }
 
 impl<'a> UiLayout<'a> {
-
     pub(crate) fn run(data: &'a mut UiData, root: Cid, window_size: Size) {
-        trace!("Running `UiLayout`");
+        log::trace!("Running `UiLayout`");
 
         let mut ui = UiLayout {
-            data,
+            name: &data.name,
+            pointer: &data.pointer,
+            parent: &data.parent,
+            children: &data.children,
+            position: &mut data.position,
+            size: &mut data.size,
+            state: &mut data.state,
             current: Cid::invalid(),
         };
-        
+
         ui.size(root, BoxConstraints::tight(window_size));
     }
 
     pub fn size(&mut self, child: Cid, constraints: BoxConstraints) -> Size {
-        let layout = self.data.pointer[child.get()].layout;
+        let layout = self.pointer[child.get()].layout;
 
-        // As long as this function is being called there is no other
-        // way to access the `UiData` and thus it should be safe
-        // to use a pointer to the children and pass a mutable
-        // reference `self` to the layout function
-        let children = &self.data.children[child.get()] as *const Vec<Cid>;
+        let state = self.state[child.get()].as_ref().unwrap();
+        let children = &self.children[child.get()];
 
         let previous = self.current;
         self.current = child;
-        let proposed = layout(constraints, unsafe { &*children }, self);
+        let proposed = layout(state, children, constraints, self);
         self.current = previous;
 
         let size = constraints.check_size(proposed);
+        log::trace!(
+            "Sized {} to {:?}",
+            crate::full_debug_name_of(self.parent, self.name, child),
+            size
+        );
 
-        self.data.size[child.get()] = size;
+        self.size[child.get()] = size;
 
         size
     }
 
+    pub fn position(&mut self, child: Cid, position: Position) {
+        self.position[child.get()] = position;
+    }
+
     pub fn full_debug_name(&self) -> String {
-        self.data.full_debug_name_of(self.current)
+        crate::full_debug_name_of(self.parent, self.name, self.current)
     }
 }

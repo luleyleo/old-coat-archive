@@ -1,8 +1,7 @@
 use crate::component::ComponentPointerTrait;
 use crate::{
-    AppEvent, AppProps, Cid, Component, Named, PropsBuilder, ReactivePropsBuilder, UiData, ContentBuilder
+    AppEvent, AppProps, Cid, Component, Named, PropsBuilder, ReactivePropsBuilder, UiData, ContentBuilder,
 };
-use log::trace;
 use std::any::TypeId;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -30,18 +29,20 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
     where
         Comp: Component<Props = AppProps, Event = AppEvent>,
     {
-        trace!("Running `UiView`");
+        log::trace!("Running `UiView`");
         if data.typeid[app_id.get()] == TypeId::of::<()>() {
-            trace!("Initializing Root Component with {:?}", app_id);
+            log::trace!("Initializing Root Component with {:?}", app_id);
             data.typeid[app_id.get()] = TypeId::of::<Comp>();
             data.name[app_id.get()] = "Root";
             data.pointer[app_id.get()] = Comp::pointer();
             data.state[app_id.get()] = Some(Box::new(Comp::init_state(&props)));
             data.messages[app_id.get()] = Some(Box::new(Vec::<Comp::Msg>::new()));
             data.events[app_id.get()] = Box::new(Vec::<Comp::Event>::new());
+            
+            log::trace!("View set: {}", data.full_debug_name_of(app_id));
         }
 
-        trace!(
+        log::trace!(
             "Detaching the `state` of Root with {:?} to setup the `view`",
             app_id
         );
@@ -52,7 +53,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             Comp::view(&props, state.downcast_ref().unwrap(), &mut ui);
         }
 
-        trace!(
+        log::trace!(
             "Reataching the `state` of Root with {:?} after setting up the `view`",
             app_id
         );
@@ -105,23 +106,25 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             .cloned()
             .unwrap_or_else(|| {
                 let cid = self.data.fresh_id();
-                trace!("Initializing {} Component with {:?}", name, cid);
+                log::trace!("Initializing {} Component with {:?}", name, cid);
                 self.data.creations[self.cid.get()].insert(tid, cid);
 
-                let parent = self.parent.get().or(Some(self.cid));
+                let parent = self.parent.get().unwrap_or(self.cid);
 
                 self.data.typeid[cid.get()] = TypeId::of::<C>();
                 self.data.name[cid.get()] = name;
                 self.data.pointer[cid.get()] = C::pointer();
-                self.data.parent[cid.get()] = parent;
-                self.data.children[self.cid.get()].push(cid);
+                self.data.parent[cid.get()] = Some(parent);
+                self.data.children[parent.get()].push(cid);
                 self.data.state[cid.get()] = Some(Box::new(C::init_state(&*builder)));
                 self.data.messages[cid.get()] = Some(Box::new(Vec::<C::Msg>::new()));
                 self.data.events[cid.get()] = Box::new(Vec::<C::Event>::new());
 
+                log::trace!("View set: {}", self.data.full_debug_name_of(cid));
+
                 cid
             });
-        trace!("Detaching the `state` of {:?} to setup the `view`", cid);
+        log::trace!("Detaching the `state` of {:?} to setup the `view`", cid);
         let state = self.data.state[cid.get()].take().unwrap();
 
         {
@@ -135,7 +138,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             self.parent.set(current_parent);
         }
 
-        trace!(
+        log::trace!(
             "Reataching the `state` of {:?} after setting up the `view`",
             cid
         );

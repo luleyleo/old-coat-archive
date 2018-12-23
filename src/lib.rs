@@ -15,7 +15,7 @@ mod constraints;
 pub use self::constraints::BoxConstraints;
 
 mod ui;
-use self::ui::{UiData, UiRender, UiInputBase};
+use self::ui::{UiData, UiRender, UiInputBase, full_debug_name_of};
 pub use self::ui::{Cid, UiView, UiUpdate, UiLayout, UiInput};
 
 mod mutable;
@@ -25,7 +25,7 @@ mod render;
 pub use self::render::{AppEvent, AppProps, Window};
 
 mod primitives;
-pub use self::primitives::{Rectangle};
+pub use self::primitives::{Rectangle, Linear, Constrained};
 
 mod color;
 pub use self::color::Color;

@@ -65,14 +65,18 @@ impl UiData {
         self.typeid[id.get()] == TypeId::of::<()>()
     }
 
-    pub fn full_debug_name_of(&self, id: Cid) -> String {
-        let mut names: SmallVec<[&'static str; 10]> = SmallVec::new();
-        names.push(self.name[id.get()]);
-        let mut current = id;
-        while let Some(parent) = self.parent[current.get()] {
-            current = parent;
-            names.push(self.name[parent.get()]);
-        }
-        names.iter().rev().fold(String::new(),  |acc, n| acc + "/" + n)
+    pub(crate) fn full_debug_name_of(&self, id: Cid) -> String {
+        full_debug_name_of(&self.parent, &self.name, id)
     }
+}
+
+pub(crate) fn full_debug_name_of(parent: &Vec<Option<Cid>>, name: &Vec<&'static str>, id: Cid) -> String {
+    let mut names: SmallVec<[&'static str; 10]> = SmallVec::new();
+    names.push(name[id.get()]);
+    let mut current = id;
+    while let Some(parent) = parent[current.get()] {
+        current = parent;
+        names.push(name[parent.get()]);
+    }
+    names.iter().rev().fold(String::new(),  |acc, n| acc + "/" + n)
 }
