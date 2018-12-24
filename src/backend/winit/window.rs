@@ -1,9 +1,5 @@
 use crate::Component;
 
-mod eventloop;
-mod notifier;
-mod webrender;
-
 #[derive(Default)]
 pub struct AppProps;
 
@@ -18,8 +14,8 @@ where
     Msg: 'static,
     Comp: Component<Props=AppProps, State=State, Msg=Msg, Event=AppEvent>
 {
-    title: String,
-    app: std::marker::PhantomData<Comp>,
+    pub(crate) title: String,
+    pub(crate) app: std::marker::PhantomData<Comp>,
 }
 
 impl<State, Msg, Comp> Window<State, Msg, Comp>
@@ -42,6 +38,6 @@ where
     }
 
     pub fn run(self) {
-        self::webrender::run(self);
+        crate::backend::webrender::run(self);
     }
 }

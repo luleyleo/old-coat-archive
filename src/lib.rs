@@ -21,8 +21,8 @@ pub use self::ui::{Cid, UiView, UiUpdate, UiLayout, UiInput};
 mod mutable;
 pub use self::mutable::Mut;
 
-mod render;
-pub use self::render::{AppEvent, AppProps, Window};
+mod backend;
+pub use self::backend::*;
 
 mod primitives;
 pub use self::primitives::{Rectangle, Linear, Constrained};

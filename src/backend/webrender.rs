@@ -5,8 +5,10 @@ use euclid;
 
 use webrender::{self, api::*};
 use crate::{UiData, UiView, UiLayout, UiRender, UiInput, UiUpdate, Component, Size, Window, AppEvent, AppProps, Input};
-use super::eventloop::EventLoop;
-use super::notifier::Notifier;
+use crate::backend::winit::EventLoop;
+
+mod notifier;
+use self::notifier::Notifier;
 
 pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Window<Comp::State, Comp::Msg, Comp>) {
     let mut wsize = Size::new(600.0, 400.0);
