@@ -1,5 +1,4 @@
-mod types;
-pub use self::types::{Scalar, Renderer};
+pub type Scalar = f32;
 
 mod bounds;
 pub use self::bounds::{Position, Size, Bounds};
