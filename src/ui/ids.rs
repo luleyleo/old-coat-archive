@@ -1,5 +1,12 @@
 use std::any::TypeId;
 
+/// A "Component Identifier"
+///
+/// This is the id used to reference a components data
+/// stored in the `UiData` struct.
+///
+/// It can be different every time an app runs and gets
+/// generated at runtime.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Cid(usize);
 
@@ -12,11 +19,28 @@ impl Cid {
         Cid(std::usize::MAX)
     }
 
-    pub fn get(&self) -> usize {
+    pub(crate) fn get(&self) -> usize {
         self.0
     }
 }
 
+/// A "Intermediate Identifier"
+///
+/// This is used when `set`ing a component to identify it.
+///
+/// It has to be **unique per component** and gets generated
+/// at compile time. Usually the `ids!()` macro takes care of this.
+///
+/// ```ignore
+/// ids!(A, B, C);
+///
+/// let a: Iid = A;
+/// let b: Iid = B;
+///
+/// Button::new()
+///     ...
+///     .set(A, ui);
+/// ```
 #[derive(Clone, Copy, Debug)]
 pub struct Iid {
     pub(crate) name: &'static str,
@@ -24,6 +48,10 @@ pub struct Iid {
 }
 
 impl Iid {
+    /// **Don't use this**
+    /// 
+    /// `Iid`s should be created using `ids!()` but this has to
+    /// be public to make the `ids!()` macro work from other crates
     pub fn new(name: &'static str, id: TypeId) -> Self {
         Iid { name, id }
     }
@@ -41,6 +69,15 @@ impl std::hash::Hash for Iid {
     }
 }
 
+/// This macro simplifies creating `Iid`s.
+///
+/// ```ignore
+/// ids!(Container, Count, AddButton, SubButton);
+///
+/// Button::new()
+///     ...
+///     .set(AddButton, ui);
+/// ```
 #[macro_export]
 macro_rules! ids {
     ($($id:ident),*,) => {
