@@ -13,7 +13,7 @@ mod winit;
 pub use self::webrender::Renderer;
 
 use crate::Rectangle;
-pub trait PrimitiveRendererTrait {
+trait PrimitiveRendererTrait {
     fn rectangle(state: &<Rectangle as Component>::State, bounds: Bounds, renderer: &mut Renderer);
 }
 
