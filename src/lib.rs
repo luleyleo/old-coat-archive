@@ -1,5 +1,5 @@
 mod types;
-pub use self::types::{Scalar, MsgVec, Renderer};
+pub use self::types::{Scalar, Renderer};
 
 mod bounds;
 pub use self::bounds::{Position, Size, Bounds};
