@@ -23,8 +23,11 @@ pub use self::mutable::Mut;
 mod backend;
 pub use self::backend::*;
 
-mod primitives;
-pub use self::primitives::{Rectangle, Linear, Constrained};
+mod layout;
+pub use self::layout::{Linear, Constrained};
+
+mod widget;
+pub use self::widget::{Rectangle};
 
 mod color;
 pub use self::color::Color;

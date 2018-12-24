@@ -7,7 +7,7 @@ pub struct Rectangle;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct Props {
-    color: Color,
+    pub(crate) color: Color,
 }
 
 impl PropsBuilder<Rectangle> {
@@ -66,16 +66,6 @@ impl Component for Rectangle {
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
-        use webrender::api::*;
-
-        let position = bounds.position;
-        let size = bounds.size;
-        let color = state.color;
-
-        let info = LayoutPrimitiveInfo::new(LayoutRect::new(
-            LayoutPoint::new(position.x, position.y),
-            LayoutSize::new(size.w, size.h),
-        ));
-        renderer.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
+        crate::backend::PrimitiveRenderer::rectangle(state, bounds, renderer);
     }
 }

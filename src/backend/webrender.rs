@@ -10,6 +10,9 @@ use crate::backend::winit::EventLoop;
 mod notifier;
 use self::notifier::Notifier;
 
+mod primitives;
+pub use self::primitives::PrimitiveRenderer;
+
 pub type Renderer = DisplayListBuilder;
 
 pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Window<Comp::State, Comp::Msg, Comp>) {
