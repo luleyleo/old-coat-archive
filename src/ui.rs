@@ -2,8 +2,8 @@
 mod data;
 pub(crate) use self::data::{UiData, full_debug_name_of};
 
-mod cid;
-pub use self::cid::Cid;
+mod ids;
+pub use self::ids::{Cid, Iid};
 
 mod view;
 pub use self::view::UiView;

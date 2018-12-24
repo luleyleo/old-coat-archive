@@ -1,6 +1,6 @@
 use crate::component::ComponentPointerTrait;
 use crate::{
-    AppEvent, AppProps, Cid, Component, Named, PropsBuilder, ReactivePropsBuilder, UiData, ContentBuilder,
+    AppEvent, AppProps, Cid, Iid, Component, PropsBuilder, ReactivePropsBuilder, UiData, ContentBuilder,
 };
 use std::any::TypeId;
 use std::marker::PhantomData;
@@ -64,15 +64,14 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         self.parent.clone()
     }
 
-    pub fn set_reactive<ID, C, T>(&mut self, id: ID, builder: ReactivePropsBuilder<C, T>) -> ContentBuilder
+    pub fn set_reactive<C, T>(&mut self, iid: Iid, builder: ReactivePropsBuilder<C, T>) -> ContentBuilder
     where
-        ID: Named + 'static,
         C: Component,
         T: Component,
     {
-        let content_builder = self.set(id, builder.base);
+        let content_builder = self.set(iid, builder.base);
 
-        let tid = TypeId::of::<ID>();
+        let tid = iid.id;
         let handler = builder.handler;
 
         let emitter = self.data.creations[self.cid.get()][&tid];
@@ -94,13 +93,12 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         content_builder
     }
 
-    pub fn set<ID, C>(&mut self, _id: ID, builder: PropsBuilder<C>) -> ContentBuilder
+    pub fn set<C>(&mut self, iid: Iid, builder: PropsBuilder<C>) -> ContentBuilder
     where
-        ID: Named + 'static,
         C: Component,
     {
-        let tid = TypeId::of::<ID>();
-        let name = ID::name();
+        let tid = iid.id;
+        let name = iid.name;
         let cid = self.data.creations[self.cid.get()]
             .get(&tid)
             .cloned()

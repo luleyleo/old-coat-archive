@@ -1,4 +1,4 @@
-use crate::{Cid, Component, Named, UiView};
+use crate::{Cid, Iid, Component, UiView};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -34,9 +34,8 @@ where
         }
     }
 
-    pub fn set<ID, T>(self, id: ID, ui: &mut UiView<T>) -> ContentBuilder
+    pub fn set<T>(self, id: Iid, ui: &mut UiView<T>) -> ContentBuilder
     where
-        ID: Named + 'static,
         T: Component,
     {
         ui.set(id, self)
@@ -48,10 +47,7 @@ where
     C: Component,
     T: Component,
 {
-    pub fn set<ID>(self, id: ID, ui: &mut UiView<T>) -> ContentBuilder
-    where
-        ID: Named + 'static,
-    {
+    pub fn set(self, id: Iid, ui: &mut UiView<T>) -> ContentBuilder {
         ui.set_reactive(id, self)
     }
 }

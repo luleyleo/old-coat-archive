@@ -15,7 +15,7 @@ pub use self::constraints::BoxConstraints;
 
 mod ui;
 use self::ui::{UiData, UiRender, UiInputBase, full_debug_name_of};
-pub use self::ui::{Cid, UiView, UiUpdate, UiLayout, UiInput};
+pub use self::ui::{Cid, Iid, UiView, UiUpdate, UiLayout, UiInput};
 
 mod mutable;
 pub use self::mutable::Mut;
@@ -31,9 +31,6 @@ pub use self::widget::{Rectangle};
 
 mod color;
 pub use self::color::Color;
-
-mod name;
-pub use self::name::Named;
 
 mod input;
 pub use self::input::{Input, Event};
