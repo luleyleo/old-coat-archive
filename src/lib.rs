@@ -26,11 +26,11 @@ pub use self::mutable::Mut;
 mod backend;
 pub use self::backend::*;
 
-mod layout;
-pub use self::layout::{Constrained, Linear};
+mod layouts;
+pub use self::layouts::{Constrained, Linear};
 
-mod widget;
-pub use self::widget::Rectangle;
+mod widgets;
+pub use self::widgets::Rectangle;
 
 mod color;
 pub use self::color::Color;
