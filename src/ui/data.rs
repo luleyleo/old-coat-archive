@@ -2,7 +2,6 @@ use crate::{Cid, Position, Size, ComponentPointer};
 use fnv::FnvHashMap;
 use std::any::{Any, TypeId};
 use smallvec::SmallVec;
-use log::trace;
 
 /// Contains all data that is necessary for the ui
 #[derive(Default)]
@@ -32,8 +31,10 @@ pub(crate) struct UiData {
     pub(crate) state: Vec<Option<Box<Any>>>,
     /// Holds all messages of the `Component`s.
     /// The `Vec<Box<Any>>` is the alternative to a `Vec<Vec<Box<Any>>>`
-    /// to avoid allocating for every message in exchange for a more confusing type
+    /// to avoid allocating for every message in exchange for a more confusing type.
+    /// Thus this resolves to a `Vec<Option<Vec<Component::Msg>>>`
     pub(crate) messages: Vec<Option<Box<Any>>>,
+    /// Cache events. Similar to `messages` this is a `Vec<Vec<Component::Event>>`
     pub(crate) events: Vec<Box<Any>>,
 
     /// The next `Cid` that will be allocated when needed
@@ -43,7 +44,7 @@ pub(crate) struct UiData {
 impl UiData {
     pub(crate) fn fresh_id(&mut self) -> Cid {
         let id = Cid::new(self.id_count);
-        trace!("Allocated {:?}", id);
+        log::trace!("Allocated {:?}", id);
         self.id_count += 1;
 
         self.typeid.push(TypeId::of::<()>());
