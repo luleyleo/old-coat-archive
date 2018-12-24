@@ -1,5 +1,6 @@
 use crate::*;
 
+/// A wrapper Component which provides functions to further constrain a Components size
 pub struct Constrained;
 
 #[derive(Default, Clone, Copy, PartialEq)]
@@ -33,14 +34,12 @@ impl PropsBuilder<Constrained> {
 }
 
 pub type State = Props;
-pub type Msg = ();
-pub type Event = ();
 
 impl Component for Constrained {
     type Props = Props;
     type State = State;
-    type Msg = Msg;
-    type Event = Event;
+    type Msg = ();
+    type Event = ();
 
     fn new() -> PropsBuilder<Self> {
         PropsBuilder::new(Props::default())
@@ -70,25 +69,68 @@ impl Component for Constrained {
                 ui.full_debug_name(),
                 children.len(),
             );
+            if children.is_empty() {
+                return Size::default();
+            }
         }
 
         let mut constraints = constraints;
 
         if let Some(min_width) = state.min_width {
-            constraints = constraints.min_width(min_width);
+            if constraints.min_width < min_width {
+                constraints = constraints.min_width(min_width);
+            } else {
+                log::warn!(
+                    "Property ignored: `min_width` of `Constrained` layout {} is smaller than the original constraint ({} < {})",
+                    ui.full_debug_name(),
+                    min_width, constraints.min_width
+                );
+            }
         }
         if let Some(min_height) = state.min_height {
-            constraints = constraints.min_height(min_height);
+            if constraints.min_height < min_height {
+                constraints = constraints.min_height(min_height);
+            } else {
+                log::warn!(
+                    "Property ignored: `min_height` of `Constrained` layout {} is smaller than the original constraint ({} < {})",
+                    ui.full_debug_name(),
+                    min_height, constraints.min_height
+                );
+            }
         }
         if let Some(max_width) = state.max_width {
-            constraints = constraints.max_width(max_width);
+            if let Some(imposed_max_width) = constraints.max_width {
+                if max_width < imposed_max_width {
+                    constraints = constraints.max_width(max_width);
+                } else {
+                    log::warn!(
+                        "Property ignored: `max_width` of `Constrained` layout {} is larger than the original constraint ({} > {})",
+                        ui.full_debug_name(),
+                        max_width, imposed_max_width
+                    );
+                }
+            } else {
+                constraints = constraints.max_width(max_width);
+            }
         }
         if let Some(max_height) = state.max_height {
-            constraints = constraints.max_height(max_height);
+            if let Some(imposed_max_height) = constraints.max_height {
+                if max_height < imposed_max_height {
+                    constraints = constraints.max_height(max_height);
+                } else {
+                    log::warn!(
+                        "Property ignored: `max_height` of `Constrained` layout {} is larger than the original constraint ({} > {})",
+                        ui.full_debug_name(),
+                        max_height, imposed_max_height
+                    );
+                }
+            } else {
+                constraints = constraints.max_height(max_height);
+            }
         }
 
         log::trace!(
-            "BoxConstraints for Constrained layout {} are {:?}",
+            "BoxConstraints for `Constrained` layout {} are {:?}",
             ui.full_debug_name(),
             constraints,
         );
