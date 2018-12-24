@@ -18,7 +18,7 @@ impl<'a> UiUpdate<'a> {
     pub(crate) fn run(data: &'a mut UiData, root: Cid) -> bool {
         if data.is_fresh(root) {
             trace!("Skipping `UiUpdate`");
-            return true
+            return true;
         }
         trace!("Running `UiUpdate`");
 

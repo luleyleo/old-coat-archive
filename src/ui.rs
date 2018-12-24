@@ -1,6 +1,5 @@
-
 mod data;
-pub(crate) use self::data::{UiData, full_debug_name_of};
+pub(crate) use self::data::{full_debug_name_of, UiData};
 
 mod ids;
 pub use self::ids::{Cid, Iid};

@@ -1,7 +1,7 @@
-use crate::backend::{PrimitiveRendererTrait};
+use crate::backend::PrimitiveRendererTrait;
 use webrender::api::*;
 
-use crate::{Component, Bounds, Rectangle, Renderer};
+use crate::{Bounds, Component, Rectangle, Renderer};
 
 pub struct PrimitiveRenderer;
 impl PrimitiveRendererTrait for PrimitiveRenderer {

@@ -1,11 +1,12 @@
 use crate::component::ComponentPointerTrait;
 use crate::{
-    AppEvent, AppProps, Cid, Iid, Component, PropsBuilder, ReactivePropsBuilder, UiData, ContentBuilder,
+    AppEvent, AppProps, Cid, Component, ContentBuilder, Iid, PropsBuilder, ReactivePropsBuilder,
+    UiData,
 };
 use std::any::TypeId;
+use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use std::cell::Cell;
 
 pub struct UiView<'a, C: Component> {
     data: &'a mut UiData,
@@ -38,7 +39,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             data.state[app_id.get()] = Some(Box::new(Comp::init_state(&props)));
             data.messages[app_id.get()] = Some(Box::new(Vec::<Comp::Msg>::new()));
             data.events[app_id.get()] = Box::new(Vec::<Comp::Event>::new());
-            
+
             log::trace!("View set: {}", data.full_debug_name_of(app_id));
         }
 
@@ -64,7 +65,11 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         self.parent.clone()
     }
 
-    pub fn set_reactive<C, T>(&mut self, iid: Iid, builder: ReactivePropsBuilder<C, T>) -> ContentBuilder
+    pub fn set_reactive<C, T>(
+        &mut self,
+        iid: Iid,
+        builder: ReactivePropsBuilder<C, T>,
+    ) -> ContentBuilder
     where
         C: Component,
         T: Component,
@@ -144,7 +149,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
         ContentBuilder {
             cid,
-            parent: self.parent_pointer()
+            parent: self.parent_pointer(),
         }
     }
 }

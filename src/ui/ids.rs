@@ -49,7 +49,7 @@ pub struct Iid {
 
 impl Iid {
     /// **Don't use this**
-    /// 
+    ///
     /// `Iid`s should be created using `ids!()` but this has to
     /// be public to make the `ids!()` macro work from other crates
     pub fn new(name: &'static str, id: TypeId) -> Self {

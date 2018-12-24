@@ -1,4 +1,4 @@
-use crate::{Cid, Iid, Component, UiView};
+use crate::{Cid, Component, Iid, UiView};
 use std::cell::Cell;
 use std::rc::Rc;
 

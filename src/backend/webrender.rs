@@ -1,11 +1,14 @@
-use glutin::{self, GlContext};
-use gleam::gl;
-use winit;
 use euclid;
+use gleam::gl;
+use glutin::{self, GlContext};
 use webrender::{self, api::*};
+use winit;
 
-use crate::{UiData, UiView, UiLayout, UiRender, UiInput, UiUpdate, Component, Size, Window, AppEvent, AppProps, Input};
 use crate::backend::winit::EventLoop;
+use crate::{
+    AppEvent, AppProps, Component, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdate,
+    UiView, Window,
+};
 
 mod notifier;
 use self::notifier::Notifier;
@@ -15,20 +18,21 @@ pub use self::primitives::PrimitiveRenderer;
 
 pub type Renderer = DisplayListBuilder;
 
-pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Window<Comp::State, Comp::Msg, Comp>) {
+pub fn run<Comp: Component<Props = AppProps, Event = AppEvent> + 'static>(
+    window: Window<Comp::State, Comp::Msg, Comp>,
+) {
     let mut wsize = Size::new(600.0, 400.0);
     let mut eventloop = EventLoop::new();
-    let context_builder = glutin::ContextBuilder::new()
-        .with_gl(glutin::GlRequest::GlThenGles {
-            opengl_version: (3, 2),
-            opengles_version: (3, 0),
-        });
+    let context_builder = glutin::ContextBuilder::new().with_gl(glutin::GlRequest::GlThenGles {
+        opengl_version: (3, 2),
+        opengles_version: (3, 0),
+    });
     let window_builder = winit::WindowBuilder::new()
         .with_title(window.title)
         .with_multitouch()
         .with_dimensions(winit::dpi::LogicalSize::new(wsize.w as f64, wsize.h as f64));
-    let window = glutin::GlWindow::new(window_builder, context_builder, eventloop.events_loop())
-        .unwrap();
+    let window =
+        glutin::GlWindow::new(window_builder, context_builder, eventloop.events_loop()).unwrap();
 
     unsafe {
         window.make_current().ok();
@@ -61,7 +65,8 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
         DeviceIntSize::new(size.width as i32, size.height as i32)
     };
     let notifier = Box::new(Notifier::new(eventloop.create_proxy()));
-    let (mut renderer, sender) = webrender::Renderer::new(gl.clone(), notifier, opts, None).unwrap();
+    let (mut renderer, sender) =
+        webrender::Renderer::new(gl.clone(), notifier, opts, None).unwrap();
     let api = sender.create_api();
     let document_id = api.add_document(framebuffer_size, 0);
 
@@ -83,25 +88,22 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
 
         for event in events {
             match event {
-                winit::Event::WindowEvent { ref event, .. } => {
-                    match event {
-                        winit::WindowEvent::CloseRequested => {
-                            break 'main;
-                        }
-                        winit::WindowEvent::Resized(lsize) => {
-                            wsize = Size::new(lsize.width as f32, lsize.height as f32);
-                            fresh = true;
-                        }
-                        _ => ()
+                winit::Event::WindowEvent { ref event, .. } => match event {
+                    winit::WindowEvent::CloseRequested => {
+                        break 'main;
                     }
-                }
-                _ => ()
+                    winit::WindowEvent::Resized(lsize) => {
+                        wsize = Size::new(lsize.width as f32, lsize.height as f32);
+                        fresh = true;
+                    }
+                    _ => (),
+                },
+                _ => (),
             }
             input.push_event(event);
         }
 
         {
-
             UiInput::<Comp>::run(&mut data, &mut input, app_id);
 
             if fresh | UiUpdate::run(&mut data, app_id) {
@@ -111,25 +113,22 @@ pub fn run<Comp: Component<Props=AppProps, Event=AppEvent> + 'static>(window: Wi
 
                 UiLayout::run(&mut data, app_id, wsize);
 
-                let mut builder = DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
+                let mut builder =
+                    DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
                 let mut txn = Transaction::new();
 
                 UiRender::run(&data, &mut builder, app_id);
 
-                txn.set_display_list(
-                    epoch,
-                    None,
-                    layout_size,
-                    builder.finalize(),
-                    true,
-                );
+                txn.set_display_list(epoch, None, layout_size, builder.finalize(), true);
                 txn.generate_frame();
                 api.send_transaction(document_id, txn);
             }
         }
 
         renderer.update();
-        renderer.render(DeviceIntSize::new(wsize.w as i32, wsize.h as i32)).unwrap();
+        renderer
+            .render(DeviceIntSize::new(wsize.w as i32, wsize.h as i32))
+            .unwrap();
         let _ = renderer.flush_pipeline_info();
         window.swap_buffers().ok();
     }

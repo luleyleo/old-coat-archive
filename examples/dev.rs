@@ -14,8 +14,6 @@ impl Component for DevApp {
 
     fn init_state(_props: &Self::Props) -> Self::State {}
 
-    fn update(_: Self::Msg, _: Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> { None }
-
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
         ids!(Container, Limit, First, Second);
 

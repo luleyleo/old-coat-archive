@@ -1,4 +1,4 @@
-use crate::{Scalar, Position};
+use crate::{Position, Scalar};
 
 mod event;
 pub use self::event::*;
@@ -18,15 +18,13 @@ impl Input {
 
     pub(crate) fn push_event(&mut self, event: Event) {
         match &event {
-            winit::Event::WindowEvent { event, .. } => {
-                match event {
-                    winit::WindowEvent::CursorMoved { position, .. } => {
-                        self.pointer = Position::new(position.x as Scalar, position.y as Scalar);
-                    }
-                    _ => ()
+            winit::Event::WindowEvent { event, .. } => match event {
+                winit::WindowEvent::CursorMoved { position, .. } => {
+                    self.pointer = Position::new(position.x as Scalar, position.y as Scalar);
                 }
-            }
-            _ => ()
+                _ => (),
+            },
+            _ => (),
         };
         self.events.push((event, false));
     }

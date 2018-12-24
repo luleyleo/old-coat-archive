@@ -1,4 +1,4 @@
-use crate::{UiData, Cid, Renderer, Bounds};
+use crate::{Bounds, Cid, Renderer, UiData};
 use log::trace;
 
 pub struct UiRender<'a> {

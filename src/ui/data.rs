@@ -1,7 +1,7 @@
-use crate::{Cid, Position, Size, ComponentPointer};
+use crate::{Cid, ComponentPointer, Position, Size};
 use fnv::FnvHashMap;
-use std::any::{Any, TypeId};
 use smallvec::SmallVec;
+use std::any::{Any, TypeId};
 
 /// Contains all data that is necessary for the ui
 #[derive(Default)]
@@ -71,7 +71,11 @@ impl UiData {
     }
 }
 
-pub(crate) fn full_debug_name_of(parent: &Vec<Option<Cid>>, name: &Vec<&'static str>, id: Cid) -> String {
+pub(crate) fn full_debug_name_of(
+    parent: &Vec<Option<Cid>>,
+    name: &Vec<&'static str>,
+    id: Cid,
+) -> String {
     let mut names: SmallVec<[&'static str; 10]> = SmallVec::new();
     names.push(name[id.get()]);
     let mut current = id;
@@ -79,5 +83,8 @@ pub(crate) fn full_debug_name_of(parent: &Vec<Option<Cid>>, name: &Vec<&'static 
         current = parent;
         names.push(name[parent.get()]);
     }
-    names.iter().rev().fold(String::new(),  |acc, n| acc + "/" + n)
+    names
+        .iter()
+        .rev()
+        .fold(String::new(), |acc, n| acc + "/" + n)
 }

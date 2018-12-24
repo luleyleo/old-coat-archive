@@ -1,4 +1,4 @@
-use winit::{EventsLoop, EventsLoopProxy, ControlFlow, Event};
+use winit::{ControlFlow, Event, EventsLoop, EventsLoopProxy};
 
 pub struct EventLoop {
     ui_needs_update: bool,
@@ -7,7 +7,6 @@ pub struct EventLoop {
 }
 
 impl EventLoop {
-
     pub fn new() -> Self {
         EventLoop {
             last_update: std::time::Instant::now(),
@@ -52,5 +51,4 @@ impl EventLoop {
 
         events
     }
-
 }

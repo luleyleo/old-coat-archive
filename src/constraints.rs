@@ -1,4 +1,4 @@
-use crate::{Scalar, bounds::Size};
+use crate::{bounds::Size, Scalar};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct BoxConstraints {
