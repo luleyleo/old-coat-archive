@@ -1,4 +1,8 @@
-
+/// A wrapper to track wether a mutable reference has actually been mutated.
+/// This is being used to avoid rendering when there was no state change.
+/// It implements both `Deref` and `DerefMut`.
+/// When `Deref` is used it won't trigger rendering but as soon as
+/// its content is dereferenced mutably it will.
 pub struct Mut<'a, D> {
     data: &'a mut D,
     mutated: &'a mut bool,
