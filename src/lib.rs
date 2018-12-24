@@ -13,9 +13,12 @@ use self::component::ComponentPointer;
 mod constraints;
 pub use self::constraints::BoxConstraints;
 
+mod ids;
+pub use self::ids::{Cid, Iid};
+
 mod ui;
 use self::ui::{full_debug_name_of, UiData, UiInputBase, UiRender};
-pub use self::ui::{Cid, Iid, UiInput, UiLayout, UiUpdate, UiView};
+pub use self::ui::{UiInput, UiLayout, UiUpdate, UiView};
 
 mod mutable;
 pub use self::mutable::Mut;
