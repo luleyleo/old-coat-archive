@@ -59,32 +59,6 @@ impl Component for Counter {
     }
 
     /**
-     * Writing the ui using React style "rsx".
-     * This should mostly expand to the "pure" variant.
-     * When setting a property called `text` it will expand to
-     * a builder call of its method `text` with the rhs as parameter.
-     * Actions have to be annotated with `@` because they are part
-     * of the `handle` builder function and not a function themselves.
-     * To keep it pure there is a need for control flow components like `If`.
-     * The problem with this is that I cannot think of a way to express loops like that.
-     */
-    #[cfg(xml)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
-        xml! {
-            <VBox>
-                <Label text=format!("{}" state.count)/>
-                <HBox spacing=10.0 even=true>
-                    <Button label="+" @Action(_)=Msg::Increment/>
-                    <If pred={state.count < 0}>
-                        <Button label="C" @Action(_)=Msg::Set(0)/>
-                    </If>
-                    <Button label="-" @Action(_)=Msg::Decrement/>
-                </HBox>
-            </VBox>
-        }
-    }
-
-    /**
      * Mostly the same as `xml` but allows a more React style by
      * mixing Rust and xml. So instead of requiring an `IF` component
      * you can just use a Rust `if` expression.
@@ -124,7 +98,7 @@ impl Component for Counter {
      * to Rusts syntax by having `<case>` children for each branch.
      * The `<case>` tags are also not being highlighted.
      */
-    #[cfg(xml_mixed_extended)]
+    #[cfg(xml_extended)]
     fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
         xml! {
             <VBox>
@@ -140,7 +114,7 @@ impl Component for Counter {
         }
     }
 
-    #[cfg(xml_mixed_extended_example)]
+    #[cfg(xml_extended_example)]
     fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
         xml! {
             <VBox>
@@ -164,47 +138,11 @@ impl Component for Counter {
 
     /**
      * Inspired by qml, pretty straight forward.
-     */
-    #[cfg(qml)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
-        qml! {
-            VBox {
-                Label {
-                    text: format!("{}", state.count);
-                }
-                HBox {
-                    spacing: 10.0;
-
-                    Button {
-                        label: "+";
-                        @Action(_): Msg::Increment;
-                    }
-
-                    If {
-                        pred: state.count > 0;
-
-                        Button {
-                            label: "C";
-                            @Action(_): Msg::Set(0);
-                        }
-                    }
-
-                    Button {
-                        label: "-";
-                        @Action(_): Msg::Decrement;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Like the previous one, but with rust control flow build into the macro.
      * This allows the use of `if`, `loop`/`while`/`for` and `match`.
-     * In difference to `xml_mixed` this would feel just right and
+     * In difference to the xml syntax this would feel just right and
      * would be rather straight forward to implement.
      */
-    #[cfg(qml_mixed)]
+    #[cfg(qml)]
     fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
         qml! {
             VBox {
@@ -485,7 +423,7 @@ impl Component for Counter {
 
         VBox::new()
             .set(ROOT, ui)
-            .add(|ui|{
+            .add(||{
                 Label::new()
                     .text(format!("{}", state.count))
                     .set(LABEL, ui);
