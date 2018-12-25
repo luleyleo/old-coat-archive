@@ -3,6 +3,7 @@
 A pure Rust GUI library mainly inspired by Conrod, React, Elm and Flutter.
 
 In the `concepts` folder are examples of what I imagine this library to be like.
+The `examples/dev.rs` roughly reflects the current state.
 
 # Goals
 
@@ -17,4 +18,4 @@ In the `concepts` folder are examples of what I imagine this library to be like.
 - Try to stick with this project until it can be used productive (this will be the hardest part).
 
 # State
-It can open a window. And close it. While using a lot of RAM.
+It can open a Window and layout + draw rectangles.
