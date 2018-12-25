@@ -4,11 +4,8 @@ use glutin::{self, GlContext};
 use webrender::{self, api::*};
 use winit;
 
-use crate::backend::winit::EventLoop;
-use crate::{
-    AppEvent, AppProps, Component, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdate,
-    UiView, Window,
-};
+use crate::backend::winit::{AppEvent, AppProps, EventLoop, Window};
+use crate::{Component, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdate, UiView};
 
 mod notifier;
 use self::notifier::Notifier;

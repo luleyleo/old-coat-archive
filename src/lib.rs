@@ -16,14 +16,14 @@ pub use self::constraints::BoxConstraints;
 mod ids;
 pub use self::ids::{Cid, Iid};
 
-mod ui;
+pub mod ui;
 use self::ui::{full_debug_name_of, UiData, UiInputBase, UiRender};
 pub use self::ui::{UiInput, UiLayout, UiUpdate, UiView};
 
 mod mutable;
 pub use self::mutable::Mut;
 
-mod backend;
+pub mod backend;
 pub use self::backend::*;
 
 mod layouts;

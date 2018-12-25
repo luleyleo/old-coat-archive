@@ -1,6 +1,6 @@
 use crate::component::ComponentPointerTrait;
 use crate::{
-    AppEvent, AppProps, Cid, Component, ContentBuilder, Iid, PropsBuilder, ReactivePropsBuilder,
+    Cid, Component, ContentBuilder, Iid, PropsBuilder, ReactivePropsBuilder,
     UiData,
 };
 use std::any::TypeId;
@@ -26,10 +26,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         }
     }
 
-    pub(crate) fn run(data: &'a mut UiData, app_id: Cid, props: AppProps)
-    where
-        Comp: Component<Props = AppProps, Event = AppEvent>,
-    {
+    pub(crate) fn run(data: &'a mut UiData, app_id: Cid, props: Comp::Props) {
         log::trace!("Running `UiView`");
         if data.typeid[app_id.get()] == TypeId::of::<()>() {
             log::trace!("Initializing Root Component with {:?}", app_id);

@@ -1,32 +1,31 @@
 //! Provides `struct`s and `trait`s that are the same for any back end
 //! as well as back end specific code.
 //!
-//! Independent of the use back end it should export:
-//! - `struct Renderer`: This provides everything necessary to render anything
-//! - `struct PrimitiveRenderer`: Provides all functions of the `PrimitiveRendererTrait`
+//! Independent of the back end it should export `Renderer`
 
 use crate::{Bounds, Component};
 
 mod webrender;
-mod winit;
-
-pub use self::webrender::Renderer;
+pub mod winit;
 
 use crate::Rectangle;
 trait PrimitiveRendererTrait {
     fn rectangle(state: &<Rectangle as Component>::State, bounds: Bounds, renderer: &mut Renderer);
 }
 
-use self::webrender::PrimitiveRenderer as WrPrimitiveRenderer;
-pub struct PrimitiveRenderer;
+/// Contains all data and functions required to render something with the chosen back end
+pub type Renderer = self::webrender::Renderer;
+
+type UsedPrimitiveRenderer = self::webrender::PrimitiveRenderer;
+
+/// Provides the functionality of `PrimitiveRendererTrait` without using the trait
+pub(crate) struct PrimitiveRenderer;
 impl PrimitiveRenderer {
     pub fn rectangle(
         state: &<Rectangle as Component>::State,
         bounds: Bounds,
         renderer: &mut Renderer,
     ) {
-        WrPrimitiveRenderer::rectangle(state, bounds, renderer);
+        UsedPrimitiveRenderer::rectangle(state, bounds, renderer);
     }
 }
-
-pub use self::winit::{AppEvent, AppProps, Window};

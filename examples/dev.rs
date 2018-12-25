@@ -1,4 +1,5 @@
 use coat::*;
+use coat::backend::winit::{Window, AppProps, AppEvent};
 
 struct DevApp;
 
