@@ -4,7 +4,7 @@ use crate::{
 };
 use std::any::Any;
 
-pub trait Component: Sized + 'static {
+pub trait Component: Sized {
     type Props: Sized;
     type State: Sized + 'static;
     type Msg: Sized + 'static;

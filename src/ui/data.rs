@@ -1,4 +1,4 @@
-use crate::{Cid, ComponentPointer, Position, Size};
+use crate::{Cid, Component, ComponentPointer, Position, Size};
 use fnv::FnvHashMap;
 use smallvec::SmallVec;
 use std::any::{Any, TypeId};
@@ -7,7 +7,7 @@ use std::any::{Any, TypeId};
 #[derive(Default)]
 pub(crate) struct UiData {
     /// The `TypeId` of the `Component` behind a `Cid`
-    pub(crate) typeid: Vec<TypeId>,
+    pub(crate) typeids: Vec<TypeIds>,
     /// A `stringify!()`ed version of the `creations` id
     pub(crate) name: Vec<&'static str>,
     /// A "pointer" to dynamic versions of a `Component`s functions
@@ -47,7 +47,7 @@ impl UiData {
         log::trace!("Allocated {:?}", id);
         self.id_count += 1;
 
-        self.typeid.push(TypeId::of::<()>());
+        self.typeids.push(TypeIds::void());
         self.name.push("");
         self.pointer.push(ComponentPointer::default());
         self.parent.push(None);
@@ -63,11 +63,36 @@ impl UiData {
     }
 
     pub(crate) fn is_fresh(&self, id: Cid) -> bool {
-        self.typeid[id.get()] == TypeId::of::<()>()
+        self.typeids[id.get()] == TypeIds::void()
     }
 
     pub(crate) fn full_debug_name_of(&self, id: Cid) -> String {
         full_debug_name_of(&self.parent, &self.name, id)
+    }
+}
+
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub(crate) struct TypeIds {
+    state: TypeId,
+    message: TypeId,
+    event: TypeId,
+}
+
+impl TypeIds {
+    pub fn of<Comp: Component>() -> Self {
+        TypeIds {
+            state: TypeId::of::<Comp::State>(),
+            message: TypeId::of::<Comp::Msg>(),
+            event: TypeId::of::<Comp::Event>(),
+        }
+    }
+    pub fn void() -> Self {
+        let void = TypeId::of::<()>();
+        TypeIds {
+            state: void,
+            message: void,
+            event: void,
+        }
     }
 }
 

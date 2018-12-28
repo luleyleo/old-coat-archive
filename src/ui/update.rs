@@ -1,9 +1,9 @@
-use crate::{Cid, Component, ComponentPointer, UiData};
+use crate::{Cid, Component, ComponentPointer, TypeIds, UiData};
 use log::{trace, warn};
-use std::any::{Any, TypeId};
+use std::any::Any;
 
 pub struct UiUpdate<'a> {
-    typeid: &'a Vec<TypeId>,
+    typeids: &'a Vec<TypeIds>,
     pointer: &'a Vec<ComponentPointer>,
     parent: &'a Vec<Option<Cid>>,
     children: &'a Vec<Vec<Cid>>,
@@ -23,7 +23,7 @@ impl<'a> UiUpdate<'a> {
         trace!("Running `UiUpdate`");
 
         let mut ui = UiUpdate {
-            typeid: &data.typeid,
+            typeids: &data.typeids,
             pointer: &data.pointer,
             parent: &data.parent,
             children: &data.children,
@@ -71,13 +71,10 @@ impl<'a> UiUpdate<'a> {
     }
 
     /// Sends the `msg` to the closest parent of the related `Component`
-    pub fn bubble<C>(&mut self, msg: C::Msg)
-    where
-        C: Component + 'static,
-    {
+    pub fn bubble<Comp: Component>(&mut self, msg: Comp::Msg) {
         while let Some(parent) = self.parent[self.cid.get()] {
-            if self.typeid[parent.get()] == TypeId::of::<C>() {
-                let messages: &mut Vec<C::Msg> = self.messages[parent.get()]
+            if self.typeids[parent.get()] == TypeIds::of::<Comp>() {
+                let messages: &mut Vec<Comp::Msg> = self.messages[parent.get()]
                     .as_mut()
                     .unwrap()
                     .downcast_mut()

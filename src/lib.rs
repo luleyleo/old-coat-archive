@@ -17,7 +17,7 @@ mod ids;
 pub use self::ids::{Cid, Iid};
 
 pub mod ui;
-use self::ui::{full_debug_name_of, UiData, UiInputBase, UiRender};
+use self::ui::{full_debug_name_of, TypeIds, UiData, UiInputBase, UiRender};
 pub use self::ui::{UiInput, UiLayout, UiUpdate, UiView};
 
 mod mutable;

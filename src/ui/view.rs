@@ -1,9 +1,7 @@
 use crate::component::ComponentPointerTrait;
 use crate::{
-    Cid, Component, ContentBuilder, Iid, PropsBuilder, ReactivePropsBuilder,
-    UiData,
+    Cid, Component, ContentBuilder, Iid, PropsBuilder, ReactivePropsBuilder, TypeIds, UiData,
 };
-use std::any::TypeId;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -28,9 +26,9 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
     pub(crate) fn run(data: &'a mut UiData, app_id: Cid, props: Comp::Props) {
         log::trace!("Running `UiView`");
-        if data.typeid[app_id.get()] == TypeId::of::<()>() {
+        if data.typeids[app_id.get()] == TypeIds::void() {
             log::trace!("Initializing Root Component with {:?}", app_id);
-            data.typeid[app_id.get()] = TypeId::of::<Comp>();
+            data.typeids[app_id.get()] = TypeIds::of::<Comp>();
             data.name[app_id.get()] = "Root";
             data.pointer[app_id.get()] = Comp::pointer();
             data.state[app_id.get()] = Some(Box::new(Comp::init_state(&props)));
@@ -111,7 +109,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
                 let parent = self.parent.get().unwrap_or(self.cid);
 
-                self.data.typeid[cid.get()] = TypeId::of::<C>();
+                self.data.typeids[cid.get()] = TypeIds::of::<C>();
                 self.data.name[cid.get()] = name;
                 self.data.pointer[cid.get()] = C::pointer();
                 self.data.parent[cid.get()] = Some(parent);
