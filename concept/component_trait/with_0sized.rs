@@ -1,11 +1,7 @@
+//! This would require GATs, which currently are not even available on nightly :(
 use crate::*;
-use std::marker::PhantomData;
 
-/// This still allows
-/// `let button = Button;`
-/// or
-/// `call_function(Button);`
-pub struct Button<'a>(PhantomData<&'a ()>);
+pub struct Button;
 
 pub struct ButtonProps<'a> {
     label: &'a str,
@@ -31,8 +27,8 @@ pub enum ButtonEvent {
     Activated,
 }
 
-impl<'a> Component for Button<'a> {
-    type Props = ButtonProps<'a>;
+impl Component for Button {
+    type Props<'a> = ButtonProps<'a>;
     type State = ButtonState;
     type Msg = ButtonMsg;
     type Event = ButtonEvent;
