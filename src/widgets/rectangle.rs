@@ -1,6 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Color, Component, Mut, PropsBuilder, Renderer, Size, UiLayout,
-    UiUpdate, UiView,
+    Bounds, BoxConstraints, Cid, Color, Component, PropsBuilder, Renderer, Size, UiLayout, UiView,
 };
 
 pub struct Rectangle;
