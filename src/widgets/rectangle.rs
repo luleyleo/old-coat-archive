@@ -4,7 +4,7 @@ use crate::{
 
 pub struct Rectangle;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Default, Clone, Copy, PartialEq)]
 pub struct Props {
     pub(crate) color: Color,
 }
@@ -21,12 +21,6 @@ impl Component for Rectangle {
     type State = Props;
     type Msg = ();
     type Event = ();
-
-    fn new() -> PropsBuilder<Self> {
-        PropsBuilder::new(Props {
-            color: Color::default(),
-        })
-    }
 
     fn init(props: &Self::Props) -> Self::State {
         *props

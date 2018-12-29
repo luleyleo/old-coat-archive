@@ -5,12 +5,14 @@ use crate::{
 use std::any::Any;
 
 pub trait Component: Sized {
-    type Props: Sized;
+    type Props: Default + Sized;
     type State: Sized + 'static;
     type Msg: Sized + 'static;
     type Event: Sized + 'static;
 
-    fn new() -> PropsBuilder<Self>;
+    fn new() -> PropsBuilder<Self> {
+        PropsBuilder::new(Self::Props::default())
+    }
 
     fn init(props: &Self::Props) -> Self::State;
 

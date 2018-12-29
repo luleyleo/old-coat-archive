@@ -41,10 +41,6 @@ impl Component for Constrained {
     type Msg = ();
     type Event = ();
 
-    fn new() -> PropsBuilder<Self> {
-        PropsBuilder::new(Props::default())
-    }
-
     fn init(props: &Self::Props) -> Self::State {
         *props
     }
