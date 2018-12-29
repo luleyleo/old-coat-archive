@@ -42,7 +42,7 @@ impl Component for DevApp {
 fn main() {
     env_logger::init();
 
-    Window::new(DevApp)
+    Window::new()
         .title("Dev App")
-        .run();
+        .run::<DevApp>();
 }

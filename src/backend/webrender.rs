@@ -1,11 +1,6 @@
-use euclid;
 use gleam::gl;
-use glutin::{self, GlContext};
-use webrender::{self, api::*};
-use winit;
-
-use crate::backend::winit::{AppEvent, AppProps, EventLoop, Window};
-use crate::{Component, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdate, UiView};
+use std::rc::Rc;
+use webrender::api::*;
 
 mod notifier;
 use self::notifier::Notifier;
@@ -15,120 +10,79 @@ pub use self::primitives::PrimitiveRenderer;
 
 pub type Renderer = DisplayListBuilder;
 
-pub fn run<Comp: Component<Props = AppProps, Event = AppEvent> + 'static>(
-    window: Window<Comp::State, Comp::Msg, Comp>,
-) {
-    let mut wsize = Size::new(600.0, 400.0);
-    let mut eventloop = EventLoop::new();
-    let context_builder = glutin::ContextBuilder::new().with_gl(glutin::GlRequest::GlThenGles {
-        opengl_version: (3, 2),
-        opengles_version: (3, 0),
-    });
-    let window_builder = winit::WindowBuilder::new()
-        .with_title(window.title)
-        .with_multitouch()
-        .with_dimensions(winit::dpi::LogicalSize::new(wsize.w as f64, wsize.h as f64));
-    let window =
-        glutin::GlWindow::new(window_builder, context_builder, eventloop.events_loop()).unwrap();
+pub struct Webrenderer {
+    renderer: webrender::Renderer,
+    api: RenderApi,
+    layout_size: LayoutSize,
+    device_size: DeviceIntSize,
+    document_id: DocumentId,
+    pipeline_id: PipelineId,
+}
 
-    unsafe {
-        window.make_current().ok();
-    }
+impl Webrenderer {
+    pub fn new(proxy: winit::EventsLoopProxy, gl: Rc<gl::Gl>, dpr: f32) -> Self {
+        let opts = webrender::RendererOptions {
+            device_pixel_ratio: dpr,
+            clear_color: Some(ColorF::new(0.1, 0.1, 0.1, 1.0)),
+            ..webrender::RendererOptions::default()
+        };
 
-    let gl = match window.get_api() {
-        glutin::Api::OpenGl => unsafe {
-            gl::GlFns::load_with(|symbol| window.get_proc_address(symbol) as *const _)
-        },
-        glutin::Api::OpenGlEs => unsafe {
-            gl::GlesFns::load_with(|symbol| window.get_proc_address(symbol) as *const _)
-        },
-        glutin::Api::WebGl => unimplemented!(),
-    };
-
-    let device_pixel_ratio = window.get_hidpi_factor() as f32;
-
-    let opts = webrender::RendererOptions {
-        device_pixel_ratio,
-        clear_color: Some(ColorF::new(0.1, 0.1, 0.1, 1.0)),
-        debug_flags: webrender::DebugFlags::ECHO_DRIVER_MESSAGES,
-        ..webrender::RendererOptions::default()
-    };
-
-    let framebuffer_size = {
-        let size = window
-            .get_inner_size()
-            .unwrap()
-            .to_physical(device_pixel_ratio as f64);
-        DeviceIntSize::new(size.width as i32, size.height as i32)
-    };
-    let notifier = Box::new(Notifier::new(eventloop.create_proxy()));
-    let (mut renderer, sender) =
-        webrender::Renderer::new(gl.clone(), notifier, opts, None).unwrap();
-    let api = sender.create_api();
-    let document_id = api.add_document(framebuffer_size, 0);
-
-    let epoch = Epoch(0);
-    let pipeline_id = PipelineId(0, 0);
-    let layout_size = framebuffer_size.to_f32() / euclid::TypedScale::new(device_pixel_ratio);
-
-    let mut txn = Transaction::new();
-    txn.set_root_pipeline(pipeline_id);
-    api.send_transaction(document_id, txn);
-
-    let mut fresh = true;
-    let mut input = Input::new();
-    let mut data = UiData::default();
-    let app_id = data.fresh_id();
-
-    'main: loop {
-        let events = eventloop.next();
-
-        for event in events {
-            match event {
-                winit::Event::WindowEvent { ref event, .. } => match event {
-                    winit::WindowEvent::CloseRequested => {
-                        break 'main;
-                    }
-                    winit::WindowEvent::Resized(lsize) => {
-                        wsize = Size::new(lsize.width as f32, lsize.height as f32);
-                        fresh = true;
-                    }
-                    _ => (),
-                },
-                _ => (),
-            }
-            input.push_event(event);
-        }
+        let notifier = Box::new(Notifier::new(proxy));
+        let (renderer, sender) =
+            webrender::Renderer::new(gl.clone(), notifier, opts, None).unwrap();
+        let api = sender.create_api();
+        let pipeline_id = PipelineId(0, 0);
+        let layout_size = LayoutSize::new(0.0, 0.0);
+        let device_size = DeviceIntSize::new(0, 0);
+        let document_id = api.add_document(device_size, 0);
 
         {
-            UiInput::<Comp>::run(&mut data, &mut input, app_id);
-
-            if fresh | UiUpdate::run(&mut data, app_id) {
-                fresh = false;
-
-                UiView::<Comp>::run(&mut data, app_id, AppProps::default());
-
-                UiLayout::run(&mut data, app_id, wsize);
-
-                let mut builder =
-                    DisplayListBuilder::new(pipeline_id, LayoutSize::new(wsize.w, wsize.h));
-                let mut txn = Transaction::new();
-
-                UiRender::run(&data, &mut builder, app_id);
-
-                txn.set_display_list(epoch, None, layout_size, builder.finalize(), true);
-                txn.generate_frame();
-                api.send_transaction(document_id, txn);
-            }
+            let mut txn = Transaction::new();
+            txn.set_root_pipeline(pipeline_id);
+            api.send_transaction(document_id, txn);
         }
 
-        renderer.update();
-        renderer
-            .render(DeviceIntSize::new(wsize.w as i32, wsize.h as i32))
-            .unwrap();
-        let _ = renderer.flush_pipeline_info();
-        window.swap_buffers().ok();
+        Webrenderer {
+            renderer,
+            api,
+            layout_size,
+            device_size,
+            document_id,
+            pipeline_id,
+        }
     }
 
-    renderer.deinit();
+    pub fn resize(&mut self, width: f32, height: f32, dpr: f32) {
+        self.layout_size = LayoutSize::new(width, height);
+        let (width, height) = (width * dpr, height * dpr);
+        let (width, height) = (width as i32, height as i32);
+        self.device_size = DeviceIntSize::new(width, height);
+        self.api.set_window_parameters(
+            self.document_id,
+            self.device_size,
+            self.device_size.into(),
+            dpr,
+        );
+    }
+
+    pub fn new_builder(&mut self) -> Renderer {
+        DisplayListBuilder::new(self.pipeline_id, self.layout_size)
+    }
+
+    pub fn render(&mut self, builder: Renderer) {
+        let mut txn = Transaction::new();
+        txn.set_display_list(Epoch(0), None, self.layout_size, builder.finalize(), true);
+        txn.generate_frame();
+        self.api.send_transaction(self.document_id, txn);
+    }
+
+    pub fn flush(&mut self) {
+        self.renderer.update();
+        self.renderer.render(self.device_size).unwrap(); // TODO: Handle possible errors
+        self.renderer.flush_pipeline_info();
+    }
+
+    pub fn deinit(self) {
+        self.renderer.deinit();
+    }
 }
