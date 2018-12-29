@@ -78,7 +78,6 @@ impl Component for Button {
                     }
                     None
                 };
-
             }
         }
     }

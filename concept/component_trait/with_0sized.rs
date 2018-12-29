@@ -1,4 +1,3 @@
-//! This would require GATs, which currently are not even available on nightly :(
 use crate::*;
 
 pub struct Button;
@@ -28,6 +27,7 @@ pub enum ButtonEvent {
 }
 
 impl Component for Button {
+    /// This would require GATs, which currently are not even implemented on nightly :(
     type Props<'a> = ButtonProps<'a>;
     type State = ButtonState;
     type Msg = ButtonMsg;
@@ -37,7 +37,7 @@ impl Component for Button {
         PropsBuilder::new(Self::Props { label: "" })
     }
 
-    fn init_state(props: &Self::Props) -> Self::State {
+    fn init(props: &Self::Props) -> Self::State {
         ButtonState { hovered: false }
     }
 

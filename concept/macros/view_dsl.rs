@@ -1,3 +1,7 @@
+use coat::*;
+
+//! This concept demonstrates possible macros / styles to define the ui
+
 struct Counter;
 
 #[non_exhaustive]
@@ -13,6 +17,7 @@ impl PropsBuilder<Counter> {
 }
 
 struct State {
+    step: usize,
     count: usize,
 }
 
@@ -27,34 +32,40 @@ enum Event {
     OverTen(usize),
 }
 
-type Ctx = ();
-
 impl Component for Counter {
     type Props = Props;
     type State = State;
     type Msg = Msg;
     type Event = Event;
-    type Ctx = Ctx;
 
-    fn new<T: Component>() -> PropsBuilder<Self, T> {
-        Props { step: 1 }.into()
+    fn new() -> PropsBuilder<Self> {
+        PropsBuilder::new(
+            Props { step: 1 }
+        )
     }
 
-    fn init_state(props: Props) -> State {
-        State { count: 0 }
+    fn init(props: &Props) -> State {
+        State {
+            step: props.step,
+            count: 0,
+        }
     }
 
-    fn update(msg: Msg, props: Props, state: &mut State, ctx: &Ctx) -> Option<Event> {
+    fn derive_state(props: &Props, state: Mut<State>) {
+        if state.step != props.step {
+            state.step = props.step;
+        }
+    }
+
+    fn update(msg: Msg, mut state: Mut<State>, ui: &mut UiUpdate) {
         match msg {
-            Msg::Increment => state.count += props.step,
-            Msg::Decrement => state.count -= props.step,
+            Msg::Increment => state.count += state.step,
+            Msg::Decrement => state.count -= state.step,
             Msg::Set(value) => state.count = value,
         }
 
         if state.count > 10 {
-            Some(Event::OverTen(state.count))
-        } else {
-            None
+            ui.dispatch(Event::OverTen(state.count));
         }
     }
 
@@ -75,7 +86,7 @@ impl Component for Counter {
      * That aside it just looks ugly.
      */
     #[cfg(xml_mixed)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         xml! {
             <VBox>
                 <Label text=format!("{}" state.count)/>
@@ -99,7 +110,7 @@ impl Component for Counter {
      * The `<case>` tags are also not being highlighted.
      */
     #[cfg(xml_extended)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         xml! {
             <VBox>
                 <Label text=format!("{}" state.count)/>
@@ -115,7 +126,7 @@ impl Component for Counter {
     }
 
     #[cfg(xml_extended_example)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         xml! {
             <VBox>
                 <Label text=format!("{}" state.count)/>
@@ -143,7 +154,7 @@ impl Component for Counter {
      * would be rather straight forward to implement.
      */
     #[cfg(qml)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UI) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         qml! {
             VBox {
                 Label {
@@ -188,7 +199,7 @@ impl Component for Counter {
      * the full power Rust has to offer.
      */
     #[cfg(pure)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         VBox::new()
             .set(0, ui);
         {
@@ -238,7 +249,7 @@ impl Component for Counter {
      * Same as before but with constants instead of raw numbers as ids.
      */
     #[cfg(pure_human)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         const ROOT: usize = 0;
         const LABEL: usize = 1;
         const BOX: usize = 2;
@@ -295,7 +306,7 @@ impl Component for Counter {
      * Some macro magic to automate declaring the id constants.
      */
     #[cfg(pure_human_macro)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         ids!(ROOT, LABEL, BOX, PLUS, CLEAR, MINUS);
 
         VBox::new()
@@ -356,7 +367,7 @@ impl Component for Counter {
      * but I doubt it would be much worse than for the previous ones.
      */
     #[cfg(pure_human_macro_extended)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         ids!{ui,
             ROOT {
                 LABEL,
@@ -418,7 +429,7 @@ impl Component for Counter {
      * - Provide `add` with an `Rc<Cell<?>>` to tell the `Ui` about the indentation
      */
     #[cfg(pure_human_macro_indented)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         ids!(ROOT, LABEL, BOX, PLUS, CLEAR, MINUS);
 
         VBox::new()
@@ -465,7 +476,7 @@ impl Component for Counter {
      * This style makes it really easy to split the `view` function
      */
     #[cfg(pure_human_macro_indented_split)]
-    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut Ui) {
+    fn view(props: Props, state: &State, ctx: &Ctx, ui: &mut UiView) {
         ids!(ROOT, LABEL, BOX);
 
         VBox::new()
@@ -484,7 +495,7 @@ impl Component for Counter {
 }
 
 #[cfg(pure_human_macro_extended_split)]
-fn buttons(state: &State, ui: &mut Ui) {
+fn buttons(state: &State, ui: &mut UiView) {
     ids!(PLUS, CLEAR, MINUS);
 
     Button::new()

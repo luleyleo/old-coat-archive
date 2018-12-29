@@ -1,11 +1,11 @@
 struct Button;
 
 struct Props {
-    label: Option<Str>,
+    label: Option<String>,
 }
 
 impl PropsBuilder<Button> {
-    pub fn label(mut self, value: Str) -> Self {
+    pub fn label(mut self, value: String) -> Self {
         self.label = value.into();
         self
     }
@@ -30,8 +30,10 @@ impl Component for Button {
     type Msg = Msg;
     type Event = Event;
 
-    fn new<T: Component>() -> PropsBuilder<Self, T> {
-        Props { label: None }.into()
+    fn new() -> PropsBuilder<Self> {
+        PropsBuilder::new(
+            Props { label: None }
+        )
     }
 
     fn init_state(props: Props) -> State {

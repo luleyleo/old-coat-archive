@@ -77,10 +77,10 @@ pub trait Component: Sized {
     fn layout(state: &Self::State, children: &[Cid], constraints: BoxConstraints, ui: &mut UiLayout) -> Size {}
 
     #[allow(unused_variables)]
-    fn input(input: &mut UiInput<Self>) {}
+    fn derive_state(props: &Self, state: Mut<Self::State>) {}
 
     #[allow(unused_variables)]
-    fn derive_state(props: &Self, state: Mut<Self::State>) {}
+    fn input(input: &mut UiInput<Self>) {}
 
     #[allow(unused_variables)]
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}
