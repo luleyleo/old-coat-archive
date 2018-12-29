@@ -48,7 +48,7 @@ impl Component for Linear {
         })
     }
 
-    fn init_state(props: &Props) -> State {
+    fn init(props: &Props) -> State {
         *props
     }
 
@@ -57,8 +57,6 @@ impl Component for Linear {
             *state = *props;
         }
     }
-
-    fn view(_props: &Props, _state: &State, _ui: &mut UiView<Self>) {}
 
     fn layout(
         state: &Self::State,

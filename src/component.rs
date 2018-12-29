@@ -12,14 +12,13 @@ pub trait Component: Sized {
 
     fn new() -> PropsBuilder<Self>;
 
-    fn init_state(props: &Self::Props) -> Self::State;
+    fn init(props: &Self::Props) -> Self::State;
 
     #[allow(unused_variables)]
-    fn update(msg: Self::Msg, state: Mut<Self::State>, ui: &mut UiUpdate) -> Option<Self::Event> {
-        None
-    }
+    fn update(msg: Self::Msg, state: Mut<Self::State>, ui: &mut UiUpdate) {}
 
-    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>);
+    #[allow(unused_variables)]
+    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {}
 
     #[allow(unused_variables)]
     fn layout(
@@ -82,9 +81,7 @@ where
         let mut mutated = false;
         for msg in messages.drain(..) {
             let state = Mut::new(state, &mut mutated);
-            if let Some(event) = Self::update(msg, state, ui) {
-                ui.emit(event);
-            }
+            Self::update(msg, state, ui);
         }
         if mutated {
             ui.needs_update();

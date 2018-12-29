@@ -31,7 +31,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             data.typeids[app_id.get()] = TypeIds::of::<Comp>();
             data.name[app_id.get()] = "Root";
             data.pointer[app_id.get()] = Comp::pointer();
-            data.state[app_id.get()] = Some(Box::new(Comp::init_state(&props)));
+            data.state[app_id.get()] = Some(Box::new(Comp::init(&props)));
             data.messages[app_id.get()] = Some(Box::new(Vec::<Comp::Msg>::new()));
             data.events[app_id.get()] = Box::new(Vec::<Comp::Event>::new());
 
@@ -114,7 +114,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
                 self.data.pointer[cid.get()] = C::pointer();
                 self.data.parent[cid.get()] = Some(parent);
                 self.data.children[parent.get()].push(cid);
-                self.data.state[cid.get()] = Some(Box::new(C::init_state(&*builder)));
+                self.data.state[cid.get()] = Some(Box::new(C::init(&*builder)));
                 self.data.messages[cid.get()] = Some(Box::new(Vec::<C::Msg>::new()));
                 self.data.events[cid.get()] = Box::new(Vec::<C::Event>::new());
 

@@ -1,6 +1,6 @@
 use crate::{Cid, Component, ComponentPointer, TypeIds, UiData};
 use log::{trace, warn};
-use std::any::Any;
+use std::any::{Any, TypeId};
 
 pub struct UiUpdate<'a> {
     typeids: &'a Vec<TypeIds>,
@@ -15,6 +15,36 @@ pub struct UiUpdate<'a> {
 }
 
 impl<'a> UiUpdate<'a> {
+    pub fn emit<E: 'static>(&mut self, event: E) {
+        if self.typeids[self.cid.get()].message == TypeId::of::<E>() {
+            let events = &mut self.events[self.cid.get()];
+            let events = events.downcast_mut::<Vec<E>>().unwrap();
+            events.push(event);
+        }
+    }
+
+    /// Sends the `msg` to the closest parent of the related `Component`
+    pub fn bubble<Comp: Component>(&mut self, msg: Comp::Msg) {
+        while let Some(parent) = self.parent[self.cid.get()] {
+            if self.typeids[parent.get()] == TypeIds::of::<Comp>() {
+                let messages: &mut Vec<Comp::Msg> = self.messages[parent.get()]
+                    .as_mut()
+                    .unwrap()
+                    .downcast_mut()
+                    .unwrap();
+                messages.push(msg);
+                return;
+            }
+        }
+        warn!("Tried to bubble a message but the targeted Component does not exist");
+    }
+}
+
+impl<'a> UiUpdate<'a> {
+    pub(crate) fn needs_update(&mut self) {
+        self.needs_update = true;
+    }
+
     pub(crate) fn run(data: &'a mut UiData, root: Cid) -> bool {
         if data.is_fresh(root) {
             trace!("Skipping `UiUpdate`");
@@ -57,32 +87,5 @@ impl<'a> UiUpdate<'a> {
             self.cid = *child;
             self.visit(*child);
         }
-    }
-
-    pub(crate) fn emit<E: 'static>(&mut self, event: E) {
-        let events = &mut self.events[self.cid.get()];
-        if let Some(events) = events.downcast_mut::<Vec<E>>() {
-            events.push(event);
-        }
-    }
-
-    pub(crate) fn needs_update(&mut self) {
-        self.needs_update = true;
-    }
-
-    /// Sends the `msg` to the closest parent of the related `Component`
-    pub fn bubble<Comp: Component>(&mut self, msg: Comp::Msg) {
-        while let Some(parent) = self.parent[self.cid.get()] {
-            if self.typeids[parent.get()] == TypeIds::of::<Comp>() {
-                let messages: &mut Vec<Comp::Msg> = self.messages[parent.get()]
-                    .as_mut()
-                    .unwrap()
-                    .downcast_mut()
-                    .unwrap();
-                messages.push(msg);
-                return;
-            }
-        }
-        warn!("Tried to bubble a message but the targeted Component does not exist");
     }
 }

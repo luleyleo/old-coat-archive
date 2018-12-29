@@ -73,9 +73,9 @@ impl UiData {
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub(crate) struct TypeIds {
-    state: TypeId,
-    message: TypeId,
-    event: TypeId,
+    pub state: TypeId,
+    pub message: TypeId,
+    pub event: TypeId,
 }
 
 impl TypeIds {

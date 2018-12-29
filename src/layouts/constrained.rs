@@ -45,11 +45,9 @@ impl Component for Constrained {
         PropsBuilder::new(Props::default())
     }
 
-    fn init_state(props: &Self::Props) -> Self::State {
+    fn init(props: &Self::Props) -> Self::State {
         *props
     }
-
-    fn view(_props: &Self::Props, _state: &Self::State, _ui: &mut UiView<Self>) {}
 
     fn derive_state(props: &Self::Props, mut state: Mut<Self::State>) {
         if *props != *state {

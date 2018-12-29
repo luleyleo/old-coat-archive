@@ -29,12 +29,8 @@ impl Component for Rectangle {
         })
     }
 
-    fn init_state(props: &Self::Props) -> Self::State {
+    fn init(props: &Self::Props) -> Self::State {
         *props
-    }
-
-    fn update(_: Self::Msg, _: Mut<Self::State>, _: &mut UiUpdate) -> Option<Self::Event> {
-        None
     }
 
     fn view(_: &Self::Props, _: &Self::State, _: &mut UiView<Self>) {}

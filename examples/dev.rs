@@ -13,7 +13,7 @@ impl Component for DevApp {
         PropsBuilder::new(AppProps::default())
     }
 
-    fn init_state(_props: &Self::Props) -> Self::State {}
+    fn init(_props: &Self::Props) -> Self::State {}
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
         ids!(Container, Limit, First, Second);
