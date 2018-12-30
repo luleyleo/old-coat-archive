@@ -27,7 +27,7 @@ impl<'a> UiLayout<'a> {
             current: Cid::invalid(),
         };
 
-        ui.size(root, BoxConstraints::tight(window_size));
+        ui.size(root, BoxConstraints::new_tight(window_size));
     }
 
     pub fn size(&mut self, child: Cid, constraints: BoxConstraints) -> Size {

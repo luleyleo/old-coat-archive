@@ -9,31 +9,18 @@ pub struct BoxConstraints {
 }
 
 impl BoxConstraints {
-    pub fn zero() -> Self {
-        BoxConstraints {
-            min_width: 0.0,
-            min_height: 0.0,
-            max_width: None,
-            max_height: None,
-        }
+    pub fn new_tight(size: Size) -> Self {
+        Self::default()
+            .min(size)
+            .max(size)
     }
 
-    pub fn min(size: Size) -> Self {
-        BoxConstraints {
-            min_width: size.w,
-            min_height: size.h,
-            max_width: None,
-            max_height: None,
-        }
+    pub fn min(self, size: Size) -> Self {
+        self.min_width(size.w).min_height(size.h)
     }
 
-    pub fn tight(size: Size) -> Self {
-        BoxConstraints {
-            min_width: size.w,
-            min_height: size.h,
-            max_width: Some(size.w),
-            max_height: Some(size.h),
-        }
+    pub fn max(self, size: Size) -> Self {
+        self.max_width(size.w).max_height(size.h)
     }
 
     pub fn min_width(mut self, width: Scalar) -> Self {
@@ -53,16 +40,6 @@ impl BoxConstraints {
 
     pub fn max_height(mut self, height: Scalar) -> Self {
         self.max_height = Some(height);
-        self
-    }
-
-    pub fn grow_to_max(mut self) -> Self {
-        if let Some(max_width) = self.max_width {
-            self.min_width = max_width;
-        }
-        if let Some(max_height) = self.max_height {
-            self.min_height = max_height;
-        }
         self
     }
 
@@ -110,10 +87,10 @@ mod test {
     fn test_check_width() {
         let width = 10.0;
 
-        let larger = BoxConstraints::tight(Size::new(20.0, 0.0));
+        let larger = BoxConstraints::new_tight(Size::new(20.0, 0.0));
         assert_eq!(larger.check_width(width), 20.0);
 
-        let smaller = BoxConstraints::tight(Size::new(5.0, 0.0));
+        let smaller = BoxConstraints::new_tight(Size::new(5.0, 0.0));
         assert_eq!(smaller.check_width(width), 5.0);
     }
 
@@ -121,10 +98,10 @@ mod test {
     fn test_check_height() {
         let height = 10.0;
 
-        let larger = BoxConstraints::tight(Size::new(0.0, 20.0));
+        let larger = BoxConstraints::new_tight(Size::new(0.0, 20.0));
         assert_eq!(larger.check_height(height), 20.0);
 
-        let smaller = BoxConstraints::tight(Size::new(0.0, 5.0));
+        let smaller = BoxConstraints::new_tight(Size::new(0.0, 5.0));
         assert_eq!(smaller.check_height(height), 5.0);
     }
 }
