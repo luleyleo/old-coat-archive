@@ -11,7 +11,7 @@ pub struct PaddingProps {
 }
 
 impl PropsBuilder<Padding> {
-    pub fn all(mut self, value: Scalar) -> Self {
+    pub fn all(self, value: Scalar) -> Self {
         self.top(value).right(value).bottom(value).left(value)
     }
 
