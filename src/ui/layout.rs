@@ -53,6 +53,10 @@ impl<'a> UiLayout<'a> {
         size
     }
 
+    pub fn get_size(&self, child: Cid) -> Size {
+        self.size[child.get()]
+    }
+
     pub fn position(&mut self, child: Cid, position: Position) {
         self.position[child.get()] = position;
     }

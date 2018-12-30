@@ -27,7 +27,7 @@ pub mod backend;
 pub use self::backend::*;
 
 mod layouts;
-pub use self::layouts::{Constrained, Linear};
+pub use self::layouts::{Constrained, Linear, Stack, Padding};
 
 mod widgets;
 pub use self::widgets::Rectangle;

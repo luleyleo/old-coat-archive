@@ -16,25 +16,38 @@ impl Component for DevApp {
     fn init(_props: &Self::Props) -> Self::State {}
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
-        ids!(Container, Limit, First, Second);
+        ids!(container, limit, first, second, stack, pad,  inner);
 
         Linear::new()
             .horizontal()
             .spacing(10.0)
-            .set(Container, ui)
+            .set(container, ui)
             .add(|| {
                 Constrained::new()
                     .max_width(200.0)
-                    .set(Limit, ui)
+                    .set(limit, ui)
                     .add(|| {
                         Rectangle::new()
                             .color(Color::rgb(0.1, 0.4, 0.1))
-                            .set(First, ui);
+                            .set(first, ui);
                     });
 
-                Rectangle::new()
-                    .color(Color::rgb(0.4, 0.1, 0.1))
-                    .set(Second, ui);
+                Stack::new()
+                    .set(stack, ui)
+                    .add(|| {
+                        Rectangle::new()
+                            .color(Color::rgb(0.4, 0.1, 0.1))
+                            .set(second, ui);
+                        
+                        Padding::new()
+                            .all(50.0)
+                            .set(pad, ui)
+                            .add(|| {
+                                Rectangle::new()
+                                    .color(Color::rgb(0.1, 0.1, 0.4))
+                                    .set(inner, ui);
+                            });
+                    });
             });
     }
 }
