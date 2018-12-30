@@ -68,29 +68,13 @@ impl Component for Constrained {
             }
         }
 
-        let mut constraints = constraints;
+        let mut constraints = constraints.min(Size::default());
 
         if let Some(min_width) = state.min_width {
-            if constraints.min_width < min_width {
-                constraints = constraints.min_width(min_width);
-            } else {
-                log::warn!(
-                    "Property ignored: `min_width` of `Constrained` layout {} is smaller than the original constraint ({} < {})",
-                    ui.full_debug_name(),
-                    min_width, constraints.min_width
-                );
-            }
+            constraints = constraints.min_width(min_width);
         }
         if let Some(min_height) = state.min_height {
-            if constraints.min_height < min_height {
-                constraints = constraints.min_height(min_height);
-            } else {
-                log::warn!(
-                    "Property ignored: `min_height` of `Constrained` layout {} is smaller than the original constraint ({} < {})",
-                    ui.full_debug_name(),
-                    min_height, constraints.min_height
-                );
-            }
+            constraints = constraints.min_height(min_height);
         }
         if let Some(max_width) = state.max_width {
             if let Some(imposed_max_width) = constraints.max_width {
