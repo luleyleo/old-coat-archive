@@ -55,6 +55,17 @@ impl Component for Rectangle {
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
-        crate::backend::PrimitiveRenderer::rectangle(state, bounds, renderer);
+        use webrender::api::*;
+
+        let position = bounds.position;
+        let size = bounds.size;
+        let color = state.color;
+
+        let info = LayoutPrimitiveInfo::new(LayoutRect::new(
+            LayoutPoint::new(position.x, position.y),
+            LayoutSize::new(size.w, size.h),
+        ));
+        
+        renderer.builder.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
     }
 }

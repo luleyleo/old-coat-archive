@@ -5,10 +5,10 @@ use webrender::api::*;
 mod notifier;
 use self::notifier::Notifier;
 
-mod primitives;
-pub use self::primitives::PrimitiveRenderer;
-
-pub type Renderer = DisplayListBuilder;
+pub struct Renderer {
+    pub builder: DisplayListBuilder,
+    pub api: RenderApi,
+}
 
 pub struct Webrenderer {
     renderer: webrender::Renderer,
@@ -66,12 +66,15 @@ impl Webrenderer {
     }
 
     pub fn new_builder(&mut self) -> Renderer {
-        DisplayListBuilder::new(self.pipeline_id, self.layout_size)
+        Renderer {
+            builder: DisplayListBuilder::new(self.pipeline_id, self.layout_size),
+            api: self.api.clone_sender().create_api(),
+        }
     }
 
-    pub fn render(&mut self, builder: Renderer) {
+    pub fn render(&mut self, renderer: Renderer) {
         let mut txn = Transaction::new();
-        txn.set_display_list(Epoch(0), None, self.layout_size, builder.finalize(), true);
+        txn.set_display_list(Epoch(0), None, self.layout_size, renderer.builder.finalize(), true);
         txn.generate_frame();
         self.api.send_transaction(self.document_id, txn);
     }
