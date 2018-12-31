@@ -30,7 +30,7 @@ mod layouts;
 pub use self::layouts::{Constrained, Linear, Stack, Padding};
 
 mod widgets;
-pub use self::widgets::Rectangle;
+pub use self::widgets::{Rectangle, Text};
 
 mod color;
 pub use self::color::Color;
