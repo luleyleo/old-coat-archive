@@ -4,6 +4,8 @@ use crate::{Component, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdat
 use gleam::gl;
 use glutin::GlContext;
 
+static FONT: &[u8] = include_bytes!("../../../assets/fonts/OpenSans-Regular.ttf");
+
 #[derive(Default)]
 pub struct AppProps;
 
@@ -78,6 +80,8 @@ impl Window {
 
         let mut webrenderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
         webrenderer.resize(self.size.w, self.size.h, dpr);
+        let default_font = data.font_queue.add(FONT);
+        webrenderer.handle_fontqueue(&mut data.font_queue);
 
         'main: loop {
             let events = eventloop.next();
@@ -110,14 +114,14 @@ impl Window {
 
                 if fresh | UiUpdate::run(&mut data, app_id) {
                     fresh = false;
+                    webrenderer.handle_fontqueue(&mut data.font_queue);
 
                     UiView::<Comp>::run(&mut data, app_id, Comp::Props::default());
 
                     UiLayout::run(&mut data, app_id, self.size);
 
-                    let mut builder = webrenderer.new_builder();
-                    UiRender::run(&data, &mut builder, app_id);
-                    webrenderer.render(builder);
+                    UiRender::run(&data, &mut webrenderer, app_id);
+                    webrenderer.render();
                 }
             }
 

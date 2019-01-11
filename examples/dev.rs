@@ -16,7 +16,7 @@ impl Component for DevApp {
     fn init(_props: &Self::Props) -> Self::State {}
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
-        ids!(container, limit, first, second, stack, pad,  inner);
+        ids!(container, limit, first, second, stack, pad, inner, stack2, text);
 
         Linear::new()
             .horizontal()
@@ -43,9 +43,18 @@ impl Component for DevApp {
                             .all(50.0)
                             .set(pad, ui)
                             .add(|| {
-                                Rectangle::new()
-                                    .color(Color::rgb(0.1, 0.1, 0.4))
-                                    .set(inner, ui);
+                                Stack::new()
+                                    .set(stack2, ui)
+                                    .add(|| {
+                                        Rectangle::new()
+                                            .color(Color::rgb(0.1, 0.1, 0.4))
+                                            .set(inner, ui);
+
+                                        Text::new()
+                                            .content("Hello world!")
+                                            .size(14)
+                                            .set(text, ui);
+                                    });
                             });
                     });
             });

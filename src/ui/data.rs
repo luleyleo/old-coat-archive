@@ -1,4 +1,4 @@
-use crate::{Cid, Component, ComponentPointer, Position, Size};
+use crate::{Cid, Component, ComponentPointer, Position, Size, FontQueue};
 use fnv::FnvHashMap;
 use smallvec::SmallVec;
 use std::any::{Any, TypeId};
@@ -37,6 +37,7 @@ pub(crate) struct UiData {
     /// Cache events. Similar to `messages` this is a `Vec<Vec<Component::Event>>`
     pub(crate) events: Vec<Box<Any>>,
 
+    pub(crate) font_queue: FontQueue,
     /// The next `Cid` that will be allocated when needed
     id_count: usize,
 }

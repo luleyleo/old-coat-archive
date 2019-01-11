@@ -1,5 +1,6 @@
 use crate::Scalar;
 
+#[derive(Debug)]
 pub struct Bounds {
     pub position: Position,
     pub size: Size,

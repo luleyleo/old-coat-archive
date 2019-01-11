@@ -7,4 +7,4 @@ mod webrender;
 pub mod winit;
 
 /// Contains all data and functions required to render something with the chosen back end
-pub type Renderer = self::webrender::Renderer;
+pub type Renderer = self::webrender::Webrenderer;

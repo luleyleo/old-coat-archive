@@ -1,3 +1,4 @@
+use crate::FontQueue;
 use gleam::gl;
 use std::rc::Rc;
 use webrender::api::*;
@@ -5,22 +6,22 @@ use webrender::api::*;
 mod notifier;
 use self::notifier::Notifier;
 
-pub struct Renderer {
-    pub builder: DisplayListBuilder,
-    pub api: RenderApi,
-}
+mod font_manager;
+pub use self::font_manager::FontManager;
 
 pub struct Webrenderer {
     renderer: webrender::Renderer,
-    api: RenderApi,
     layout_size: LayoutSize,
     device_size: DeviceIntSize,
     document_id: DocumentId,
     pipeline_id: PipelineId,
+    pub api: RenderApi,
+    pub font_manager: FontManager,
+    pub builder: DisplayListBuilder,
 }
 
 impl Webrenderer {
-    pub fn new(proxy: winit::EventsLoopProxy, gl: Rc<gl::Gl>, dpr: f32) -> Self {
+    pub(crate) fn new(proxy: winit::EventsLoopProxy, gl: Rc<gl::Gl>, dpr: f32) -> Self {
         let opts = webrender::RendererOptions {
             device_pixel_ratio: dpr,
             clear_color: Some(ColorF::new(0.1, 0.1, 0.1, 1.0)),
@@ -35,6 +36,8 @@ impl Webrenderer {
         let layout_size = LayoutSize::new(0.0, 0.0);
         let device_size = DeviceIntSize::new(0, 0);
         let document_id = api.add_document(device_size, 0);
+        let font_manager = FontManager::default();
+        let builder = DisplayListBuilder::new(pipeline_id, layout_size);
 
         {
             let mut txn = Transaction::new();
@@ -49,10 +52,22 @@ impl Webrenderer {
             device_size,
             document_id,
             pipeline_id,
+            font_manager,
+            builder,
         }
     }
 
-    pub fn resize(&mut self, width: f32, height: f32, dpr: f32) {
+    pub(crate) fn handle_fontqueue(&mut self, queue: &mut FontQueue) {
+        use crate::FontQueueAction::*;
+        for action in queue.drain() {
+            match action {
+                Add(fid, data) => self.font_manager.add_font(fid, data, &self.api),
+                Remove(fid) => self.font_manager.remove_font(fid, &self.api),
+            }
+        }
+    }
+
+    pub(crate) fn resize(&mut self, width: f32, height: f32, dpr: f32) {
         self.layout_size = LayoutSize::new(width, height);
         let (width, height) = (width * dpr, height * dpr);
         let (width, height) = (width as i32, height as i32);
@@ -63,29 +78,25 @@ impl Webrenderer {
             self.device_size.into(),
             dpr,
         );
+        self.builder = DisplayListBuilder::new(self.pipeline_id, self.layout_size);
     }
 
-    pub fn new_builder(&mut self) -> Renderer {
-        Renderer {
-            builder: DisplayListBuilder::new(self.pipeline_id, self.layout_size),
-            api: self.api.clone_sender().create_api(),
-        }
-    }
-
-    pub fn render(&mut self, renderer: Renderer) {
+    pub(crate) fn render(&mut self) {
         let mut txn = Transaction::new();
-        txn.set_display_list(Epoch(0), None, self.layout_size, renderer.builder.finalize(), true);
+        let mut builder = DisplayListBuilder::new(self.pipeline_id, self.layout_size);
+        std::mem::swap(&mut builder, &mut self.builder);
+        txn.set_display_list(Epoch(0), None, self.layout_size, builder.finalize(), true);
         txn.generate_frame();
         self.api.send_transaction(self.document_id, txn);
     }
 
-    pub fn flush(&mut self) {
+    pub(crate) fn flush(&mut self) {
         self.renderer.update();
         self.renderer.render(self.device_size).unwrap(); // TODO: Handle possible errors
         self.renderer.flush_pipeline_info();
     }
 
-    pub fn deinit(self) {
+    pub(crate) fn deinit(self) {
         self.renderer.deinit();
     }
 }
