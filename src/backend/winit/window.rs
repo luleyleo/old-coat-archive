@@ -78,10 +78,10 @@ impl Window {
         let mut data = UiData::default();
         let app_id = data.fresh_id();
 
-        let mut webrenderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
-        webrenderer.resize(self.size.w, self.size.h, dpr);
+        let mut renderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
+        renderer.resize(self.size.w, self.size.h, dpr);
         let default_font = data.font_queue.add(FONT);
-        webrenderer.handle_fontqueue(&mut data.font_queue);
+        renderer.handle_fontqueue(&mut data.font_queue);
 
         'main: loop {
             let events = eventloop.next();
@@ -95,12 +95,12 @@ impl Window {
                         }
                         WindowEvent::Resized(lsize) => {
                             self.size = Size::new(lsize.width as f32, lsize.height as f32);
-                            webrenderer.resize(self.size.w, self.size.h, dpr);
+                            renderer.resize(self.size.w, self.size.h, dpr);
                             fresh = true;
                         }
                         WindowEvent::HiDpiFactorChanged(new_dpr) => {
                             dpr = (*new_dpr) as f32;
-                            webrenderer.resize(self.size.w, self.size.h, dpr);
+                            renderer.resize(self.size.w, self.size.h, dpr);
                         }
                         _ => (),
                     },
@@ -114,21 +114,21 @@ impl Window {
 
                 if fresh | UiUpdate::run(&mut data, app_id) {
                     fresh = false;
-                    webrenderer.handle_fontqueue(&mut data.font_queue);
+                    renderer.handle_fontqueue(&mut data.font_queue);
 
                     UiView::<Comp>::run(&mut data, app_id, Comp::Props::default());
 
                     UiLayout::run(&mut data, app_id, self.size);
 
-                    UiRender::run(&data, &mut webrenderer, app_id);
-                    webrenderer.render();
+                    UiRender::run(&data, &mut renderer, app_id);
+                    renderer.render();
                 }
             }
 
-            webrenderer.flush();
+            renderer.flush();
             window.swap_buffers().ok();
         }
 
-        webrenderer.deinit();
+        renderer.deinit();
     }
 }
