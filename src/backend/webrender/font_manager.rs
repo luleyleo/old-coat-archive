@@ -1,11 +1,6 @@
 use crate::{FontId, FontSize};
 use fnv::FnvHashMap as HashMap;
-use webrender::api::{AddFont, AddFontInstance, FontInstanceKey, FontKey, RenderApi, ResourceUpdate, Transaction};
-
-struct QueuedFont {
-    id: FontId,
-    data: Vec<u8>,
-}
+use webrender::api::{AddFont, AddFontInstance, FontInstanceKey, FontKey, RenderApi, ResourceUpdate};
 
 pub(crate) struct Font {
     rusttype: rusttype::Font<'static>,
