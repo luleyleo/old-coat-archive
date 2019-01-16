@@ -1,4 +1,4 @@
-use crate::{Cid, Component, ComponentPointer, TypeIds, UiData};
+use crate::{Cid, Component, ComponentPointer, TypeIds, UiData, Font, FontQueue};
 use log::{trace, warn};
 use std::any::{Any, TypeId};
 
@@ -10,6 +10,7 @@ pub struct UiUpdate<'a> {
     messages: &'a mut Vec<Option<Box<Any>>>,
     events: &'a mut Vec<Box<Any>>,
     state: &'a mut Vec<Option<Box<Any>>>,
+    font_queue: &'a mut FontQueue,
     cid: Cid,
     needs_update: bool,
 }
@@ -38,6 +39,14 @@ impl<'a> UiUpdate<'a> {
         }
         warn!("Tried to bubble a message but the targeted Component does not exist");
     }
+
+    pub fn add_font(&mut self, font: &Font, data: Vec<u8>) {
+        self.font_queue.add(font.clone(), data);
+    }
+
+    pub fn remove_font(&mut self, font: &Font) {
+        self.font_queue.remove(font.clone());
+    }
 }
 
 impl<'a> UiUpdate<'a> {
@@ -60,6 +69,7 @@ impl<'a> UiUpdate<'a> {
             messages: &mut data.messages,
             events: &mut data.events,
             state: &mut data.state,
+            font_queue: &mut data.font_queue,
             cid: root,
             needs_update: false,
         };
