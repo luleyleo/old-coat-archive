@@ -43,7 +43,7 @@ impl Cid {
 /// ```
 #[derive(Clone, Copy, Debug)]
 pub struct Iid {
-    pub(crate) name: &'static str,
+    pub(crate) name: Option<&'static str>,
     pub(crate) id: TypeId,
 }
 
@@ -52,7 +52,7 @@ impl Iid {
     ///
     /// `Iid`s should be created using `iids!()` and `iid()` but this has to
     /// be public to make the macros work from other crates
-    pub fn new(name: &'static str, id: TypeId) -> Self {
+    pub fn new(name: Option<&'static str>, id: TypeId) -> Self {
         Iid { name, id }
     }
 }
@@ -84,7 +84,7 @@ impl std::hash::Hash for Iid {
 macro_rules! iid {
     () => {
         Iid::new(
-            "",
+            None,
             {
                 struct UnnamedIdentifier;
                 std::any::TypeId::of::<UnnamedIdentifier>()
@@ -93,7 +93,7 @@ macro_rules! iid {
     };
     ($id:ident) => {
         Iid::new(
-            stringify!($id),
+            Some(stringify!($id)),
             {
                 struct $id;
                 std::any::TypeId::of::<$id>()

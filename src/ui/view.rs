@@ -98,7 +98,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         C: Component,
     {
         let tid = iid.id;
-        let name = iid.name;
+        let name = iid.name.unwrap_or("Unnamed");
         let cid = self.data.creations[self.cid.get()]
             .get(&tid)
             .cloned()
