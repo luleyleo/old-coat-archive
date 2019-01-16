@@ -32,7 +32,7 @@ impl Cid {
 /// at compile time. Usually the `ids!()` macro takes care of this.
 ///
 /// ```ignore
-/// ids!(A, B, C);
+/// iids!(A, B, C);
 ///
 /// let a: Iid = A;
 /// let b: Iid = B;
@@ -50,8 +50,8 @@ pub struct Iid {
 impl Iid {
     /// **Don't use this**
     ///
-    /// `Iid`s should be created using `ids!()` but this has to
-    /// be public to make the `ids!()` macro work from other crates
+    /// `Iid`s should be created using `iids!()` and `iid()` but this has to
+    /// be public to make the macros work from other crates
     pub fn new(name: &'static str, id: TypeId) -> Self {
         Iid { name, id }
     }
@@ -69,29 +69,57 @@ impl std::hash::Hash for Iid {
     }
 }
 
+/// Like the `ids!(...)` macro but it produces only one `Iid`
+/// and evaluates to an expression.
+/// ```ignore
+/// Button::new()
+///     ...
+///     .set(iid!(), ui);
+/// 
+/// Button::new()
+///     ...
+///     .set(iid!(Increase), ui);
+/// ```
+#[macro_export]
+macro_rules! iid {
+    () => {
+        Iid::new(
+            "",
+            {
+                struct UnnamedIdentifier;
+                std::any::TypeId::of::<UnnamedIdentifier>()
+            }
+        )
+    };
+    ($id:ident) => {
+        Iid::new(
+            stringify!($id),
+            {
+                struct $id;
+                std::any::TypeId::of::<$id>()
+            }
+        )
+    };
+}
+
 /// This macro simplifies creating `Iid`s.
 ///
 /// ```ignore
-/// ids!(Container, Count, AddButton, SubButton);
+/// iids!(Container, Count, AddButton, SubButton);
 ///
 /// Button::new()
 ///     ...
 ///     .set(AddButton, ui);
 /// ```
 #[macro_export]
-macro_rules! ids {
+macro_rules! iids {
     ($($id:ident),*,) => {
         ids!($($id),*);
     };
     ($($id:ident),*) => {
         $(
-            let $id: Iid = Iid::new(
-                stringify!($id),
-                {
-                    struct $id;
-                    std::any::TypeId::of::<$id>()
-                }
-            );
+            #[allow(non_snake_case)]
+            let $id: Iid = iid!($id);
         )*
     };
 }

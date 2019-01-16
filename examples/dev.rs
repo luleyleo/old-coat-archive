@@ -16,44 +16,44 @@ impl Component for DevApp {
     fn init(_props: &Self::Props) -> Self::State {}
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
-        ids!(container, limit, first, second, stack, pad, inner, stack2, text);
+        iids!(FirstRect, SecondRect, InnerRect, HelloText);
 
         Linear::new()
             .horizontal()
             .spacing(10.0)
-            .set(container, ui)
+            .set(iid!(), ui)
             .add(|| {
                 Constrained::new()
                     .max_width(200.0)
-                    .set(limit, ui)
+                    .set(iid!(), ui)
                     .add(|| {
                         Rectangle::new()
                             .color(Color::rgb(0.1, 0.4, 0.1))
-                            .set(first, ui);
+                            .set(FirstRect, ui);
                     });
 
                 Stack::new()
-                    .set(stack, ui)
+                    .set(iid!(), ui)
                     .add(|| {
                         Rectangle::new()
                             .color(Color::rgb(0.4, 0.1, 0.1))
-                            .set(second, ui);
+                            .set(SecondRect, ui);
                         
                         Padding::new()
                             .all(50.0)
-                            .set(pad, ui)
+                            .set(iid!(), ui)
                             .add(|| {
                                 Stack::new()
-                                    .set(stack2, ui)
+                                    .set(iid!(), ui)
                                     .add(|| {
                                         Rectangle::new()
                                             .color(Color::rgb(0.1, 0.1, 0.4))
-                                            .set(inner, ui);
+                                            .set(InnerRect, ui);
 
                                         Text::new()
                                             .content("Hello world!")
                                             .size(14)
-                                            .set(text, ui);
+                                            .set(HelloText, ui);
                                     });
                             });
                     });
