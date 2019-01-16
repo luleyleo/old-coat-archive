@@ -1,4 +1,4 @@
-use crate::{Bounds, Component, FontSize, PropsBuilder, Renderer, Position, Size, FontId, Cid, BoxConstraints, UiLayout};
+use crate::{Bounds, Component, FontSize, PropsBuilder, Renderer, Position, Size, Font, Cid, BoxConstraints, UiLayout};
 
 pub struct Text<'a> {
     content: &'a str,
@@ -72,11 +72,12 @@ impl<'a> Component for Text<'a> {
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
         use webrender::api::*;
+        let font = Font::from_family("OpenSans");
         let Position {x, y} = bounds.position;
         let Size {w, h} = bounds.size;
         let info = LayoutPrimitiveInfo::new(euclid::rect(x, y, w, h));
-        let font_key = renderer.font_manager.load_instance(FontId(0), state.size, &renderer.api).unwrap();
-        let glyphs = layout(&state.content, state.size, bounds.position, renderer.font_manager.load_rusttype(FontId(0)));
+        let font_key = renderer.font_manager.load_instance(&font, state.size, &renderer.api).unwrap();
+        let glyphs = layout(&state.content, state.size, bounds.position, renderer.font_manager.load_rusttype(&font));
         let mut text_flags = FontInstanceFlags::empty();
         text_flags.set(FontInstanceFlags::SUBPIXEL_BGR, true);
         text_flags.set(FontInstanceFlags::LCD_VERTICAL, true);

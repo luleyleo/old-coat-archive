@@ -61,8 +61,8 @@ impl Webrenderer {
         use crate::FontQueueAction::*;
         for action in queue.drain() {
             match action {
-                Add(fid, data) => self.font_manager.add_font(fid, data, &self.api),
-                Remove(fid) => self.font_manager.remove_font(fid, &self.api),
+                Add(font, data) => self.font_manager.add_font(font, data, &self.api),
+                Remove(font) => self.font_manager.remove_font(font, &self.api),
             }
         }
     }

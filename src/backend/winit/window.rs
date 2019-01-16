@@ -1,6 +1,6 @@
 use crate::backend::webrender::Webrenderer;
 use crate::backend::winit::EventLoop;
-use crate::{Component, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdate, UiView};
+use crate::{Component, Input, Size, Font, UiData, UiInput, UiLayout, UiRender, UiUpdate, UiView};
 use gleam::gl;
 use glutin::GlContext;
 
@@ -80,7 +80,7 @@ impl Window {
 
         let mut renderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
         renderer.resize(self.size.w, self.size.h, dpr);
-        let default_font = data.font_queue.add(FONT);
+        data.font_queue.add(Font::from_family("OpenSans"), FONT);
         renderer.handle_fontqueue(&mut data.font_queue);
 
         'main: loop {

@@ -1,32 +1,76 @@
+use std::borrow::Cow;
+
 pub type FontSize = i32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct FontId(pub usize);
-
-#[derive(Default)]
-pub(crate) struct FontQueue {
-    queue: Vec<FontQueueAction>,
-    next_font_id: usize,
+pub enum FontWeight {
+    Thin,
+    Ultralight,
+    Light,
+    Semilight,
+    Book,
+    Regular,
+    Medium,
+    Semibold,
+    Bold,
+    Ultrabold,
+    Heavy,
+    Ultraheavy,
 }
 
-impl FontQueue {
-    pub fn add(&mut self, data: impl Into<Vec<u8>>) -> FontId {
-        let fid = FontId(self.next_font_id);
-        self.queue.push(FontQueueAction::Add(fid, data.into()));
-        self.next_font_id += 1;
-        return fid;
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Font {
+    pub(crate) family: Cow<'static, str>,
+    pub(crate) weight: FontWeight,
+    pub(crate) italic: bool,
+}
+
+impl Font {
+    pub fn from_family(family: impl Into<Cow<'static, str>>) -> Self {
+        Font {
+            family: family.into(),
+            weight: FontWeight::Regular,
+            italic: false,
+        }
     }
 
-    pub fn remove(&mut self, fid: FontId) {
-        self.queue.push(FontQueueAction::Remove(fid));
+    pub fn weight(&mut self, weight: FontWeight) {
+        self.weight = weight;
+    }
+
+    pub fn with_weight(mut self, weight: FontWeight) -> Self {
+        self.weight = weight;
+        self
+    }
+
+    pub fn italic(&mut self, italic: bool) {
+        self.italic = italic;
+    }
+
+    pub fn with_italic(mut self, italic: bool) -> Self {
+        self.italic = italic;
+        self
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct FontQueue(Vec<FontQueueAction>);
+
+impl FontQueue {    
+    pub fn add(&mut self, font: Font, data: impl Into<Vec<u8>>) {
+        self.0.push(FontQueueAction::Add(font, data.into()));
+    }
+
+    pub fn remove(&mut self, font: Font) {
+        self.0.push(FontQueueAction::Remove(font));
     }
 
     pub fn drain(&mut self) -> std::vec::Drain<FontQueueAction> {
-        self.queue.drain(..)
+        self.0.drain(..)
     }
 }
 
 pub(crate) enum FontQueueAction {
-    Add(FontId, Vec<u8>),
-    Remove(FontId),
+    Add(Font, Vec<u8>),
+    Remove(Font),
 }
