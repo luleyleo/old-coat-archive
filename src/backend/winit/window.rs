@@ -47,8 +47,8 @@ impl Window {
             .with_title(self.title)
             .with_multitouch()
             .with_dimensions(winit::dpi::LogicalSize::new(
-                self.size.w as f64,
-                self.size.h as f64,
+                self.size.width as f64,
+                self.size.height as f64,
             ));
 
         let window =
@@ -77,7 +77,8 @@ impl Window {
         let app_id = data.fresh_id();
 
         let mut renderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
-        renderer.resize(self.size.w, self.size.h, dpr);
+        // TODO: pass `Size` directly
+        renderer.resize(self.size, dpr);
         data.font_queue.add(Font::from_family(super::DEFAULT_FONT_NAME), super::DEFAULT_FONT);
         renderer.handle_fontqueue(&mut data.font_queue);
 
@@ -93,12 +94,12 @@ impl Window {
                         }
                         WindowEvent::Resized(lsize) => {
                             self.size = Size::new(lsize.width as f32, lsize.height as f32);
-                            renderer.resize(self.size.w, self.size.h, dpr);
+                            renderer.resize(self.size, dpr);
                             fresh = true;
                         }
                         WindowEvent::HiDpiFactorChanged(new_dpr) => {
                             dpr = (*new_dpr) as f32;
-                            renderer.resize(self.size.w, self.size.h, dpr);
+                            renderer.resize(self.size, dpr);
                         }
                         _ => (),
                     },

@@ -11,7 +11,7 @@ pub struct Input {
 impl Input {
     pub fn new() -> Self {
         Input {
-            pointer: Position::default(),
+            pointer: Position::zero(),
             events: Vec::new(),
         }
     }

@@ -87,9 +87,9 @@ impl FontManager {
     }
 
     pub fn dimensions(&self, text: &str, font: &Font, size: FontSize) -> Size {
-        let mut dimensions = Size::default();
+        let mut dimensions = Size::zero();
         let size = size as f32;
-        dimensions.h = size;
+        dimensions.height = size;
         let scale = rusttype::Scale {
             // TODO: Fix glyph overlapping without additional x-scaling
             // The current value roughly fits OpenSans
@@ -103,7 +103,7 @@ impl FontManager {
             .map(|glyph| {
                 let pos = glyph.position();
                 let hmet = glyph.unpositioned().h_metrics();
-                dimensions.w = pos.x + hmet.advance_width;
+                dimensions.width = pos.x + hmet.advance_width;
             });
         return dimensions;
     }

@@ -10,17 +10,15 @@ pub struct BoxConstraints {
 
 impl BoxConstraints {
     pub fn new_tight(size: Size) -> Self {
-        Self::default()
-            .min(size)
-            .max(size)
+        Self::default().min(size).max(size)
     }
 
     pub fn min(self, size: Size) -> Self {
-        self.min_width(size.w).min_height(size.h)
+        self.min_width(size.width).min_height(size.height)
     }
 
     pub fn max(self, size: Size) -> Self {
-        self.max_width(size.w).max_height(size.h)
+        self.max_width(size.width).max_height(size.height)
     }
 
     pub fn min_width(mut self, width: Scalar) -> Self {
@@ -72,10 +70,7 @@ impl BoxConstraints {
     }
 
     pub fn check_size(&self, size: Size) -> Size {
-        Size {
-            w: self.check_width(size.w),
-            h: self.check_height(size.h),
-        }
+        Size::new(self.check_width(size.width), self.check_height(size.height))
     }
 }
 

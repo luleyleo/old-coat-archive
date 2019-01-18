@@ -44,26 +44,23 @@ impl Component for Rectangle {
 
         if let Some(width) = constraints.max_width {
             if let Some(height) = constraints.max_height {
-                return Size {
-                    w: width,
-                    h: height,
-                };
+                return Size::new(width, height);
             }
         }
 
-        Size::default()
+        Size::zero()
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
         use webrender::api::*;
 
-        let position = bounds.position;
+        let position = bounds.origin;
         let size = bounds.size;
         let color = state.color;
 
         let info = LayoutPrimitiveInfo::new(LayoutRect::new(
             LayoutPoint::new(position.x, position.y),
-            LayoutSize::new(size.w, size.h),
+            LayoutSize::new(size.width, size.height),
         ));
         
         renderer.builder.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));

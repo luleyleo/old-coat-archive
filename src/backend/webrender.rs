@@ -1,4 +1,4 @@
-use crate::FontQueue;
+use crate::{FontQueue, Size};
 use gleam::gl;
 use std::rc::Rc;
 use webrender::api::*;
@@ -67,7 +67,8 @@ impl Webrenderer {
         }
     }
 
-    pub(crate) fn resize(&mut self, width: f32, height: f32, dpr: f32) {
+    pub(crate) fn resize(&mut self, size: Size, dpr: f32) {
+        let Size { width, height, .. } = size;
         self.layout_size = LayoutSize::new(width, height);
         let (width, height) = (width * dpr, height * dpr);
         let (width, height) = (width as i32, height as i32);

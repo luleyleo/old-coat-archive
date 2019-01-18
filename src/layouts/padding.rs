@@ -59,11 +59,11 @@ impl Component for Padding {
                 children.len(),
             );
             if children.is_empty() {
-                return Size::default();
+                return Size::zero();
             }
         }
 
-        let constraints = constraints.min(Size::default());
+        let constraints = constraints.min(Size::zero());
 
         let width = constraints.max_width.map(|w| w - state.left - state.right);
         let height = constraints.max_height.map(|h| h - state.top - state.bottom);
@@ -77,8 +77,8 @@ impl Component for Padding {
         let position = Position::new(state.left, state.top);
         ui.position(children[0], position);
 
-        let width = size.w + state.left + state.right;
-        let height = size.h + state.top + state.bottom;
+        let width = size.width + state.left + state.right;
+        let height = size.height + state.top + state.bottom;
 
         Size::new(width, height)
     }

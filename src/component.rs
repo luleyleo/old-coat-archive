@@ -30,7 +30,7 @@ pub trait Component: Sized {
         ui: &mut UiLayout,
     ) -> Size {
         if children.is_empty() {
-            Size::default()
+            Size::zero()
         } else {
             if children.len() > 1 {
                 let name = ui.full_debug_name();

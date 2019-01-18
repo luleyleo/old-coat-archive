@@ -54,8 +54,8 @@ impl UiData {
         self.parent.push(None);
         self.children.push(Vec::new());
         self.creations.push(FnvHashMap::default());
-        self.position.push(Position::default());
-        self.size.push(Size::default());
+        self.position.push(Position::zero());
+        self.size.push(Size::zero());
         self.state.push(None);
         self.messages.push(Some(Box::new(Vec::<()>::new())));
         self.events.push(Box::new(Vec::<()>::new()));

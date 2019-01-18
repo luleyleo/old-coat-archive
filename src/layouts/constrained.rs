@@ -64,11 +64,11 @@ impl Component for Constrained {
                 children.len(),
             );
             if children.is_empty() {
-                return Size::default();
+                return Size::zero();
             }
         }
 
-        let mut constraints = constraints.min(Size::default());
+        let mut constraints = constraints.min(Size::zero());
 
         if let Some(min_width) = state.min_width {
             constraints = constraints.min_width(min_width);

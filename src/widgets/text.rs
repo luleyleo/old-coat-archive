@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Position, PropsBuilder, Renderer, Size,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, PropsBuilder, Renderer, Size,
     UiLayout,
 };
 
@@ -72,14 +72,11 @@ impl<'a> Component for Text<'a> {
 
         if let Some(width) = constraints.max_width {
             if let Some(height) = constraints.max_height {
-                return Size {
-                    w: width,
-                    h: height,
-                };
+                return Size::new(width, height);
             }
         }
 
-        Size::default()
+        Size::zero()
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
@@ -92,17 +89,17 @@ impl<'a> Component for Text<'a> {
 
         let fm = &mut renderer.font_manager;
         let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
-        let mut dimensions = fm.dimensions(&state.content, font, state.size);
-        let glyphs = fm.layout(&state.content, font, state.size, bounds.position);
+        let mut dim = fm.dimensions(&state.content, font, state.size);
+        let glyphs = fm.layout(&state.content, font, state.size, bounds.origin);
 
-        let Position { x, y } = bounds.position;
-        if dimensions.w > bounds.size.w || dimensions.h > bounds.size.h {
-            dimensions = bounds.size;
+        // Check weather the text is larger than the bounds
+        if dim.width > bounds.size.width || dim.height > bounds.size.height {
+            dim = bounds.size;
             // TODO: log with debug name of the component
             log::warn!("Text overflow while rendering \"{}\"", state.content);
         }
-        let Size { w, h } = dimensions;
-        let info = LayoutPrimitiveInfo::new(euclid::rect(x, y, w, h));
+        let pos = bounds.origin;
+        let info = LayoutPrimitiveInfo::new(euclid::rect(pos.x, pos.y, dim.width, dim.height));
 
         let mut text_flags = FontInstanceFlags::empty();
         text_flags.set(FontInstanceFlags::SUBPIXEL_BGR, true);

@@ -88,8 +88,8 @@ impl Component for Linear {
                 };
                 ui.position(*child, position);
                 let (distance, thickness2) = match state.direction {
-                    Horizontal => (size.w, size.h),
-                    Vertical => (size.h, size.w),
+                    Horizontal => (size.width, size.height),
+                    Vertical => (size.height, size.width),
                 };
                 length += distance;
                 if thickness2 > thickness {
@@ -116,8 +116,8 @@ impl Component for Linear {
                 ui.position(*child, position);
 
                 let (distance, thickness2) = match state.direction {
-                    Horizontal => (size.w, size.h),
-                    Vertical => (size.h, size.w),
+                    Horizontal => (size.width, size.height),
+                    Vertical => (size.height, size.width),
                 };
                 length += distance;
 
