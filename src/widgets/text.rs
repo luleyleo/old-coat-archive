@@ -1,8 +1,12 @@
-use crate::{Bounds, Component, FontSize, PropsBuilder, Renderer, Position, Size, Font, Cid, BoxConstraints, UiLayout};
+use crate::{
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Position, PropsBuilder, Renderer, Size,
+    UiLayout,
+};
 
 pub struct Text<'a> {
     content: &'a str,
     size: FontSize,
+    font: Option<Font>,
 }
 
 impl<'a> Default for Text<'a> {
@@ -10,6 +14,7 @@ impl<'a> Default for Text<'a> {
         Self {
             content: "",
             size: 12,
+            font: None,
         }
     }
 }
@@ -24,11 +29,17 @@ impl<'a> PropsBuilder<Text<'a>> {
         self.size = size;
         self
     }
+
+    pub fn font(mut self, font: Font) -> Self {
+        self.font = Some(font);
+        self
+    }
 }
 
 pub struct TextState {
     content: String,
     size: FontSize,
+    font: Option<Font>,
 }
 
 impl<'a> Component for Text<'a> {
@@ -41,6 +52,7 @@ impl<'a> Component for Text<'a> {
         TextState {
             content: props.content.to_string(),
             size: props.size,
+            font: props.font.clone(),
         }
     }
 
@@ -71,13 +83,26 @@ impl<'a> Component for Text<'a> {
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
-        use webrender::api::*;
-        let font = Font::from_family("OpenSans");
-        let Position {x, y} = bounds.position;
-        let Size {w, h} = bounds.size;
+        use webrender::api::{
+            ColorF, FontInstanceFlags, FontRenderMode, GlyphOptions, LayoutPrimitiveInfo,
+        };
+
+        let default_font = renderer.font_manager.default_font().clone();
+        let font = state.font.as_ref().unwrap_or(&default_font);
+
+        let Position { x, y } = bounds.position;
+        let Size { w, h } = bounds.size;
         let info = LayoutPrimitiveInfo::new(euclid::rect(x, y, w, h));
-        let font_key = renderer.font_manager.load_instance(&font, state.size, &renderer.api).unwrap();
-        let glyphs = layout(&state.content, state.size, bounds.position, renderer.font_manager.load_rusttype(&font));
+
+        let font_key = renderer
+            .font_manager
+            .instance(font, state.size, &renderer.api)
+            .unwrap();
+        let glyphs =
+            renderer
+                .font_manager
+                .layout(&state.content, font, state.size, bounds.position);
+
         let mut text_flags = FontInstanceFlags::empty();
         text_flags.set(FontInstanceFlags::SUBPIXEL_BGR, true);
         text_flags.set(FontInstanceFlags::LCD_VERTICAL, true);
@@ -85,37 +110,9 @@ impl<'a> Component for Text<'a> {
             render_mode: FontRenderMode::Subpixel,
             flags: text_flags,
         };
-        renderer.builder.push_text(
-            &info,
-            glyphs.as_slice(),
-            font_key,
-            ColorF::WHITE,
-            Some(text_options),
-        );
-    }
-}
 
-pub fn layout<'a>(
-    text: &str,
-    size: FontSize,
-    position: Position,
-    font: &'a rusttype::Font<'static>,
-) -> Vec<webrender::api::GlyphInstance> {
-    use webrender::api::{GlyphInstance, LayoutPoint};
-    let size = size as f32;
-    let scale = rusttype::Scale {
-        // TODO: Fix glyph overlapping without additional x-scaling
-        // The current value roughly fits OpenSans
-        x: size * 1.2,
-        y: size,
-    };
-    let point = rusttype::Point { x: position.x, y: position.y };
-    font.layout(text, scale, point)
-        .map(|glyph| {
-            let index = glyph.id().0;
-            let pos = glyph.position();
-            let point = LayoutPoint::new(pos.x, pos.y + size);
-            GlyphInstance { index, point }
-        })
-        .collect()
+        renderer
+            .builder
+            .push_text(&info, glyphs, font_key, ColorF::WHITE, Some(text_options));
+    }
 }

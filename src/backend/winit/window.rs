@@ -4,8 +4,6 @@ use crate::{Component, Input, Size, Font, UiData, UiInput, UiLayout, UiRender, U
 use gleam::gl;
 use glutin::GlContext;
 
-static FONT: &[u8] = include_bytes!("../../../assets/fonts/OpenSans-Regular.ttf");
-
 #[derive(Default)]
 pub struct AppProps;
 
@@ -80,7 +78,7 @@ impl Window {
 
         let mut renderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
         renderer.resize(self.size.w, self.size.h, dpr);
-        data.font_queue.add(Font::from_family("OpenSans"), FONT);
+        data.font_queue.add(Font::from_family(super::DEFAULT_FONT_NAME), super::DEFAULT_FONT);
         renderer.handle_fontqueue(&mut data.font_queue);
 
         'main: loop {
