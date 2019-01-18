@@ -90,18 +90,19 @@ impl<'a> Component for Text<'a> {
         let default_font = renderer.font_manager.default_font().clone();
         let font = state.font.as_ref().unwrap_or(&default_font);
 
-        let Position { x, y } = bounds.position;
-        let Size { w, h } = bounds.size;
-        let info = LayoutPrimitiveInfo::new(euclid::rect(x, y, w, h));
+        let fm = &mut renderer.font_manager;
+        let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
+        let mut dimensions = fm.dimensions(&state.content, font, state.size);
+        let glyphs = fm.layout(&state.content, font, state.size, bounds.position);
 
-        let font_key = renderer
-            .font_manager
-            .instance(font, state.size, &renderer.api)
-            .unwrap();
-        let glyphs =
-            renderer
-                .font_manager
-                .layout(&state.content, font, state.size, bounds.position);
+        let Position { x, y } = bounds.position;
+        if dimensions.w > bounds.size.w || dimensions.h > bounds.size.h {
+            dimensions = bounds.size;
+            // TODO: log with debug name of the component
+            log::warn!("Text overflow while rendering \"{}\"", state.content);
+        }
+        let Size { w, h } = dimensions;
+        let info = LayoutPrimitiveInfo::new(euclid::rect(x, y, w, h));
 
         let mut text_flags = FontInstanceFlags::empty();
         text_flags.set(FontInstanceFlags::SUBPIXEL_BGR, true);
