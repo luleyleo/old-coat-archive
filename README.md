@@ -18,4 +18,7 @@ The `examples/dev.rs` roughly reflects the current state.
 - Try to stick with this project until it can be used productive (this will be the hardest part).
 
 # State
-It can open a Window and layout + draw rectangles.
+
+Screenshot of `examples/dev.rs`
+
+![Preview of the dev.rs example](examples/dev.png)
