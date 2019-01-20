@@ -28,7 +28,7 @@ impl Component for DevApp {
                     .set(iid!(), ui)
                     .add(|| {
                         Rectangle::new()
-                            .color(Color::rgb(0.1, 0.4, 0.1))
+                            .color(Color::rgb(0.3, 0.7, 0.3))
                             .set(FirstRect, ui);
                     });
 
@@ -36,7 +36,7 @@ impl Component for DevApp {
                     .set(iid!(), ui)
                     .add(|| {
                         Rectangle::new()
-                            .color(Color::rgb(0.4, 0.1, 0.1))
+                            .color(Color::rgb(0.7, 0.3, 0.3))
                             .set(SecondRect, ui);
                         
                         Padding::new()
@@ -47,7 +47,7 @@ impl Component for DevApp {
                                     .set(iid!(), ui)
                                     .add(|| {
                                         Rectangle::new()
-                                            .color(Color::rgb(0.1, 0.1, 0.4))
+                                            .color(Color::rgb(0.3, 0.3, 0.7))
                                             .set(InnerRect, ui);
 
                                         Text::new()
