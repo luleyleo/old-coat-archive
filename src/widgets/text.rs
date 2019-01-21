@@ -1,6 +1,6 @@
 use crate::{
     Bounds, BoxConstraints, Cid, Component, Font, FontSize, PropsBuilder, Renderer, Size,
-    UiLayout,
+    UiLayout, Mut,
 };
 
 pub struct Text<'a> {
@@ -53,6 +53,18 @@ impl<'a> Component for Text<'a> {
             content: props.content.to_string(),
             size: props.size,
             font: props.font.clone(),
+        }
+    }
+
+    fn derive_state(props: &Self::Props, mut state: Mut<Self::State>) {
+        if props.content != state.content {
+            state.content = props.content.to_string();
+        }
+        if props.size != state.size {
+            state.size = props.size;
+        }
+        if props.font != state.font {
+            state.font = props.font.clone();
         }
     }
 
