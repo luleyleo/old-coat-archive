@@ -56,7 +56,7 @@ impl Font {
 #[derive(Default)]
 pub(crate) struct FontQueue(Vec<FontQueueAction>);
 
-impl FontQueue {    
+impl FontQueue {
     pub fn add(&mut self, font: Font, data: impl Into<Vec<u8>>) {
         self.0.push(FontQueueAction::Add(font, data.into()));
     }
