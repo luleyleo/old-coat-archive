@@ -52,25 +52,3 @@ impl Font {
         self
     }
 }
-
-#[derive(Default)]
-pub(crate) struct FontQueue(Vec<FontQueueAction>);
-
-impl FontQueue {
-    pub fn add(&mut self, font: Font, data: impl Into<Vec<u8>>) {
-        self.0.push(FontQueueAction::Add(font, data.into()));
-    }
-
-    pub fn remove(&mut self, font: Font) {
-        self.0.push(FontQueueAction::Remove(font));
-    }
-
-    pub fn drain(&mut self) -> std::vec::Drain<FontQueueAction> {
-        self.0.drain(..)
-    }
-}
-
-pub(crate) enum FontQueueAction {
-    Add(Font, Vec<u8>),
-    Remove(Font),
-}

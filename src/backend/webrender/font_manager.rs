@@ -42,7 +42,7 @@ impl FontManager {
         );
     }
 
-    pub(crate) fn remove_font(&mut self, font: Font, api: &RenderApi) {
+    pub(crate) fn remove_font(&mut self, font: &Font, api: &RenderApi) {
         let font = self.fonts.remove(&font).unwrap();
         let mut updates = Vec::default();
         for instance in font.instances.values() {

@@ -40,4 +40,3 @@ pub use self::input::{Event, Input};
 
 mod font;
 pub use self::font::{Font, FontWeight, FontSize};
-pub(crate) use self::font::{FontQueue, FontQueueAction};

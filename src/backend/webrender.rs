@@ -1,4 +1,4 @@
-use crate::{FontQueue, Size};
+use crate::{Size, Font};
 use gleam::gl;
 use std::rc::Rc;
 use webrender::api::*;
@@ -57,14 +57,12 @@ impl Webrenderer {
         }
     }
 
-    pub(crate) fn handle_fontqueue(&mut self, queue: &mut FontQueue) {
-        use crate::FontQueueAction::*;
-        for action in queue.drain() {
-            match action {
-                Add(font, data) => self.font_manager.add_font(font, data, &self.api),
-                Remove(font) => self.font_manager.remove_font(font, &self.api),
-            }
-        }
+    pub(crate) fn add_font(&mut self, font: Font, data: impl Into<Vec<u8>>) {
+        self.font_manager.add_font(font, data.into(), &self.api);
+    }
+
+    pub(crate) fn remove_font(&mut self, font: &Font) {
+        self.font_manager.remove_font(font, &self.api)
     }
 
     pub(crate) fn resize(&mut self, size: Size, dpr: f32) {

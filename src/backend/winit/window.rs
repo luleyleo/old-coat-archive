@@ -79,8 +79,7 @@ impl Window {
         let mut renderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
         // TODO: pass `Size` directly
         renderer.resize(self.size, dpr);
-        data.font_queue.add(Font::from_family(super::DEFAULT_FONT_NAME), super::DEFAULT_FONT);
-        renderer.handle_fontqueue(&mut data.font_queue);
+        renderer.add_font(Font::from_family(super::DEFAULT_FONT_NAME), super::DEFAULT_FONT);
 
         'main: loop {
             let events = eventloop.next();
@@ -111,9 +110,8 @@ impl Window {
             {
                 UiInput::<Comp>::run(&mut data, &mut input, app_id);
 
-                if fresh | UiUpdate::run(&mut data, app_id) {
+                if fresh | UiUpdate::run(&mut data, &mut renderer, app_id) {
                     fresh = false;
-                    renderer.handle_fontqueue(&mut data.font_queue);
 
                     UiView::<Comp>::run(&mut data, app_id, Comp::Props::default());
 

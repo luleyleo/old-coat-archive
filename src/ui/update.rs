@@ -1,4 +1,4 @@
-use crate::{Cid, Component, ComponentPointer, TypeIds, UiData, Font, FontQueue};
+use crate::{Cid, Component, ComponentPointer, TypeIds, UiData, Font, Renderer};
 use log::{trace, warn};
 use std::any::{Any, TypeId};
 
@@ -10,7 +10,7 @@ pub struct UiUpdate<'a> {
     messages: &'a mut Vec<Option<Box<Any>>>,
     events: &'a mut Vec<Box<Any>>,
     state: &'a mut Vec<Option<Box<Any>>>,
-    font_queue: &'a mut FontQueue,
+    renderer: &'a mut Renderer,
     cid: Cid,
     needs_update: bool,
 }
@@ -40,12 +40,12 @@ impl<'a> UiUpdate<'a> {
         warn!("Tried to bubble a message but the targeted Component does not exist");
     }
 
-    pub fn add_font(&mut self, font: &Font, data: Vec<u8>) {
-        self.font_queue.add(font.clone(), data);
+    pub fn add_font(&mut self, font: &Font, data: impl Into<Vec<u8>>) {
+        self.renderer.add_font(font.clone(), data.into());
     }
 
     pub fn remove_font(&mut self, font: &Font) {
-        self.font_queue.remove(font.clone());
+        self.renderer.remove_font(font);
     }
 }
 
@@ -54,7 +54,7 @@ impl<'a> UiUpdate<'a> {
         self.needs_update = true;
     }
 
-    pub(crate) fn run(data: &'a mut UiData, root: Cid) -> bool {
+    pub(crate) fn run(data: &'a mut UiData, renderer: &'a mut Renderer, root: Cid) -> bool {
         if data.is_fresh(root) {
             trace!("Skipping `UiUpdate`");
             return true;
@@ -69,7 +69,7 @@ impl<'a> UiUpdate<'a> {
             messages: &mut data.messages,
             events: &mut data.events,
             state: &mut data.state,
-            font_queue: &mut data.font_queue,
+            renderer: renderer,
             cid: root,
             needs_update: false,
         };
