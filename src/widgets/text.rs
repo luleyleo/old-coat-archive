@@ -69,7 +69,7 @@ impl<'a> Component for Text<'a> {
     }
 
     fn layout(
-        _state: &Self::State,
+        state: &Self::State,
         children: &[Cid],
         constraints: BoxConstraints,
         ui: &mut UiLayout,
@@ -82,13 +82,9 @@ impl<'a> Component for Text<'a> {
             );
         }
 
-        if let Some(width) = constraints.max_width {
-            if let Some(height) = constraints.max_height {
-                return Size::new(width, height);
-            }
-        }
+        let size = ui.get_text_size(&state.content, state.font.as_ref(), state.size);
 
-        Size::zero()
+        size
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
