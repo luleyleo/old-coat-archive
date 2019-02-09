@@ -1,0 +1,26 @@
+<Component name=MyComp>
+    <View>
+        <MyStack>
+            <Button text="First" />
+            <Button text="Second" />
+            <Button text="Third" />
+        </MyStack>
+    </View>
+</Component>
+<Component name=MyStack>
+    <Props closeable:bool=false />
+    <State active:usize=0 />
+    <Msg>
+        <Activate index=bool>
+            state.active = index;
+        </Activate>
+    </Msg>
+    <View>
+        <Linear vertical spacing=10.0>
+            <Switcher active=state.active @SwitcherEvent::Activate(i)=Msg::Activate(i) />
+            <SwitchStack active=state.active >
+                <Children />
+            </SwitchStack>
+        </Linear>
+    </View>
+</Component>
