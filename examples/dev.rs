@@ -1,17 +1,13 @@
 use coat::*;
-use coat::backend::winit::{Window, AppProps, AppEvent};
+use coat::backend::winit::{Window, AppEvent};
 
 struct DevApp;
 
 impl Component for DevApp {
-    type Props = AppProps;
+    type Props = ();
     type State = ();
     type Msg = ();
     type Event = AppEvent;
-
-    fn new() -> PropsBuilder<Self> {
-        PropsBuilder::new(AppProps::default())
-    }
 
     fn init(_props: &Self::Props) -> Self::State {}
 

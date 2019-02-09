@@ -4,9 +4,6 @@ use crate::{Component, Input, Size, Font, UiData, UiInput, UiLayout, UiRender, U
 use gleam::gl;
 use glutin::GlContext;
 
-#[derive(Default)]
-pub struct AppProps;
-
 pub enum AppEvent {
     SetTitle(String),
     Quit,
@@ -33,7 +30,6 @@ impl Window {
     pub fn run<Comp>(mut self)
     where
         Comp: Component<Event = AppEvent>,
-        Comp::Props: Default,
     {
         let mut eventloop = EventLoop::new();
 
