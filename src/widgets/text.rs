@@ -71,7 +71,7 @@ impl<'a> Component for Text<'a> {
     fn layout(
         state: &Self::State,
         children: &[Cid],
-        constraints: BoxConstraints,
+        _constraints: BoxConstraints,
         ui: &mut UiLayout,
     ) -> Size {
         if children.len() != 0 {
@@ -82,6 +82,7 @@ impl<'a> Component for Text<'a> {
             );
         }
 
+        // TODO: Some sort of ellipsis or so if the constraints are to small
         let size = ui.get_text_size(&state.content, state.font.as_ref(), state.size);
 
         size
