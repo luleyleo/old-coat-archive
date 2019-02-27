@@ -54,7 +54,7 @@ impl Component for Linear {
         *props
     }
 
-    fn derive_state(props: &Self::Props, mut state: Mut<Self::State>) {
+    fn derive_state(props: &Self::Props, state: &mut Self::State) {
         if *props != *state {
             *state = *props;
         }

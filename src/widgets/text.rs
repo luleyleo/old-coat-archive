@@ -56,7 +56,7 @@ impl<'a> Component for Text<'a> {
         }
     }
 
-    fn derive_state(props: &Self::Props, mut state: Mut<Self::State>) {
+    fn derive_state(props: &Self::Props, state: &mut Self::State) {
         if props.content != state.content {
             state.content = props.content.to_string();
         }

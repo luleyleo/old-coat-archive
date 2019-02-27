@@ -123,12 +123,14 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
                 cid
             });
         log::trace!("Detaching the `state` of {:?} to setup the `view`", cid);
-        let state = self.data.state[cid.get()].take().unwrap();
+        let mut state = self.data.state[cid.get()].take().unwrap();
 
         {
             let current_parent = self.parent.get();
             self.parent.set(Some(self.cid));
             self.cid = cid;
+
+            C::derive_state(&*builder, state.downcast_mut().unwrap());
 
             let mut ui = UiView::new(self.data, cid);
             C::view(&*builder, state.downcast_ref().unwrap(), &mut ui);
