@@ -125,6 +125,7 @@ pub(crate) struct ComponentPointer {
 }
 
 impl Default for ComponentPointer {
+    #[rustfmt::skip]
     fn default() -> Self {
         ComponentPointer {
             layout: |_, _, _, _| panic!("Called `layout` on default `ComponentPointer`"),
