@@ -75,7 +75,7 @@ impl std::hash::Hash for Iid {
 /// Button::new()
 ///     ...
 ///     .set(iid!(), ui);
-/// 
+///
 /// Button::new()
 ///     ...
 ///     .set(iid!(Increase), ui);
@@ -83,22 +83,16 @@ impl std::hash::Hash for Iid {
 #[macro_export]
 macro_rules! iid {
     () => {
-        Iid::new(
-            None,
-            {
-                struct UnnamedIdentifier;
-                std::any::TypeId::of::<UnnamedIdentifier>()
-            }
-        )
+        Iid::new(None, {
+            struct UnnamedIdentifier;
+            std::any::TypeId::of::<UnnamedIdentifier>()
+        })
     };
     ($id:ident) => {
-        Iid::new(
-            Some(stringify!($id)),
-            {
-                struct $id;
-                std::any::TypeId::of::<$id>()
-            }
-        )
+        Iid::new(Some(stringify!($id)), {
+            struct $id;
+            std::any::TypeId::of::<$id>()
+        })
     };
 }
 

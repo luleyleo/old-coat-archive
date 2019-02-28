@@ -1,4 +1,6 @@
-use crate::{BoxConstraints, Cid, ComponentPointer, Position, Size, UiData, Renderer, Font, FontSize};
+use crate::{
+    BoxConstraints, Cid, ComponentPointer, Font, FontSize, Position, Renderer, Size, UiData,
+};
 use std::any::Any;
 
 pub struct UiLayout<'a> {

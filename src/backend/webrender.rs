@@ -1,4 +1,4 @@
-use crate::{Size, Font};
+use crate::{Font, Size};
 use gleam::gl;
 use std::rc::Rc;
 use webrender::api::*;

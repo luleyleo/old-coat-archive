@@ -1,4 +1,4 @@
-use crate::{Cid, Component, ComponentPointer, TypeIds, UiData, Font, Renderer};
+use crate::{Cid, Component, ComponentPointer, Font, Renderer, TypeIds, UiData};
 use log::{trace, warn};
 use std::any::{Any, TypeId};
 

@@ -62,7 +62,9 @@ impl Component for Rectangle {
             LayoutPoint::new(position.x, position.y),
             LayoutSize::new(size.width, size.height),
         ));
-        
-        renderer.builder.push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
+
+        renderer
+            .builder
+            .push_rect(&info, ColorF::new(color.r, color.g, color.b, color.a));
     }
 }

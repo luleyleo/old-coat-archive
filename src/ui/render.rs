@@ -1,4 +1,4 @@
-use crate::{Bounds, Cid, Renderer, UiData, Position};
+use crate::{Bounds, Cid, Position, Renderer, UiData};
 
 pub struct UiRender<'a> {
     data: &'a UiData,

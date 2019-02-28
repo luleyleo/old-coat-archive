@@ -27,7 +27,7 @@ pub mod backend;
 pub use self::backend::*;
 
 mod layouts;
-pub use self::layouts::{Constrained, Linear, Stack, Padding};
+pub use self::layouts::{Constrained, Linear, Padding, Stack};
 
 mod widgets;
 pub use self::widgets::{Rectangle, Text};
@@ -39,4 +39,4 @@ mod input;
 pub use self::input::{Event, Input};
 
 mod font;
-pub use self::font::{Font, FontWeight, FontSize};
+pub use self::font::{Font, FontSize, FontWeight};

@@ -1,8 +1,9 @@
-use crate::{Font, FontSize, Position, Size};
 use crate::backend::winit::DEFAULT_FONT_NAME;
+use crate::{Font, FontSize, Position, Size};
 use fnv::FnvHashMap as HashMap;
 use webrender::api::{
-    AddFont, AddFontInstance, FontInstanceKey, FontKey, RenderApi, ResourceUpdate, GlyphInstance, LayoutPoint
+    AddFont, AddFontInstance, FontInstanceKey, FontKey, GlyphInstance, LayoutPoint, RenderApi,
+    ResourceUpdate,
 };
 
 pub(crate) struct LoadedFont {
@@ -30,7 +31,11 @@ impl Default for FontManager {
 impl FontManager {
     pub(crate) fn add_font(&mut self, font: Font, data: Vec<u8>, api: &RenderApi) {
         let key = api.generate_font_key();
-        api.update_resources(vec![ResourceUpdate::AddFont(AddFont::Raw(key, data.clone(), 0))]);
+        api.update_resources(vec![ResourceUpdate::AddFont(AddFont::Raw(
+            key,
+            data.clone(),
+            0,
+        ))]);
         let rt_font = rusttype::Font::from_bytes(data).unwrap();
         self.fonts.insert(
             font,
@@ -60,7 +65,12 @@ impl FontManager {
         &self.fonts[font].rusttype
     }
 
-    pub fn instance(&mut self, font: &Font, size: FontSize, api: &RenderApi) -> Option<FontInstanceKey> {
+    pub fn instance(
+        &mut self,
+        font: &Font,
+        size: FontSize,
+        api: &RenderApi,
+    ) -> Option<FontInstanceKey> {
         if let Some(loaded_font) = self.fonts.get_mut(&font) {
             let key = loaded_font
                 .instances
@@ -98,13 +108,11 @@ impl FontManager {
         };
         let point = rusttype::Point { x: 0.0, y: 0.0 };
         let font = &self.fonts[font].rusttype;
-        font.layout(text, scale, point)
-            .last()
-            .map(|glyph| {
-                let pos = glyph.position();
-                let hmet = glyph.unpositioned().h_metrics();
-                dimensions.width = pos.x + hmet.advance_width;
-            });
+        font.layout(text, scale, point).last().map(|glyph| {
+            let pos = glyph.position();
+            let hmet = glyph.unpositioned().h_metrics();
+            dimensions.width = pos.x + hmet.advance_width;
+        });
         return dimensions;
     }
 
@@ -127,13 +135,12 @@ impl FontManager {
             y: position.y,
         };
         let font = &self.fonts[font].rusttype;
-        let glyphs = font.layout(text, scale, point)
-            .map(|glyph| {
-                let index = glyph.id().0;
-                let pos = glyph.position();
-                let point = LayoutPoint::new(pos.x, pos.y + size);
-                GlyphInstance { index, point }
-            });
+        let glyphs = font.layout(text, scale, point).map(|glyph| {
+            let index = glyph.id().0;
+            let pos = glyph.position();
+            let point = LayoutPoint::new(pos.x, pos.y + size);
+            GlyphInstance { index, point }
+        });
         self.glyph_cash.clear();
         self.glyph_cash.extend(glyphs);
         return self.glyph_cash.as_slice();

@@ -1,6 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, PropsBuilder, Renderer, Size,
-    UiLayout, Mut,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, PropsBuilder, Renderer, Size, UiLayout,
 };
 
 pub struct Text<'a> {
