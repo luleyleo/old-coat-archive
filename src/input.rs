@@ -26,8 +26,6 @@ impl Input {
     }
 
     pub fn iter_all_events(&mut self) -> impl Iterator<Item = (&Event, bool)> {
-        self.events
-            .iter()
-            .map(|ev| (&ev.0, ev.1))
+        self.events.iter().map(|ev| (&ev.0, ev.1))
     }
 }
