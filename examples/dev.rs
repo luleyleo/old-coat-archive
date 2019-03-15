@@ -72,8 +72,10 @@ impl Component for DevApp {
 }
 
 fn hello_handler(event: TouchAreaEvent) -> Option<Msg> {
+    use TouchAreaEvent::*;
     match event {
-        TouchAreaEvent::Released(MouseButton::Left) => Some(Msg::SayHello),
+        Entered => (None, println!("Click now!")).0,
+        Activated(MouseButton::Left) => Some(Msg::SayHello),
         _ => None,
     }
 }
