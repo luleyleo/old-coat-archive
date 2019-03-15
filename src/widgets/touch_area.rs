@@ -1,11 +1,11 @@
-use crate::{Component, Event, Mut, UiInput, UiUpdate};
+use crate::{Component, Event, MouseButton, Mut, UiInput, UiUpdate};
 
 pub struct TouchArea;
 
 pub enum TouchAreaEvent {
-    Pressed,
-    Released,
-    Activated,
+    Pressed(MouseButton),
+    Released(MouseButton),
+    Activated(MouseButton),
 
     Entered,
     Moved,
@@ -25,32 +25,21 @@ impl Component for TouchArea {
     }
 
     fn input(ui: &mut UiInput<Self>) {
-        let UiInput {
-            messages,
-            input,
-            bounds,
-        } = ui;
-
-        input.for_new_events(|event| {
+        for (event, handled) in ui.input.iter_new_events() {
             match event {
-                Event::MouseInput {
-                    position,
-                    button: _,
-                    pressed,
-                } => {
-                    if bounds.contains(position) {
+                Event::MouseInput { position, button, pressed} => {
+                    if ui.bounds.contains(position) {
                         if *pressed {
-                            messages.send(TouchAreaEvent::Pressed);
-                            return true;
+                            ui.messages.send(TouchAreaEvent::Pressed(*button));
+                            *handled = true;
                         } else {
-                            messages.send(TouchAreaEvent::Released);
-                            return true;
+                            ui.messages.send(TouchAreaEvent::Released(*button));
+                            *handled = true;
                         }
                     }
                 }
                 _ => (),
             }
-            false
-        });
+        }
     }
 }

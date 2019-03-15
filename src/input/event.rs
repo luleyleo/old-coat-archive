@@ -12,6 +12,7 @@ pub struct ModifiersState {
     pub logo: bool,
 }
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum MouseButton {
     Left,
     Middle,

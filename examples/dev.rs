@@ -3,13 +3,32 @@ use coat::*;
 
 struct DevApp;
 
+struct State {
+    hellos: usize,
+}
+
+enum Msg {
+    SayHello,
+}
+
 impl Component for DevApp {
     type Props = ();
-    type State = ();
-    type Msg = ();
+    type State = State;
+    type Msg = Msg;
     type Event = AppEvent;
 
-    fn init(_props: &Self::Props) -> Self::State {}
+    fn init(_props: &Self::Props) -> Self::State {
+        Self::State { hellos: 0 }
+    }
+
+    fn update(msg: Self::Msg, mut state: Mut<Self::State>, _ui: &mut UiUpdate) {
+        match msg {
+            Msg::SayHello => {
+                state.hellos += 1;
+                println!("{}th hello!", state.hellos);
+            }
+        }
+    }
 
     fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
         iids!(FirstRect, SecondRect, InnerRect, HelloText);
@@ -32,13 +51,7 @@ impl Component for DevApp {
 
                     Padding::new().all(50.0).set(iid!(), ui).add(|| {
                         TouchArea::new()
-                            .handle(|event| match event {
-                                TouchAreaEvent::Released => {
-                                    println!("Yay!");
-                                    None
-                                }
-                                _ => None,
-                            })
+                            .handle(hello_handler)
                             .set(iid!(), ui)
                             .add(|| {
                                 Stack::new().set(iid!(), ui).add(|| {
@@ -55,6 +68,13 @@ impl Component for DevApp {
                     });
                 });
             });
+    }
+}
+
+fn hello_handler(event: TouchAreaEvent) -> Option<Msg> {
+    match event {
+        TouchAreaEvent::Released(MouseButton::Left) => Some(Msg::SayHello),
+        _ => None,
     }
 }
 

@@ -18,21 +18,16 @@ impl Input {
         self.events.push((event, false));
     }
 
-    pub fn for_all_events(&mut self, mut handler: impl FnMut(bool, &Event) -> bool) {
-        for (ref event, ref mut handled) in &mut self.events {
-            if handler(*handled, event) {
-                *handled = true;
-            }
-        }
+    pub fn iter_new_events(&mut self) -> impl Iterator<Item = (&Event, &mut bool)> {
+        self.events
+            .iter_mut()
+            .filter(|ev| ev.1 == false)
+            .map(|ev| (&ev.0, &mut ev.1))
     }
 
-    pub fn for_new_events(&mut self, mut handler: impl FnMut(&Event) -> bool) {
-        for (ref event, ref mut handled) in &mut self.events {
-            if !(*handled) {
-                if handler(event) {
-                    *handled = true;
-                }
-            }
-        }
+    pub fn iter_all_events(&mut self) -> impl Iterator<Item = (&Event, bool)> {
+        self.events
+            .iter()
+            .map(|ev| (&ev.0, ev.1))
     }
 }
