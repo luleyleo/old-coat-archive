@@ -21,6 +21,7 @@ impl<'a> UiUpdate<'a> {
             let events = &mut self.events[self.cid.get()];
             let events = events.downcast_mut::<Vec<E>>().unwrap();
             events.push(event);
+            self.needs_update();
         }
     }
 
@@ -34,6 +35,7 @@ impl<'a> UiUpdate<'a> {
                     .downcast_mut()
                     .unwrap();
                 messages.push(msg);
+                self.needs_update();
                 return;
             }
         }
@@ -42,10 +44,12 @@ impl<'a> UiUpdate<'a> {
 
     pub fn add_font(&mut self, font: &Font, data: impl Into<Vec<u8>>) {
         self.renderer.add_font(font.clone(), data.into());
+        self.needs_update();
     }
 
     pub fn remove_font(&mut self, font: &Font) {
         self.renderer.remove_font(font);
+        self.needs_update();
     }
 }
 

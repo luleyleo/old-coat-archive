@@ -1,31 +1,38 @@
-use crate::{Position, Scalar};
-
 mod event;
 pub use self::event::*;
 
 pub struct Input {
-    pub(crate) pointer: Position,
-    pub(crate) events: Vec<(Event, bool)>,
+    events: Vec<(Event, bool)>,
 }
 
 impl Input {
-    pub fn new() -> Self {
-        Input {
-            pointer: Position::zero(),
-            events: Vec::new(),
-        }
+    pub(crate) fn new() -> Self {
+        Input { events: Vec::new() }
+    }
+
+    pub(crate) fn clear_events(&mut self) {
+        self.events.clear();
     }
 
     pub(crate) fn push_event(&mut self, event: Event) {
-        match &event {
-            winit::Event::WindowEvent { event, .. } => match event {
-                winit::WindowEvent::CursorMoved { position, .. } => {
-                    self.pointer = Position::new(position.x as Scalar, position.y as Scalar);
-                }
-                _ => (),
-            },
-            _ => (),
-        };
         self.events.push((event, false));
+    }
+
+    pub fn for_all_events(&mut self, mut handler: impl FnMut(bool, &Event) -> bool) {
+        for (ref event, ref mut handled) in &mut self.events {
+            if handler(*handled, event) {
+                *handled = true;
+            }
+        }
+    }
+
+    pub fn for_new_events(&mut self, mut handler: impl FnMut(&Event) -> bool) {
+        for (ref event, ref mut handled) in &mut self.events {
+            if !(*handled) {
+                if handler(event) {
+                    *handled = true;
+                }
+            }
+        }
     }
 }

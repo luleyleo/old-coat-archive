@@ -24,6 +24,15 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         }
     }
 
+    fn another<'b, AComp: Component>(&'b mut self, cid: Cid) -> UiView<'b, AComp> {
+        UiView {
+            data: self.data,
+            parent: self.parent.clone(),
+            cid: cid,
+            marker: PhantomData,
+        }
+    }
+
     pub(crate) fn run(data: &'a mut UiData, app_id: Cid, props: Comp::Props) {
         log::trace!("Running `UiView`");
         if data.typeids[app_id.get()] == TypeIds::void() {
@@ -56,10 +65,6 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         data.state[app_id.get()] = Some(state);
     }
 
-    pub(crate) fn parent_pointer(&self) -> Rc<Cell<Option<Cid>>> {
-        self.parent.clone()
-    }
-
     pub fn set_reactive<C, T>(
         &mut self,
         iid: Iid,
@@ -69,24 +74,27 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         C: Component,
         T: Component,
     {
-        let content_builder = self.set(iid, builder.base);
-
+        let cid = self.cid;
         let tid = iid.id;
+
+        let content_builder = self.set(iid, builder.base);
         let handler = builder.handler;
 
-        let emitter = self.data.creations[self.cid.get()][&tid];
-        let receiver = self.cid;
+        if let Some(emitter) = self.data.creations[cid.get()].get(&tid) {
+            let receiver = cid;
 
-        let events: &mut Vec<C::Event> = self.data.events[emitter.get()].downcast_mut().unwrap();
-        let messages: &mut Vec<T::Msg> = self.data.messages[receiver.get()]
-            .as_mut()
-            .unwrap()
-            .downcast_mut()
-            .unwrap();
+            let events: &mut Vec<C::Event> =
+                self.data.events[emitter.get()].downcast_mut().unwrap();
+            let messages: &mut Vec<T::Msg> = self.data.messages[receiver.get()]
+                .as_mut()
+                .unwrap()
+                .downcast_mut()
+                .unwrap();
 
-        for event in events.drain(..) {
-            if let Some(msg) = handler(event) {
-                messages.push(msg);
+            for event in events.drain(..) {
+                if let Some(msg) = handler(event) {
+                    messages.push(msg);
+                }
             }
         }
 
@@ -128,11 +136,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         {
             let current_parent = self.parent.get();
             self.parent.set(Some(self.cid));
-            self.cid = cid;
 
             C::derive_state(&*builder, state.downcast_mut().unwrap());
 
-            let mut ui = UiView::new(self.data, cid);
+            let mut ui = self.another(cid);
             C::view(&*builder, state.downcast_ref().unwrap(), &mut ui);
 
             self.parent.set(current_parent);
@@ -146,7 +153,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
         ContentBuilder {
             cid,
-            parent: self.parent_pointer(),
+            parent: self.parent.clone(),
         }
     }
 }

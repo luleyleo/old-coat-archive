@@ -1,9 +1,18 @@
-use crate::{component::ComponentPointer, Cid, Component, Event, Input, UiData};
+use crate::{component::ComponentPointer, Bounds, Cid, Component, Input, Position, Size, UiData};
 use std::any::Any;
 
+pub struct Messages<'a, C: Component>(&'a mut Vec<C::Msg>);
+
+impl<'a, C: Component> Messages<'a, C> {
+    pub fn send(&mut self, msg: C::Msg) {
+        self.0.push(msg);
+    }
+}
+
 pub struct UiInput<'a, C: Component> {
-    messages: &'a mut Vec<C::Msg>,
-    input: &'a mut Input,
+    pub messages: Messages<'a, C>,
+    pub input: &'a mut Input,
+    pub bounds: Bounds,
 }
 
 impl<'a, C> UiInput<'a, C>
@@ -27,39 +36,37 @@ where
             .unwrap()
             .downcast_mut()
             .unwrap();
+        let messages = Messages(messages);
+
+        // Find absolute position
+        // TODO: Maybe we should store the absolute position instead of the relative one
+        let mut position = base.position[base.cid.get()];
+        let mut parent = base.parent[base.cid.get()];
+        while let Some(p) = parent {
+            position += base.position[p.get()].to_vector();
+            parent = base.parent[p.get()];
+        }
+
+        let bounds = Bounds::new(position, base.size[base.cid.get()]);
 
         UiInput {
-            messages: messages,
+            messages,
             input: base.input,
+            bounds,
         }
     }
 
-    pub fn send(&mut self, msg: C::Msg) {
-        self.messages.push(msg);
-    }
-
-    pub fn for_all_events(&mut self, mut handler: impl FnMut(bool, &Event) -> bool) {
-        for (ref event, ref mut handled) in &mut self.input.events {
-            if handler(*handled, event) {
-                *handled = true;
-            }
-        }
-    }
-
-    pub fn for_new_events(&mut self, mut handler: impl FnMut(&Event) -> bool) {
-        for (ref event, ref mut handled) in &mut self.input.events {
-            if !(*handled) {
-                if handler(event) {
-                    *handled = true;
-                }
-            }
-        }
+    pub fn bounds(&self) -> Bounds {
+        self.bounds
     }
 }
 
 pub(crate) struct UiInputBase<'a> {
     pointer: &'a Vec<ComponentPointer>,
+    parent: &'a Vec<Option<Cid>>,
     children: &'a Vec<Vec<Cid>>,
+    position: &'a Vec<Position>,
+    size: &'a Vec<Size>,
     messages: &'a mut Vec<Option<Box<Any>>>,
     input: &'a mut Input,
     cid: Cid,
@@ -69,7 +76,10 @@ impl<'a> UiInputBase<'a> {
     fn new(data: &'a mut UiData, input: &'a mut Input) -> Self {
         UiInputBase {
             pointer: &data.pointer,
+            parent: &data.parent,
             children: &data.children,
+            position: &data.position,
+            size: &data.size,
             messages: &mut data.messages,
             input,
             cid: Cid::invalid(),

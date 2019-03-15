@@ -27,16 +27,17 @@ pub mod backend;
 pub use self::backend::*;
 
 mod layouts;
-pub use self::layouts::{Constrained, Linear, Padding, Stack};
+pub use self::layouts::*;
 
 mod widgets;
-pub use self::widgets::{Rectangle, Text};
+pub use self::widgets::*;
 
 mod color;
 pub use self::color::Color;
 
 mod input;
-pub use self::input::{Event, Input};
+use self::input::Input;
+pub use self::input::{Event, ModifiersState, MouseButton, TouchPhase};
 
 mod font;
 pub use self::font::{Font, FontSize, FontWeight};

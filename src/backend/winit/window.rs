@@ -1,5 +1,5 @@
 use crate::backend::webrender::Webrenderer;
-use crate::backend::winit::EventLoop;
+use crate::backend::winit::{EventHandler, EventLoop};
 use crate::{Component, Font, Input, Size, UiData, UiInput, UiLayout, UiRender, UiUpdate, UiView};
 use gleam::gl;
 use glutin::GlContext;
@@ -69,6 +69,7 @@ impl Window {
 
         let mut fresh = true;
         let mut input = Input::new();
+        let mut ehandler = EventHandler::new();
         let mut data = UiData::default();
         let app_id = data.fresh_id();
 
@@ -103,11 +104,14 @@ impl Window {
                     },
                     _ => (),
                 }
-                input.push_event(event);
+                if let Some(event) = ehandler.convert_winit_event(event) {
+                    input.push_event(event);
+                }
             }
 
             {
                 UiInput::<Comp>::run(&mut data, &mut input, app_id);
+                input.clear_events();
 
                 if fresh | UiUpdate::run(&mut data, &mut renderer, app_id) {
                     fresh = false;
