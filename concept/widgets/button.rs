@@ -4,7 +4,7 @@ struct Props {
     label: Option<String>,
 }
 
-impl PropsBuilder<Button> {
+impl Props {
     pub fn label(mut self, value: String) -> Self {
         self.label = value.into();
         self

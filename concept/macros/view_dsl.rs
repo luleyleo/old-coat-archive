@@ -492,6 +492,69 @@ impl Component for Counter {
                     .add(|| buttons(state, ui));
             });
     }
+
+    fn view(props: &Props, state: &State, ui: &mut UiView) {
+        ui.add(VBox::new().spacing(10.0))
+            .add(Label::new().text(format!("{}", state.count)))
+            .and(HBox::new().spacing(10.0))
+                .add(Button::new().label("+").clicked(|| Msg::Increment))
+                .and(Button::new().label("C").clicked(|| Msg::Set(0)))
+                .and(Button::new().label("+").clicked(|| Msg::Decrement));
+        
+         ui.add(VBox::new().spacing(10.0)).id(iid!())
+            .add(Label::new().text(format!("{}", state.count)))
+            .and(HBox::new().spacing(10.0))
+                .add(Button::new().label("+"))
+                    .on(|e| match e {
+                        ButtonEvent::Action(_) => Some(Msg::Increment),
+                        _ => None,
+                    })
+                .and(Button::new().label("C"))
+                    .on(just!(ButtonEvent::Action(_) => Msg::Set(0)))
+                .and(Button::new().label("+"))
+                    .on(event!(ButtonEvent::Action(_) => Msg::Decrement));
+
+        ui.add(TabView::new().tabs(&["Title 1", "Title 2"]))
+            .add(Content1::new())
+            .add(Content2::new());
+        
+        ui.add(TabView::new()
+                .tabs(state.tabs.iter().map(|t| t.1))
+                .closeable(true)
+                .moveable(true))
+            .on(|e| match e {
+                TabViewEvent::Close(index) => Some(Msg::TabClose(index)),
+                TabViewEvent::Move(index, new_index) => Some(Msg::TabMove(index, new_index)),
+                _ => None,
+            })
+            .where(|ui| {
+                for (index, _, content) in state.tabs {
+                    ui.add(ContentView::new().data(content))
+                        .indexed(index)
+                        .close();
+                }
+                // or
+                ui.add_many();
+                for (index, _, content) in state.tabs {
+                    ui.and(ContentView::new().data(content))
+                        .indexed(index);
+                }
+            });
+    }
+
+    fn view(props: &Props, state: &State, ui: &mut UiView) {
+        ui.add(VBox::new().spacing(10.0)).with(|| {
+            ui.add(Label::new().text(state.label));
+            ui.add(HBox::new().spacing(10.0)).with(|| {
+                ui.add(Button::new().label("+"))
+                    .on(event!(ButtonEvent::Action(_) => Msg::Increment));
+                ui.add(Button::new().label("C"))
+                    .on(event!(ButtonEvent::Action(_) => Msg::Set(0)));
+                ui.add(Button::new().label("-"))
+                    .on(event!(ButtonEvent::Action(_) => Msg::Decrement));
+            });
+        });
+    }
 }
 
 #[cfg(pure_human_macro_extended_split)]
