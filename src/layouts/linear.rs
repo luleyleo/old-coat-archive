@@ -14,6 +14,10 @@ pub struct Props {
     spacing: Scalar,
 }
 
+impl Properties for Props {
+    type Component = Linear;
+}
+
 impl Default for Props {
     fn default() -> Self {
         Props {
@@ -23,7 +27,7 @@ impl Default for Props {
     }
 }
 
-impl PropsBuilder<Linear> {
+impl Props {
     pub fn horizontal(mut self) -> Self {
         self.direction = Direction::Horizontal;
         self

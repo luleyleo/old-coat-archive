@@ -10,7 +10,11 @@ pub struct PaddingProps {
     left: Scalar,
 }
 
-impl PropsBuilder<Padding> {
+impl Properties for PaddingProps {
+    type Component = Padding;
+}
+
+impl PaddingProps {
     pub fn all(self, value: Scalar) -> Self {
         self.top(value).right(value).bottom(value).left(value)
     }

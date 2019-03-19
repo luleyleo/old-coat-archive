@@ -1,7 +1,15 @@
+#![allow(dead_code)]
+
 use coat::backend::winit::{AppEvent, Window};
 use coat::*;
 
 struct DevApp;
+
+#[derive(Default)]
+struct Props;
+impl Properties for Props {
+    type Component = DevApp;
+}
 
 struct State {
     hellos: usize,
@@ -12,7 +20,7 @@ enum Msg {
 }
 
 impl Component for DevApp {
-    type Props = ();
+    type Props = Props;
     type State = State;
     type Msg = Msg;
     type Event = AppEvent;
@@ -51,7 +59,7 @@ impl Component for DevApp {
 
                     Padding::new().all(50.0).set(iid!(), ui).add(|| {
                         TouchArea::new()
-                            .handle(hello_handler)
+                            //.handle(hello_handler)
                             .set(iid!(), ui)
                             .add(|| {
                                 Stack::new().set(iid!(), ui).add(|| {

@@ -7,7 +7,7 @@ mod builder;
 pub use self::builder::{ContentBuilder, PropsBuilder, ReactivePropsBuilder};
 
 mod component;
-pub use self::component::Component;
+pub use self::component::{Component, Properties};
 use self::component::ComponentPointer;
 
 mod constraints;

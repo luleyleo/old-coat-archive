@@ -1,6 +1,12 @@
-use crate::{Component, Event, MouseButton, Mut, Position, UiInput, UiUpdate};
+use crate::{Component, Event, Properties, MouseButton, Mut, Position, UiInput, UiUpdate};
 
 pub struct TouchArea;
+
+#[derive(Default)]
+pub struct TouchAreaProps;
+impl Properties for TouchAreaProps {
+    type Component = TouchArea;
+}
 
 pub struct TouchAreaState {
     pressed: bool,
@@ -19,8 +25,8 @@ pub enum TouchAreaEvent {
 }
 
 impl Component for TouchArea {
+    type Props = TouchAreaProps;
     type State = TouchAreaState;
-    type Props = ();
     type Msg = TouchAreaEvent;
     type Event = TouchAreaEvent;
 

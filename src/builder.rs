@@ -68,8 +68,8 @@ impl<C: Component> std::ops::DerefMut for PropsBuilder<C> {
 impl ContentBuilder {
     pub fn add(self, mut builder: impl FnMut()) {
         let current_parent = self.parent.get();
-        self.parent.set(Some(self.cid));
+        (&*self.parent).set(Some(self.cid));
         builder();
-        self.parent.set(current_parent);
+        (&*self.parent).set(current_parent);
     }
 }
