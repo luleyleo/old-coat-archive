@@ -26,10 +26,10 @@ impl<'a> UiUpdate<'a> {
     }
 
     /// Sends the `msg` to the closest parent of the related `Component`
-    pub fn bubble<Comp: Component>(&mut self, msg: Comp::Msg) {
+    pub fn bubble<Target: Component>(&mut self, msg: Target::Msg) {
         while let Some(parent) = self.parent[self.cid.get()] {
-            if self.typeids[parent.get()] == TypeIds::of::<Comp>() {
-                let messages: &mut Vec<Comp::Msg> = self.messages[parent.get()]
+            if self.typeids[parent.get()] == TypeIds::of::<Target>() {
+                let messages: &mut Vec<Target::Msg> = self.messages[parent.get()]
                     .as_mut()
                     .unwrap()
                     .downcast_mut()

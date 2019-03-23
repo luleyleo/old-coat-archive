@@ -6,8 +6,13 @@ use std::rc::Rc;
 
 pub struct UiView<'a, Comp: Component> {
     data: &'a mut UiData,
+    /// The `Cid` of the component to which new ones will be added.
     parent: Rc<Cell<Option<Cid>>>,
+    /// The `Cid` of the component which's `view` function is currently being run.
+    /// This is often the `ancestor`.
+    /// The type of the associated component is `Comp`.
     cid: Cid,
+    /// Type of the component behind `cid`.
     marker: PhantomData<Comp>,
 }
 
@@ -22,6 +27,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         }
     }
 
+    /// This will construct a `UiView` with the same date but for a different component.
     fn another<'b, AComp: Component>(&'b mut self, cid: Cid) -> UiView<'b, AComp> {
         UiView {
             data: self.data,
@@ -63,10 +69,16 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         data.state[app_id.get()] = Some(state);
     }
 
-    pub fn add<C, P>(&mut self, props: P, iid: Iid) -> ContentBuilder<C, Comp>
+    /// Adds a new component to the tree.
+    /// Instead of this `Properties::set` can be used for a nicer builder pattern.
+    pub fn add<NewComp, NewCompProps>(
+        &mut self,
+        props: NewCompProps,
+        iid: Iid,
+    ) -> ContentBuilder<NewComp, Comp>
     where
-        C: Component<Props = P>,
-        P: Properties<Component = C>,
+        NewComp: Component<Props = NewCompProps>,
+        NewCompProps: Properties<Component = NewComp>,
     {
         let tid = iid.id;
         let name = iid.name.unwrap_or("Unnamed");
@@ -80,14 +92,14 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
                 let parent = self.parent.get().unwrap_or(self.cid);
 
-                self.data.typeids[cid.get()] = TypeIds::of::<C>();
+                self.data.typeids[cid.get()] = TypeIds::of::<NewComp>();
                 self.data.name[cid.get()] = name;
-                self.data.pointer[cid.get()] = C::pointer();
+                self.data.pointer[cid.get()] = NewComp::pointer();
                 self.data.parent[cid.get()] = Some(parent);
                 self.data.children[parent.get()].push(cid);
-                self.data.state[cid.get()] = Some(Box::new(C::init(&props)));
-                self.data.messages[cid.get()] = Some(Box::new(Vec::<C::Msg>::new()));
-                self.data.events[cid.get()] = Box::new(Vec::<C::Event>::new());
+                self.data.state[cid.get()] = Some(Box::new(NewComp::init(&props)));
+                self.data.messages[cid.get()] = Some(Box::new(Vec::<NewComp::Msg>::new()));
+                self.data.events[cid.get()] = Box::new(Vec::<NewComp::Event>::new());
 
                 log::trace!("View set: {}", self.data.full_debug_name_of(cid));
 
@@ -100,10 +112,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             let current_parent = self.parent.get();
             self.parent.set(Some(self.cid));
 
-            C::derive_state(&props, state.downcast_mut().unwrap());
+            NewComp::derive_state(&props, state.downcast_mut().unwrap());
 
             let mut ui = self.another(cid);
-            C::view(&props, state.downcast_ref().unwrap(), &mut ui);
+            NewComp::view(&props, state.downcast_ref().unwrap(), &mut ui);
 
             self.parent.set(current_parent);
         }
@@ -118,12 +130,14 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
     }
 
     /// Note: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
-    pub(crate) fn on<C, Handler>(&mut self, emitter: Cid, handler: Handler)
+    /// This will only be called by a `ContentBuilder` to guarantee type safety.
+    pub(crate) fn on<Emitter, Handler>(&mut self, emitter: Cid, handler: Handler)
     where
-        C: Component,
-        Handler: Fn(C::Event) -> Option<Comp::Msg>,
+        Emitter: Component,
+        Handler: Fn(Emitter::Event) -> Option<Comp::Msg>,
     {
-        let events: &mut Vec<C::Event> = self.data.events[emitter.get()].downcast_mut().unwrap();
+        let events: &mut Vec<Emitter::Event> =
+            self.data.events[emitter.get()].downcast_mut().unwrap();
         let messages: &mut Vec<Comp::Msg> = self.data.messages[self.cid.get()]
             .as_mut()
             .unwrap()

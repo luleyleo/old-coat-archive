@@ -7,7 +7,12 @@ use std::any::Any;
 pub trait Properties: Default + Sized {
     type Component: Component<Props = Self>;
 
-    fn set<C: Component>(self, id: Iid, ui: &mut UiView<C>) -> ContentBuilder<Self::Component, C> {
+    /// Adds the resulting component to the tree
+    fn set<Ancestor: Component>(
+        self,
+        id: Iid,
+        ui: &mut UiView<Ancestor>,
+    ) -> ContentBuilder<Self::Component, Ancestor> {
         ui.add(self, id)
     }
 }
@@ -72,9 +77,9 @@ pub(crate) trait ComponentPointerTrait: Component {
     fn dyn_input(input: &mut UiInputBase);
 }
 
-impl<C> ComponentPointerTrait for C
+impl<Comp> ComponentPointerTrait for Comp
 where
-    C: Component,
+    Comp: Component,
 {
     fn pointer() -> ComponentPointer {
         ComponentPointer {
