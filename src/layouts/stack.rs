@@ -15,7 +15,7 @@ impl Component for Stack {
     type Msg = ();
     type Event = ();
 
-    fn init(_props: &Self::Props) -> Self::State { }
+    fn init(_props: &Self::Props) -> Self::State {}
 
     fn layout(
         _state: &Self::State,

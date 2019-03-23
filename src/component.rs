@@ -1,11 +1,11 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Mut, ContentBuilder, Renderer, Size, UiInput, UiInputBase, UiLayout,
-    UiUpdate, UiView, Iid,
+    Bounds, BoxConstraints, Cid, ContentBuilder, Iid, Mut, Renderer, Size, UiInput, UiInputBase,
+    UiLayout, UiUpdate, UiView,
 };
 use std::any::Any;
 
 pub trait Properties: Default + Sized {
-    type Component: Component<Props=Self>;
+    type Component: Component<Props = Self>;
 
     fn set<C: Component>(self, id: Iid, ui: &mut UiView<C>) -> ContentBuilder<Self::Component, C> {
         ui.add(self, id)

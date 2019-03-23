@@ -1,16 +1,7 @@
-use crate::{Cid, Component, Iid, UiView};
+use crate::{Cid, Component, UiView};
 use std::cell::Cell;
-use std::rc::Rc;
 use std::marker::PhantomData;
-
-pub struct PropsBuilder<C: Component> {
-    pub(crate) props: C::Props,
-}
-
-pub struct ReactivePropsBuilder<C: Component, T: Component> {
-    pub(crate) base: PropsBuilder<C>,
-    pub(crate) handler: fn(C::Event) -> Option<T::Msg>,
-}
+use std::rc::Rc;
 
 pub struct ContentBuilder<Comp: Component, Target: Component> {
     /// The component which will receive events
@@ -32,7 +23,11 @@ impl<Comp: Component, Ancestor: Component> ContentBuilder<Comp, Ancestor> {
         }
     }
 
-    pub fn on(self, ui: &mut UiView<Ancestor>, handler: impl Fn(Comp::Event) -> Option<Ancestor::Msg>) -> Self {
+    pub fn on(
+        self,
+        ui: &mut UiView<Ancestor>,
+        handler: impl Fn(Comp::Event) -> Option<Ancestor::Msg>,
+    ) -> Self {
         if let Some(_parent) = self.parent.get() {
             ui.on::<Comp, _>(self.cid, handler);
         }
@@ -46,53 +41,3 @@ impl<Comp: Component, Ancestor: Component> ContentBuilder<Comp, Ancestor> {
         (&*self.parent).set(current_parent);
     }
 }
-
-impl<C> PropsBuilder<C>
-where
-    C: Component,
-{
-    pub fn new(props: C::Props) -> Self {
-        PropsBuilder { props }
-    }
-
-    pub fn handle<T>(self, handler: fn(C::Event) -> Option<T::Msg>) -> ReactivePropsBuilder<C, T>
-    where
-        T: Component,
-    {
-        ReactivePropsBuilder {
-            base: self,
-            handler,
-        }
-    }
-
-    pub fn set<T>(self, id: Iid, ui: &mut UiView<T>) -> ContentBuilder<C, T>
-    where
-        T: Component,
-    {
-        ui.set(id, self)
-    }
-}
-
-impl<C, T> ReactivePropsBuilder<C, T>
-where
-    C: Component,
-    T: Component,
-{
-    pub fn set(self, id: Iid, ui: &mut UiView<T>) -> ContentBuilder<C, T> {
-        ui.set_reactive(id, self)
-    }
-}
-
-impl<C: Component> std::ops::Deref for PropsBuilder<C> {
-    type Target = C::Props;
-    fn deref(&self) -> &Self::Target {
-        &self.props
-    }
-}
-
-impl<C: Component> std::ops::DerefMut for PropsBuilder<C> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.props
-    }
-}
-

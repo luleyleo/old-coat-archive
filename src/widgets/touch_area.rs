@@ -1,4 +1,4 @@
-use crate::{Component, Event, Properties, MouseButton, Mut, Position, UiInput, UiUpdate};
+use crate::{Component, Event, MouseButton, Mut, Position, Properties, UiInput, UiUpdate};
 
 pub struct TouchArea;
 
