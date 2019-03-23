@@ -1,16 +1,14 @@
 use crate::component::ComponentPointerTrait;
-use crate::{
-    Cid, Component, ContentBuilder, Iid, PropsBuilder, ReactivePropsBuilder, TypeIds, UiData,
-};
+use crate::{Cid, Component, ContentBuilder, Iid, Properties, TypeIds, UiData};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-pub struct UiView<'a, C: Component> {
+pub struct UiView<'a, Comp: Component> {
     data: &'a mut UiData,
     parent: Rc<Cell<Option<Cid>>>,
     cid: Cid,
-    marker: PhantomData<C>,
+    marker: PhantomData<Comp>,
 }
 
 impl<'a, Comp: Component> UiView<'a, Comp> {
@@ -65,45 +63,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         data.state[app_id.get()] = Some(state);
     }
 
-    pub fn set_reactive<C, T>(
-        &mut self,
-        iid: Iid,
-        builder: ReactivePropsBuilder<C, T>,
-    ) -> ContentBuilder
+    pub fn add<C, P>(&mut self, props: P, iid: Iid) -> ContentBuilder<C, Comp>
     where
-        C: Component,
-        T: Component,
-    {
-        let cid = self.cid;
-        let tid = iid.id;
-
-        let content_builder = self.set(iid, builder.base);
-        let handler = builder.handler;
-
-        if let Some(emitter) = self.data.creations[cid.get()].get(&tid) {
-            let receiver = cid;
-
-            let events: &mut Vec<C::Event> =
-                self.data.events[emitter.get()].downcast_mut().unwrap();
-            let messages: &mut Vec<T::Msg> = self.data.messages[receiver.get()]
-                .as_mut()
-                .unwrap()
-                .downcast_mut()
-                .unwrap();
-
-            for event in events.drain(..) {
-                if let Some(msg) = handler(event) {
-                    messages.push(msg);
-                }
-            }
-        }
-
-        content_builder
-    }
-
-    pub fn set<C>(&mut self, iid: Iid, builder: PropsBuilder<C>) -> ContentBuilder
-    where
-        C: Component,
+        C: Component<Props = P>,
+        P: Properties<Component = C>,
     {
         let tid = iid.id;
         let name = iid.name.unwrap_or("Unnamed");
@@ -122,7 +85,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
                 self.data.pointer[cid.get()] = C::pointer();
                 self.data.parent[cid.get()] = Some(parent);
                 self.data.children[parent.get()].push(cid);
-                self.data.state[cid.get()] = Some(Box::new(C::init(&*builder)));
+                self.data.state[cid.get()] = Some(Box::new(C::init(&props)));
                 self.data.messages[cid.get()] = Some(Box::new(Vec::<C::Msg>::new()));
                 self.data.events[cid.get()] = Box::new(Vec::<C::Event>::new());
 
@@ -137,10 +100,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             let current_parent = self.parent.get();
             self.parent.set(Some(self.cid));
 
-            C::derive_state(&*builder, state.downcast_mut().unwrap());
+            C::derive_state(&props, state.downcast_mut().unwrap());
 
             let mut ui = self.another(cid);
-            C::view(&*builder, state.downcast_ref().unwrap(), &mut ui);
+            C::view(&props, state.downcast_ref().unwrap(), &mut ui);
 
             self.parent.set(current_parent);
         }
@@ -151,9 +114,26 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         );
         self.data.state[cid.get()] = Some(state);
 
-        ContentBuilder {
-            cid,
-            parent: self.parent.clone(),
+        ContentBuilder::new(cid, self.parent.clone())
+    }
+
+    /// Note: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
+    pub(crate) fn on<C, Handler>(&mut self, emitter: Cid, handler: Handler)
+    where
+        C: Component,
+        Handler: Fn(C::Event) -> Option<Comp::Msg>,
+    {
+        let events: &mut Vec<C::Event> = self.data.events[emitter.get()].downcast_mut().unwrap();
+        let messages: &mut Vec<Comp::Msg> = self.data.messages[self.cid.get()]
+            .as_mut()
+            .unwrap()
+            .downcast_mut()
+            .unwrap();
+
+        for event in events.drain(..) {
+            if let Some(msg) = handler(event) {
+                messages.push(msg);
+            }
         }
     }
 }

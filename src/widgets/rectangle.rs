@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Color, Component, PropsBuilder, Renderer, Size, UiLayout, UiView,
+    Bounds, BoxConstraints, Cid, Color, Component, Properties, Renderer, Size, UiLayout, UiView,
 };
 
 pub struct Rectangle;
@@ -9,7 +9,11 @@ pub struct Props {
     pub(crate) color: Color,
 }
 
-impl PropsBuilder<Rectangle> {
+impl Properties for Props {
+    type Component = Rectangle;
+}
+
+impl Props {
     pub fn color(mut self, color: Color) -> Self {
         self.color = color;
         self

@@ -2,20 +2,20 @@ use crate::*;
 
 pub struct Stack;
 
-#[derive(Default, Clone, Copy)]
-pub struct StackProps {
-    //alignment: Alignment,
+#[derive(Default)]
+pub struct StackProps;
+
+impl Properties for StackProps {
+    type Component = Stack;
 }
 
 impl Component for Stack {
     type Props = StackProps;
-    type State = StackProps;
+    type State = ();
     type Msg = ();
     type Event = ();
 
-    fn init(props: &Self::Props) -> Self::State {
-        *props
-    }
+    fn init(_props: &Self::Props) -> Self::State {}
 
     fn layout(
         _state: &Self::State,

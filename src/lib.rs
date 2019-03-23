@@ -4,11 +4,11 @@ mod bounds;
 pub use self::bounds::{Bounds, Position, Size};
 
 mod builder;
-pub use self::builder::{ContentBuilder, PropsBuilder, ReactivePropsBuilder};
+pub use self::builder::ContentBuilder;
 
 mod component;
-pub use self::component::Component;
 use self::component::ComponentPointer;
+pub use self::component::{Component, Properties};
 
 mod constraints;
 pub use self::constraints::BoxConstraints;

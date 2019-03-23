@@ -11,7 +11,11 @@ pub struct Props {
     max_height: Option<Scalar>,
 }
 
-impl PropsBuilder<Constrained> {
+impl Properties for Props {
+    type Component = Constrained;
+}
+
+impl Props {
     pub fn min_width(mut self, min_width: Scalar) -> Self {
         self.min_width = Some(min_width);
         self

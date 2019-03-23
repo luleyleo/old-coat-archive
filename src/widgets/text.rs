@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, PropsBuilder, Renderer, Size, UiLayout,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout,
 };
 
 pub struct Text<'a> {
@@ -18,7 +18,7 @@ impl<'a> Default for Text<'a> {
     }
 }
 
-impl<'a> PropsBuilder<Text<'a>> {
+impl<'a> Text<'a> {
     pub fn content(mut self, content: &'a str) -> Self {
         self.content = content;
         self
@@ -33,6 +33,10 @@ impl<'a> PropsBuilder<Text<'a>> {
         self.font = Some(font);
         self
     }
+}
+
+impl<'a> Properties for Text<'a> {
+    type Component = Self;
 }
 
 pub struct TextState {
