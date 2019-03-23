@@ -555,6 +555,42 @@ impl Component for Counter {
             });
         });
     }
+
+    fn view(props: &Props, state: &State, ui: &mut UiView) {
+        VBox::new().spacing(10.0).set(ui, iid!()).with(|| {
+            Label::new().text(&state.label).set(ui, iid!());
+            HBox::new().spacing(10.0).set(ui, iid!()).with(|| {
+                Button::new().label("+").set(ui, iid!())
+                    .on(ui, event!(ButtonEvent::Action(_) => Msg::Increment));
+                for i in 0..state.count {
+                    Button::new().label("-").set(ui, iid!().key(i))
+                        .on(ui, event!(ButtonEvent::Action(_) => Msg::Decrement));
+                }
+            });
+        });
+    }
+
+    fn view(props, state, ui) {
+        cascade!{
+            VBox::new();
+            ..spacing(10.0);
+            ..set(ui, iid!()); // after this it probably won't work anymore
+            ..with(|| {
+                cascade!{
+                    Label::new();
+                    ..text(&state.label);
+                    ..set(ui, iid!());
+                };
+
+                cascade!{
+                    HBox::new();
+                    ..spacing(10.0);
+                    ..set(ui, iid!());
+                    //... go on
+                }
+            });
+        };
+    }
 }
 
 #[cfg(pure_human_macro_extended_split)]

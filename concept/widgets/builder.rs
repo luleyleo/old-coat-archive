@@ -42,16 +42,15 @@ impl Component for Button {
     fn view(props, state, ui) {
         ui.add(VBox::new().spacing(10.0), iid!()).with(|| {
             ui.add(Button::new().label("First"), iid!())
-                .on(event!(Button::Event::Activated(_) => Msg::SomeEvent));
+                .on(ui, event!(Button::Event::Activated(_) => Msg::SomeEvent));
             
             ui.add(Border::new(), iid!()).with(|| {
                 ui.add(Padding::new().all(5.0), iid!()).with(|| {
                     ui.add(VBox::new().spacing(5.0), iid!()).with (|| {
                         for item in state.items {
-                            ui.add(Button::new(), iid!())
-                                .identifier(item.id)
-                                .on(event!(blah))
-                                .with(|| {
+                            ui.add(Button::new(), iid!().key(item.id))
+                                .on(ui, event!(blah))
+                                .with(|ui| {
                                     ui.add(Text::new()
                                         .content(item.name)
                                         .color(Color::rgb(..))
