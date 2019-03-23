@@ -7,7 +7,7 @@ use std::any::Any;
 pub trait Properties: Default + Sized {
     type Component: Component<Props=Self>;
 
-    fn set<C: Component>(self, id: Iid, ui: &mut UiView<C>) -> ContentBuilder {
+    fn set<C: Component>(self, id: Iid, ui: &mut UiView<C>) -> ContentBuilder<Self::Component, C> {
         ui.add(self, id)
     }
 }

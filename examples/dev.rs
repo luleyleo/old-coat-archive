@@ -59,8 +59,8 @@ impl Component for DevApp {
 
                     Padding::new().all(50.0).set(iid!(), ui).add(|| {
                         TouchArea::new()
-                            //.handle(hello_handler)
                             .set(iid!(), ui)
+                            .on(ui, hello_handler)
                             .add(|| {
                                 Stack::new().set(iid!(), ui).add(|| {
                                     Rectangle::new()

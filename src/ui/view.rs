@@ -6,11 +6,11 @@ use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-pub struct UiView<'a, C: Component> {
+pub struct UiView<'a, Comp: Component> {
     data: &'a mut UiData,
     parent: Rc<Cell<Option<Cid>>>,
     cid: Cid,
-    marker: PhantomData<C>,
+    marker: PhantomData<Comp>,
 }
 
 impl<'a, Comp: Component> UiView<'a, Comp> {
@@ -65,14 +65,13 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         data.state[app_id.get()] = Some(state);
     }
 
-    pub fn set_reactive<C, T>(
+    pub fn set_reactive<C>(
         &mut self,
         iid: Iid,
-        builder: ReactivePropsBuilder<C, T>,
-    ) -> ContentBuilder
+        builder: ReactivePropsBuilder<C, Comp>,
+    ) -> ContentBuilder<C, Comp>
     where
         C: Component,
-        T: Component,
     {
         let cid = self.cid;
         let tid = iid.id;
@@ -85,7 +84,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
             let events: &mut Vec<C::Event> =
                 self.data.events[emitter.get()].downcast_mut().unwrap();
-            let messages: &mut Vec<T::Msg> = self.data.messages[receiver.get()]
+            let messages: &mut Vec<Comp::Msg> = self.data.messages[receiver.get()]
                 .as_mut()
                 .unwrap()
                 .downcast_mut()
@@ -101,7 +100,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         content_builder
     }
 
-    pub fn set<C>(&mut self, iid: Iid, builder: PropsBuilder<C>) -> ContentBuilder
+    pub fn set<C>(&mut self, iid: Iid, builder: PropsBuilder<C>) -> ContentBuilder<C, Comp>
     where
         C: Component,
     {
@@ -151,13 +150,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         );
         self.data.state[cid.get()] = Some(state);
 
-        ContentBuilder {
-            cid,
-            parent: self.parent.clone(),
-        }
+        ContentBuilder::new(cid, self.parent.clone())
     }
 
-    pub fn add<C, P>(&mut self, props: P, iid: Iid) -> ContentBuilder
+    pub fn add<C, P>(&mut self, props: P, iid: Iid) -> ContentBuilder<C, Comp>
     where
         C: Component<Props=P>,
         P: Properties<Component=C>
@@ -208,9 +204,26 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         );
         self.data.state[cid.get()] = Some(state);
 
-        ContentBuilder {
-            cid,
-            parent: self.parent.clone(),
+        ContentBuilder::new(cid, self.parent.clone())
+    }
+
+    /// Note: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
+    pub(crate) fn on<C, Handler>(&mut self, emitter: Cid, handler: Handler)
+    where
+        C: Component,
+        Handler: Fn(C::Event) -> Option<Comp::Msg>, 
+    {
+        let events: &mut Vec<C::Event> = self.data.events[emitter.get()].downcast_mut().unwrap();
+        let messages: &mut Vec<Comp::Msg> = self.data.messages[self.cid.get()]
+            .as_mut()
+            .unwrap()
+            .downcast_mut()
+            .unwrap();
+
+        for event in events.drain(..) {
+            if let Some(msg) = handler(event) {
+                messages.push(msg);
+            }
         }
     }
 }
