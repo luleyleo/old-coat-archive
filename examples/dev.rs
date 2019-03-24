@@ -13,10 +13,12 @@ impl Properties for Props {
 
 struct State {
     hellos: usize,
+    hovered: bool,
 }
 
 enum Msg {
     SayHello,
+    Active(bool)
 }
 
 impl Component for DevApp {
@@ -26,7 +28,7 @@ impl Component for DevApp {
     type Event = AppEvent;
 
     fn init(_props: &Self::Props) -> Self::State {
-        Self::State { hellos: 0 }
+        Self::State { hellos: 0, hovered: false }
     }
 
     fn update(msg: Self::Msg, mut state: Mut<Self::State>, _ui: &mut UiUpdate) {
@@ -35,11 +37,20 @@ impl Component for DevApp {
                 state.hellos += 1;
                 println!("{}th hello!", state.hellos);
             }
+            Msg::Active(active) => {
+                state.hovered = active;
+            }
         }
     }
 
-    fn view(_: &Self::Props, _: &Self::State, ui: &mut UiView<Self>) {
+    fn view(_: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
         iids!(FirstRect, SecondRect, InnerRect, HelloText);
+
+        let the_color = if state.hovered {
+            Color::rgb(0.4, 0.4, 0.8)
+        } else {
+            Color::rgb(0.3, 0.3, 0.7)
+        };
 
         Linear::new()
             .horizontal()
@@ -64,7 +75,7 @@ impl Component for DevApp {
                             .add(|| {
                                 Stack::new().set(iid!(), ui).add(|| {
                                     Rectangle::new()
-                                        .color(Color::rgb(0.3, 0.3, 0.7))
+                                        .color(the_color)
                                         .set(InnerRect, ui);
 
                                     Text::new()
@@ -82,7 +93,8 @@ impl Component for DevApp {
 fn hello_handler(event: TouchAreaEvent) -> Option<Msg> {
     use TouchAreaEvent::*;
     match event {
-        Entered => (None, println!("Click now!")).0,
+        Entered => Some(Msg::Active(true)),
+        Exited => Some(Msg::Active(false)),
         Activated(MouseButton::Left) => Some(Msg::SayHello),
         _ => None,
     }
