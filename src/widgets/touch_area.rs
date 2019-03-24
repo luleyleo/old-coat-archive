@@ -61,8 +61,8 @@ impl Component for TouchArea {
                 } else {
                     if state.inside {
                         state.inside = false;
+                        ui.emit(Exited);
                     }
-                    ui.emit(Exited);
                 }
             }
             _ => (),
