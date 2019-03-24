@@ -30,6 +30,12 @@ impl Component for Rectangle {
         *props
     }
 
+    fn derive_state(props: &Self::Props, state: &mut Self::State) {
+        if props != state {
+            *state = *props;
+        }
+    }
+
     fn view(_: &Self::Props, _: &Self::State, _: &mut UiView<Self>) {}
 
     fn layout(
