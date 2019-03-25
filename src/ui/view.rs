@@ -110,7 +110,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
         {
             let current_parent = self.parent.get();
-            self.parent.set(Some(self.cid));
+            self.parent.set(Some(cid));
 
             NewComp::derive_state(&props, state.downcast_mut().unwrap());
 

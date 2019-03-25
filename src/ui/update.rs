@@ -17,14 +17,18 @@ pub struct UiUpdate<'a> {
 
 impl<'a> UiUpdate<'a> {
     pub fn emit<E: 'static>(&mut self, event: E) {
-        if self.typeids[self.cid.get()].message == TypeId::of::<E>() {
+        if self.typeids[self.cid.get()].event == TypeId::of::<E>() {
             let events = &mut self.events[self.cid.get()];
             let events = events.downcast_mut::<Vec<E>>().unwrap();
             events.push(event);
             self.needs_update();
+        } else {
+            log::error!("Tried to emit a event of the wrong type");
+            // TODO: This should not be possible
         }
     }
 
+    /// TODO: Can this be removed?
     /// Sends the `msg` to the closest parent of the related `Component`
     pub fn bubble<Target: Component>(&mut self, msg: Target::Msg) {
         while let Some(parent) = self.parent[self.cid.get()] {
