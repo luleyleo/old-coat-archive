@@ -81,10 +81,11 @@ impl Component for Linear {
             Vertical => constraints.min_height(0.0),
         };
 
-        let mut length = 0.0;
+        let mut length = -state.spacing;
         let mut thickness = 0.0;
         if !is_limited {
             for child in children {
+                length += state.spacing;
                 let size = ui.size(*child, constraints);
                 let position = match state.direction {
                     Horizontal => Position::new(length, 0.0),
@@ -107,6 +108,7 @@ impl Component for Linear {
             };
 
             for child in children {
+                length += state.spacing;
                 let constraints = match state.direction {
                     Horizontal => constraints.max_width(max_length - length),
                     Vertical => constraints.max_height(max_length - length),
