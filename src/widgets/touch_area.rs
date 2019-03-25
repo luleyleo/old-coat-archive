@@ -57,13 +57,13 @@ impl Component for TouchArea {
                         state.inside = true;
                         ui.emit(Entered);
                     }
-                    ui.emit(msg);
                 } else {
                     if state.inside {
                         state.inside = false;
                         ui.emit(Exited);
                     }
                 }
+                ui.emit(msg);
             }
             _ => (),
         }
