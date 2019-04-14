@@ -49,7 +49,7 @@ impl Component for Constrained {
         *props
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State) {
+    fn derive_state(props: &Self::Props, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
         if *props != *state {
             *state = *props;
         }

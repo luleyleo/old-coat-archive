@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Color, Component, Properties, Renderer, Size, UiLayout, UiView,
+    Bounds, BoxConstraints, Cid, Color, Component, Properties, Renderer, Size, UiLayout, UiView, UiDerive,
 };
 
 pub struct Rectangle;
@@ -30,7 +30,7 @@ impl Component for Rectangle {
         *props
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State) {
+    fn derive_state(props: &Self::Props, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
         if props != state {
             *state = *props;
         }

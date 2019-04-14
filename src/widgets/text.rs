@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout, GlyphBounds, UiDerive,
 };
 
 pub struct Text<'a> {
@@ -45,11 +45,13 @@ pub struct TextState {
     font: Option<Font>,
 }
 
+pub type TextEvent = GlyphBounds;
+
 impl<'a> Component for Text<'a> {
     type Props = Text<'a>;
     type State = TextState;
     type Msg = ();
-    type Event = ();
+    type Event = TextEvent;
 
     fn init(props: &Self::Props) -> Self::State {
         TextState {
@@ -59,7 +61,7 @@ impl<'a> Component for Text<'a> {
         }
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State) {
+    fn derive_state(props: &Self::Props, state: &mut Self::State, ui: &mut UiDerive<Self>) {
         if props.content != state.content {
             state.content = props.content.to_string();
         }

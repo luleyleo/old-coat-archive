@@ -1,5 +1,5 @@
 use crate::component::ComponentPointerTrait;
-use crate::{Cid, Component, ContentBuilder, Iid, Properties, TypeIds, UiData};
+use crate::{Cid, Component, ContentBuilder, Iid, Properties, TypeIds, UiData, UiDerive, Renderer};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -14,16 +14,18 @@ pub struct UiView<'a, Comp: Component> {
     cid: Cid,
     /// Type of the component behind `cid`.
     marker: PhantomData<Comp>,
+    renderer: &'a mut Renderer,
 }
 
 impl<'a, Comp: Component> UiView<'a, Comp> {
-    pub(crate) fn new(data: &'a mut UiData, cid: Cid) -> Self {
+    pub(crate) fn new(data: &'a mut UiData, renderer: &'a mut Renderer, cid: Cid) -> Self {
         let parent = Rc::new(Cell::new(None));
         UiView {
             data,
             parent,
             cid,
             marker: PhantomData,
+            renderer
         }
     }
 
@@ -34,10 +36,11 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             parent: self.parent.clone(),
             cid: cid,
             marker: PhantomData,
+            renderer: self.renderer,
         }
     }
 
-    pub(crate) fn run(data: &'a mut UiData, app_id: Cid, props: Comp::Props) {
+    pub(crate) fn run(data: &'a mut UiData, renderer: &'a mut Renderer, app_id: Cid, props: Comp::Props) {
         log::trace!("Running `UiView`");
         if data.typeids[app_id.get()] == TypeIds::void() {
             log::trace!("Initializing Root Component with {:?}", app_id);
@@ -58,7 +61,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         let state = data.state[app_id.get()].take().unwrap();
 
         {
-            let mut ui = UiView::new(data, app_id);
+            let mut ui = UiView::new(data, renderer, app_id);
             Comp::view(&props, state.downcast_ref().unwrap(), &mut ui);
         }
 
@@ -112,7 +115,13 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             let current_parent = self.parent.get();
             self.parent.set(Some(cid));
 
-            NewComp::derive_state(&props, state.downcast_mut().unwrap());
+            {
+                let events = self.data.events[cid.get()].downcast_mut().unwrap();
+                let state = state.downcast_mut().unwrap();
+                let renderer = &mut self.renderer.font_manager;
+                let mut ui = UiDerive::new(events, renderer);
+                NewComp::derive_state(&props, state, &mut ui);
+            }
 
             let mut ui = self.another(cid);
             NewComp::view(&props, state.downcast_ref().unwrap(), &mut ui);
