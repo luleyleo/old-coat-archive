@@ -52,7 +52,7 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
+    fn update(msg: Self::Msg, mut state: Mut<Self::State>, _ui: &mut UiUpdate) {
         match msg {
             TextEditMsg::Selection { range } => {
                 state.cursor = range;
