@@ -1,9 +1,18 @@
-use crate::{Bounds, Position};
+use crate::{Bounds, Position, Size};
 
-// TODO: Get rid of this new-type?
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct TextLayout {
+    pub size: Size,
     pub glyphs: Vec<LayoutGlyph>,
+}
+
+impl Default for TextLayout {
+    fn default() -> Self {
+        TextLayout {
+            size: Size::zero(),
+            glyphs: Vec::default(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

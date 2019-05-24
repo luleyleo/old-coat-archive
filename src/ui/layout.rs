@@ -1,5 +1,5 @@
 use crate::{
-    BoxConstraints, Cid, ComponentPointer, Font, FontSize, Position, Renderer, Size, UiData,
+    BoxConstraints, Cid, ComponentPointer, Position, Size, UiData,
 };
 use std::any::Any;
 
@@ -11,12 +11,11 @@ pub struct UiLayout<'a> {
     position: &'a mut Vec<Position>,
     size: &'a mut Vec<Size>,
     state: &'a Vec<Option<Box<Any>>>,
-    renderer: &'a Renderer,
     current: Cid,
 }
 
 impl<'a> UiLayout<'a> {
-    pub(crate) fn run(data: &'a mut UiData, renderer: &'a Renderer, root: Cid, window_size: Size) {
+    pub(crate) fn run(data: &'a mut UiData, root: Cid, window_size: Size) {
         log::trace!("Running `UiLayout`");
 
         let mut ui = UiLayout {
@@ -27,7 +26,6 @@ impl<'a> UiLayout<'a> {
             position: &mut data.position,
             size: &mut data.size,
             state: &mut data.state,
-            renderer: renderer,
             current: Cid::invalid(),
         };
 
@@ -67,10 +65,5 @@ impl<'a> UiLayout<'a> {
 
     pub fn full_debug_name(&self) -> String {
         crate::full_debug_name_of(self.parent, self.name, self.current)
-    }
-
-    pub fn get_text_size(&self, text: &str, font: Option<&Font>, size: FontSize) -> Size {
-        let font = font.unwrap_or_else(|| self.renderer.font_manager.default_font());
-        self.renderer.font_manager.dimensions(text, font, size)
     }
 }

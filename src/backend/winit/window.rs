@@ -118,7 +118,7 @@ impl Window {
 
                     UiView::<Comp>::run(&mut data, &mut renderer, app_id, Comp::Props::default());
 
-                    UiLayout::run(&mut data, &mut renderer, app_id, self.size);
+                    UiLayout::run(&mut data, app_id, self.size);
 
                     UiRender::run(&data, &mut renderer, app_id);
                     renderer.render();

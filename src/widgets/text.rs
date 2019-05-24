@@ -98,7 +98,7 @@ impl<'a> Component for Text<'a> {
         }
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
-        let size = ui.get_text_size(&state.content, state.font.as_ref(), state.size);
+        let size = state.layout.size;
 
         size
     }
@@ -114,7 +114,7 @@ impl<'a> Component for Text<'a> {
 
         let fm = &mut renderer.font_manager;
         let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
-        let mut dim = fm.dimensions(&state.content, font, state.size);
+        let mut dim = state.layout.size;
 
         let wr_glyph = |g: &LayoutGlyph| GlyphInstance {
             index: g.index,
