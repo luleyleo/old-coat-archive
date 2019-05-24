@@ -1,5 +1,6 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout, TextLayout, UiDerive,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Properties, Renderer,
+    Size, TextLayout, UiDerive, UiLayout,
 };
 
 pub struct Text<'a> {
@@ -104,7 +105,8 @@ impl<'a> Component for Text<'a> {
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
         use webrender::api::{
-            ColorF, FontInstanceFlags, FontRenderMode, GlyphOptions, LayoutPrimitiveInfo, GlyphInstance, LayoutPoint,
+            ColorF, FontInstanceFlags, FontRenderMode, GlyphInstance, GlyphOptions, LayoutPoint,
+            LayoutPrimitiveInfo, SpecificDisplayItem, TextDisplayItem,
         };
 
         let default_font = renderer.font_manager.default_font().clone();
@@ -113,12 +115,13 @@ impl<'a> Component for Text<'a> {
         let fm = &mut renderer.font_manager;
         let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
         let mut dim = fm.dimensions(&state.content, font, state.size);
-        let glyphs: Vec<GlyphInstance> = state.layout.glyphs.iter().map(|g| GlyphInstance {
+
+        let wr_glyph = |g: &LayoutGlyph| GlyphInstance {
             index: g.index,
             point: LayoutPoint::from_untyped(&(bounds.origin + g.bounds.origin.to_vector())),
-        }).collect(); // TODO: Avoid allocation at all costs! (pass an iterator to webrender?)
+        };
+        let glyphs = state.layout.glyphs.iter().map(wr_glyph);
 
-        // Check weather the text is larger than the bounds
         if dim.width > bounds.size.width || dim.height > bounds.size.height {
             dim = bounds.size;
             // TODO: log with debug name of the component
@@ -135,8 +138,15 @@ impl<'a> Component for Text<'a> {
             flags: text_flags,
         };
 
-        renderer
-            .builder
-            .push_text(&info, &glyphs, font_key, ColorF::WHITE, Some(text_options));
+        let item = SpecificDisplayItem::Text(TextDisplayItem {
+            color: ColorF::WHITE,
+            font_key,
+            glyph_options: Some(text_options),
+        });
+
+        // TODO: Will no longer work with newer webrender
+        renderer.builder.push_item(&item, &info);
+        // TODO: This is DANGEROUS! It should check for webrenders MAX_TEXT_RUN_LENGTH
+        renderer.builder.push_iter(glyphs);
     }
 }
