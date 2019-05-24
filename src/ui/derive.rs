@@ -28,9 +28,4 @@ impl<'a, C: Component> UiDerive<'a, C> {
     ) -> TextLayout {
         self.fonts.layout(text, font, size)
     }
-
-    /// TODO: Find out why I put this here?
-    pub(crate) fn needs_update(&self) -> bool {
-        self.needs_update
-    }
 }
