@@ -40,7 +40,7 @@ use self::input::Input;
 pub use self::input::{Event, ModifiersState, MouseButton, TouchPhase};
 
 mod text;
-pub use self::text::GlyphBounds;
+pub use self::text::{TextLayout, LayoutGlyph};
 
 mod font;
 pub use self::font::{Font, FontSize, FontWeight};

@@ -1,4 +1,4 @@
-use crate::{Component, webrender::FontManager, Font, FontSize, Size, Position};
+use crate::{Component, webrender::FontManager, Font, FontSize, Size, Position, TextLayout};
 
 pub struct UiDerive<'a, C: Component> {
     events: &'a mut Vec<C::Event>,
@@ -20,6 +20,7 @@ impl<'a, C: Component> UiDerive<'a, C> {
         self.needs_update = true;
     }
 
+    /// TODO: Find out if this is needed
     pub fn dimensions(&self, text: &str, font: &Font, size: FontSize) -> Size {
         self.fonts.dimensions(text, font, size)
     }
@@ -27,13 +28,13 @@ impl<'a, C: Component> UiDerive<'a, C> {
     pub fn layout(
         &mut self,
         text: &str,
-        font: &Font,
+        font: Option<&Font>,
         size: FontSize,
-        position: Position,
-    ) -> &[webrender::api::GlyphInstance] {
-        self.fonts.layout(text, font, size, position)
+    ) -> TextLayout {
+        self.fonts.layout(text, font, size)
     }
-    
+
+    /// TODO: Find out why I put this here?
     pub(crate) fn needs_update(&self) -> bool {
         self.needs_update
     }

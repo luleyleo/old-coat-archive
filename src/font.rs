@@ -18,6 +18,7 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
+/// TODO: This should be replaced with a proper font resulution system
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Font {
     pub(crate) family: Cow<'static, str>,

@@ -85,4 +85,13 @@ impl<'a> Component for TextEdit<'a> {
             }
         }
     }
+
+    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
+        TouchArea::new()
+            .set(iid!(), ui);
+    }
+
+    fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
+        // Render some text
+    }
 }

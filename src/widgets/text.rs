@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout, GlyphBounds, UiDerive,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout, TextLayout, UiDerive,
 };
 
 pub struct Text<'a> {
@@ -43,9 +43,10 @@ pub struct TextState {
     content: String,
     size: FontSize,
     font: Option<Font>,
+    layout: TextLayout,
 }
 
-pub type TextEvent = GlyphBounds;
+pub type TextEvent = TextLayout;
 
 impl<'a> Component for Text<'a> {
     type Props = Text<'a>;
@@ -55,21 +56,29 @@ impl<'a> Component for Text<'a> {
 
     fn init(props: &Self::Props) -> Self::State {
         TextState {
-            content: props.content.to_string(),
+            content: String::default(),
             size: props.size,
             font: props.font.clone(),
+            layout: TextLayout::default(),
         }
     }
 
     fn derive_state(props: &Self::Props, state: &mut Self::State, ui: &mut UiDerive<Self>) {
+        let mut changed = false;
         if props.content != state.content {
-            state.content = props.content.to_string();
+            state.content.replace_range(.., props.content);
+            changed = true;
         }
         if props.size != state.size {
             state.size = props.size;
+            changed = true;
         }
         if props.font != state.font {
             state.font = props.font.clone();
+            changed = true;
+        }
+        if changed {
+            state.layout = ui.layout(props.content, props.font.as_ref(), props.size);
         }
     }
 
@@ -95,7 +104,7 @@ impl<'a> Component for Text<'a> {
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
         use webrender::api::{
-            ColorF, FontInstanceFlags, FontRenderMode, GlyphOptions, LayoutPrimitiveInfo,
+            ColorF, FontInstanceFlags, FontRenderMode, GlyphOptions, LayoutPrimitiveInfo, GlyphInstance, LayoutPoint,
         };
 
         let default_font = renderer.font_manager.default_font().clone();
@@ -104,7 +113,10 @@ impl<'a> Component for Text<'a> {
         let fm = &mut renderer.font_manager;
         let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
         let mut dim = fm.dimensions(&state.content, font, state.size);
-        let glyphs = fm.layout(&state.content, font, state.size, bounds.origin);
+        let glyphs: Vec<GlyphInstance> = state.layout.glyphs.iter().map(|g| GlyphInstance {
+            index: g.index,
+            point: LayoutPoint::from_untyped(&(bounds.origin + g.bounds.origin.to_vector())),
+        }).collect(); // TODO: Avoid allocation at all costs! (pass an iterator to webrender?)
 
         // Check weather the text is larger than the bounds
         if dim.width > bounds.size.width || dim.height > bounds.size.height {
@@ -125,6 +137,6 @@ impl<'a> Component for Text<'a> {
 
         renderer
             .builder
-            .push_text(&info, glyphs, font_key, ColorF::WHITE, Some(text_options));
+            .push_text(&info, &glyphs, font_key, ColorF::WHITE, Some(text_options));
     }
 }
