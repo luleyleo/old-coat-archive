@@ -15,11 +15,25 @@ pub struct TextEditState {
 
 pub enum TextEditEvent {
     Insertion {
-        index: usize,
+        range: Range,
         text: String,
     },
     Deletion {
         range: Range,
+    }
+}
+
+impl TextEditEvent {
+    pub fn apply(self, target: &mut String) {
+        use TextEditEvent::*;
+        match self {
+            Insertion { range, text } => {
+                target.replace_range(range, &text);
+            }
+            Deletion { range } => {
+                target.replace_range(range, "");
+            }
+        }
     }
 }
 
@@ -52,17 +66,32 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn update(msg: Self::Msg, mut state: Mut<Self::State>, _ui: &mut UiUpdate) {
+    fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
         match msg {
             TextEditMsg::Selection { range } => {
                 state.cursor = range;
             }
             TextEditMsg::Insertion { text } => {
-                state.text = text;
+                let cursor = state.cursor.clone();
+                state.text.replace_range(cursor.clone(), &text);
+                ui.emit(TextEditEvent::Insertion {
+                    range: cursor,
+                    text: text,
+                });
             }
             TextEditMsg::Deletion { range } => {
-                state.text.replace_range(range, "");
+                state.text.replace_range(range.clone(), "");
+                ui.emit(TextEditEvent::Deletion { range });
             }
         }
+    }
+
+    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
+        TouchArea::new()
+            .set(iid!(), ui);
+    }
+
+    fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
+        // Render some text
     }
 }

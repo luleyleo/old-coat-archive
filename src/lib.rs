@@ -18,7 +18,7 @@ pub use self::ids::{Cid, Iid};
 
 pub mod ui;
 use self::ui::{full_debug_name_of, TypeIds, UiData, UiInputBase, UiRender};
-pub use self::ui::{UiInput, UiLayout, UiUpdate, UiView};
+pub use self::ui::{UiInput, UiLayout, UiUpdate, UiView, UiDerive};
 
 mod mutable;
 pub use self::mutable::Mut;
@@ -38,6 +38,9 @@ pub use self::color::Color;
 mod input;
 use self::input::Input;
 pub use self::input::{Event, ModifiersState, MouseButton, TouchPhase};
+
+mod text;
+pub use self::text::{TextLayout, LayoutGlyph};
 
 mod font;
 pub use self::font::{Font, FontSize, FontWeight};

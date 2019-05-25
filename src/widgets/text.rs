@@ -1,5 +1,6 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Properties, Renderer, Size, UiLayout,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Properties, Renderer,
+    Size, TextLayout, UiDerive, UiLayout,
 };
 
 pub struct Text<'a> {
@@ -43,31 +44,42 @@ pub struct TextState {
     content: String,
     size: FontSize,
     font: Option<Font>,
+    layout: TextLayout,
 }
+
+pub type TextEvent = TextLayout;
 
 impl<'a> Component for Text<'a> {
     type Props = Text<'a>;
     type State = TextState;
     type Msg = ();
-    type Event = ();
+    type Event = TextEvent;
 
     fn init(props: &Self::Props) -> Self::State {
         TextState {
-            content: props.content.to_string(),
+            content: String::default(),
             size: props.size,
             font: props.font.clone(),
+            layout: TextLayout::default(),
         }
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State) {
+    fn derive_state(props: &Self::Props, state: &mut Self::State, ui: &mut UiDerive<Self>) {
+        let mut changed = false;
         if props.content != state.content {
-            state.content = props.content.to_string();
+            state.content.replace_range(.., props.content);
+            changed = true;
         }
         if props.size != state.size {
             state.size = props.size;
+            changed = true;
         }
         if props.font != state.font {
             state.font = props.font.clone();
+            changed = true;
+        }
+        if changed {
+            state.layout = ui.layout(props.content, props.font.as_ref(), props.size);
         }
     }
 
@@ -86,14 +98,15 @@ impl<'a> Component for Text<'a> {
         }
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
-        let size = ui.get_text_size(&state.content, state.font.as_ref(), state.size);
+        let size = state.layout.size;
 
         size
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
         use webrender::api::{
-            ColorF, FontInstanceFlags, FontRenderMode, GlyphOptions, LayoutPrimitiveInfo,
+            ColorF, FontInstanceFlags, FontRenderMode, GlyphInstance, GlyphOptions, LayoutPoint,
+            LayoutPrimitiveInfo, SpecificDisplayItem, TextDisplayItem,
         };
 
         let default_font = renderer.font_manager.default_font().clone();
@@ -101,10 +114,14 @@ impl<'a> Component for Text<'a> {
 
         let fm = &mut renderer.font_manager;
         let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
-        let mut dim = fm.dimensions(&state.content, font, state.size);
-        let glyphs = fm.layout(&state.content, font, state.size, bounds.origin);
+        let mut dim = state.layout.size;
 
-        // Check weather the text is larger than the bounds
+        let wr_glyph = |g: &LayoutGlyph| GlyphInstance {
+            index: g.index,
+            point: LayoutPoint::from_untyped(&(bounds.origin + g.bounds.origin.to_vector())),
+        };
+        let glyphs = state.layout.glyphs.iter().map(wr_glyph);
+
         if dim.width > bounds.size.width || dim.height > bounds.size.height {
             dim = bounds.size;
             // TODO: log with debug name of the component
@@ -121,8 +138,15 @@ impl<'a> Component for Text<'a> {
             flags: text_flags,
         };
 
-        renderer
-            .builder
-            .push_text(&info, glyphs, font_key, ColorF::WHITE, Some(text_options));
+        let item = SpecificDisplayItem::Text(TextDisplayItem {
+            color: ColorF::WHITE,
+            font_key,
+            glyph_options: Some(text_options),
+        });
+
+        // TODO: Will no longer work with newer webrender
+        renderer.builder.push_item(&item, &info);
+        // TODO: This is DANGEROUS! It should check for webrenders MAX_TEXT_RUN_LENGTH
+        renderer.builder.push_iter(glyphs);
     }
 }

@@ -3,7 +3,7 @@
 //!
 //! Independent of the back end it should export `Renderer`
 
-mod webrender;
+pub mod webrender;
 pub mod winit;
 
 /// Contains all data and functions required to render something with the chosen back end

@@ -1,8 +1,8 @@
 use crate::backend::winit::DEFAULT_FONT_NAME;
-use crate::{Font, FontSize, Position, Size};
+use crate::{Font, FontSize, Position, Size, Bounds, TextLayout, LayoutGlyph};
 use fnv::FnvHashMap as HashMap;
 use webrender::api::{
-    AddFont, AddFontInstance, FontInstanceKey, FontKey, GlyphInstance, LayoutPoint, RenderApi,
+    AddFont, AddFontInstance, FontInstanceKey, FontKey,  RenderApi,
     ResourceUpdate,
 };
 
@@ -14,7 +14,6 @@ pub(crate) struct LoadedFont {
 
 pub struct FontManager {
     fonts: HashMap<Font, LoadedFont>,
-    glyph_cash: Vec<GlyphInstance>,
     default_font: Font,
 }
 
@@ -22,7 +21,6 @@ impl Default for FontManager {
     fn default() -> Self {
         FontManager {
             fonts: HashMap::default(),
-            glyph_cash: Vec::default(),
             default_font: Font::from_family(DEFAULT_FONT_NAME),
         }
     }
@@ -96,33 +94,12 @@ impl FontManager {
         }
     }
 
-    pub fn dimensions(&self, text: &str, font: &Font, size: FontSize) -> Size {
-        let mut dimensions = Size::zero();
-        let size = size as f32;
-        dimensions.height = size;
-        let scale = rusttype::Scale {
-            // TODO: Fix glyph overlapping without additional x-scaling
-            // The current value roughly fits OpenSans
-            x: size * 1.2,
-            y: size,
-        };
-        let point = rusttype::Point { x: 0.0, y: 0.0 };
-        let font = &self.fonts[font].rusttype;
-        font.layout(text, scale, point).last().map(|glyph| {
-            let pos = glyph.position();
-            let hmet = glyph.unpositioned().h_metrics();
-            dimensions.width = pos.x + hmet.advance_width;
-        });
-        return dimensions;
-    }
-
     pub fn layout<'a>(
         &mut self,
         text: &str,
-        font: &Font,
+        font: Option<&Font>,
         size: FontSize,
-        position: Position,
-    ) -> &[webrender::api::GlyphInstance] {
+    ) -> TextLayout {
         let size = size as f32;
         let scale = rusttype::Scale {
             // TODO: Fix glyph overlapping without additional x-scaling
@@ -131,18 +108,26 @@ impl FontManager {
             y: size,
         };
         let point = rusttype::Point {
-            x: position.x,
-            y: position.y,
+            x: 0.0,
+            y: 0.0,
         };
-        let font = &self.fonts[font].rusttype;
-        let glyphs = font.layout(text, scale, point).map(|glyph| {
+        let font = &self.fonts[font.unwrap_or(self.default_font())].rusttype;
+        let glyphs: Vec<LayoutGlyph> = font.layout(text, scale, point).map(|glyph| {
             let index = glyph.id().0;
             let pos = glyph.position();
-            let point = LayoutPoint::new(pos.x, pos.y + size);
-            GlyphInstance { index, point }
-        });
-        self.glyph_cash.clear();
-        self.glyph_cash.extend(glyphs);
-        return self.glyph_cash.as_slice();
+            let dim = glyph.scale();
+            let point = Position::new(pos.x, pos.y + size);
+            let size = Size::new(dim.x, dim.y);
+            LayoutGlyph {
+                index,
+                bounds: Bounds::new(point, size),
+            }
+        }).collect();
+
+        let size = glyphs.last()
+            .map(|glyph| Size::new(glyph.bounds.max_x(), glyph.bounds.max_y()))
+            .unwrap_or(Size::zero());
+
+        TextLayout { size, glyphs }
     }
 }

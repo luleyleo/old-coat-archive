@@ -4,6 +4,9 @@ pub(crate) use self::data::{full_debug_name_of, TypeIds, UiData};
 mod view;
 pub use self::view::UiView;
 
+mod derive;
+pub use self::derive::UiDerive;
+
 mod update;
 pub use self::update::UiUpdate;
 

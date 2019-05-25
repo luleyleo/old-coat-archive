@@ -1,6 +1,6 @@
 use crate::{
     Bounds, BoxConstraints, Cid, ContentBuilder, Iid, Mut, Renderer, Size, UiInput, UiInputBase,
-    UiLayout, UiUpdate, UiView,
+    UiLayout, UiUpdate, UiView, UiDerive,
 };
 use std::any::Any;
 
@@ -58,7 +58,7 @@ pub trait Component: Sized {
     fn input(input: &mut UiInput<Self>) {}
 
     #[allow(unused_variables)]
-    fn derive_state(props: &Self::Props, state: &mut Self::State) {}
+    fn derive_state(props: &Self::Props, state: &mut Self::State, ui: &mut UiDerive<Self>) {}
 
     #[allow(unused_variables)]
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}
