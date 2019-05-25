@@ -64,6 +64,7 @@ impl Component for TouchArea {
     }
 
     fn input(ui: &mut UiInput<Self>) {
+        // TODO: This should also emit an `Exited` event for already handled events
         for (event, handled) in ui.input.iter_new_events() {
             match event {
                 Event::MouseInput {
