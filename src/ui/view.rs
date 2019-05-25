@@ -1,5 +1,5 @@
 use crate::component::ComponentPointerTrait;
-use crate::{Cid, Component, ContentBuilder, Iid, Properties, TypeIds, UiData, UiDerive, Renderer};
+use crate::{Cid, Component, ContentBuilder, Iid, TypeIds, UiData, UiDerive, Renderer};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -40,7 +40,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         }
     }
 
-    pub(crate) fn run(data: &'a mut UiData, renderer: &'a mut Renderer, app_id: Cid, props: Comp::Props) {
+    pub(crate) fn run(data: &'a mut UiData, renderer: &'a mut Renderer, app_id: Cid, props: Comp) {
         log::trace!("Running `UiView`");
         if data.typeids[app_id.get()] == TypeIds::void() {
             log::trace!("Initializing Root Component with {:?}", app_id);
@@ -74,15 +74,11 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
     /// Adds a new component to the tree.
     /// Instead of this `Properties::set` can be used for a nicer builder pattern.
-    pub fn add<NewComp, NewCompProps>(
+    pub fn add<NewComp: Component>(
         &mut self,
-        props: NewCompProps,
+        props: NewComp,
         iid: Iid,
-    ) -> ContentBuilder<NewComp, Comp>
-    where
-        NewComp: Component<Props = NewCompProps>,
-        NewCompProps: Properties<Component = NewComp>,
-    {
+    ) -> ContentBuilder<NewComp, Comp> {
         let tid = iid.id;
         let name = iid.name.unwrap_or("Unnamed");
         let cid = self.data.creations[self.cid.get()]

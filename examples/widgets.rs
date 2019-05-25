@@ -11,18 +11,13 @@ fn main() {
 //     App Component      //
 //========================//
 
+#[derive(Default)]
 struct App;
 
 #[derive(PartialEq, Eq)]
 enum ActiveButton {
     First,
     Second,
-}
-
-#[derive(Default)]
-struct Props;
-impl Properties for Props {
-    type Component = App;
 }
 
 struct State {
@@ -34,12 +29,11 @@ enum Msg {
 }
 
 impl Component for App {
-    type Props = Props;
     type State = State;
     type Msg = Msg;
     type Event = AppEvent;
 
-    fn init(_props: &Self::Props) -> Self::State {
+    fn init(_props: &Self) -> Self::State {
         State {
             active: ActiveButton::First,
         }
@@ -53,7 +47,7 @@ impl Component for App {
         }
     }
 
-    fn view(_props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
+    fn view(_props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         Padding::new().all(10.0).set(iid!(), ui).add(|| {
             Linear::new()
                 .vertical()
@@ -82,17 +76,12 @@ impl Component for App {
 //    Button Component    //
 //========================//
 
-type Button<'a> = ButtonProps<'a>;
-
 #[derive(Default)]
-struct ButtonProps<'a> {
+struct Button<'a> {
     label: &'a str,
     enabled: bool,
 }
-impl<'a> Properties for ButtonProps<'a> {
-    type Component = Button<'a>;
-}
-impl<'a> ButtonProps<'a> {
+impl<'a> Button<'a> {
     pub fn label(mut self, label: &'a str) -> Self {
         self.label = label;
         self
@@ -120,12 +109,11 @@ enum ButtonEvent {
 }
 
 impl<'a> Component for Button<'a> {
-    type Props = ButtonProps<'a>;
     type State = ButtonState;
     type Msg = ButtonMsg;
     type Event = ButtonEvent;
 
-    fn init(_props: &Self::Props) -> Self::State {
+    fn init(_props: &Self) -> Self::State {
         ButtonState {
             hovered: false,
             pressed: false,
@@ -150,7 +138,7 @@ impl<'a> Component for Button<'a> {
         }
     }
 
-    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
+    fn view(props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         let background = match 0 {
             _ if !props.enabled => Color::rgb(0.3, 0.3, 0.3),
             _ if state.pressed => Color::rgb(0.2, 0.2, 0.6),

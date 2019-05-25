@@ -1,21 +1,15 @@
 use crate::*;
 
 /// A wrapper Component which provides functions to further constrain a Components size
-pub struct Constrained;
-
 #[derive(Default, Clone, Copy, PartialEq)]
-pub struct Props {
+pub struct Constrained {
     min_width: Option<Scalar>,
     min_height: Option<Scalar>,
     max_width: Option<Scalar>,
     max_height: Option<Scalar>,
 }
 
-impl Properties for Props {
-    type Component = Constrained;
-}
-
-impl Props {
+impl Constrained {
     pub fn min_width(mut self, min_width: Scalar) -> Self {
         self.min_width = Some(min_width);
         self
@@ -37,19 +31,18 @@ impl Props {
     }
 }
 
-pub type State = Props;
+pub type State = Constrained;
 
 impl Component for Constrained {
-    type Props = Props;
     type State = State;
     type Msg = ();
     type Event = ();
 
-    fn init(props: &Self::Props) -> Self::State {
+    fn init(props: &Self) -> Self::State {
         *props
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
         if *props != *state {
             *state = *props;
         }

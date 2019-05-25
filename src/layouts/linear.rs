@@ -1,7 +1,5 @@
 use crate::*;
 
-pub struct Linear;
-
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
     Horizontal,
@@ -9,25 +7,21 @@ pub enum Direction {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-pub struct Props {
+pub struct Linear {
     direction: Direction,
     spacing: Scalar,
 }
 
-impl Properties for Props {
-    type Component = Linear;
-}
-
-impl Default for Props {
+impl Default for Linear {
     fn default() -> Self {
-        Props {
+        Linear {
             direction: Direction::Horizontal,
             spacing: 0.0,
         }
     }
 }
 
-impl Props {
+impl Linear {
     pub fn horizontal(mut self) -> Self {
         self.direction = Direction::Horizontal;
         self
@@ -44,21 +38,20 @@ impl Props {
     }
 }
 
-pub type State = Props;
+pub type State = Linear;
 pub type Msg = ();
 pub type Event = ();
 
 impl Component for Linear {
-    type Props = Props;
     type State = State;
     type Msg = Msg;
     type Event = Event;
 
-    fn init(props: &Props) -> State {
+    fn init(props: &Self) -> State {
         *props
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
         if *props != *state {
             *state = *props;
         }

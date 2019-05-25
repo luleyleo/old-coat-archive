@@ -1,19 +1,13 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Color, Component, Properties, Renderer, Size, UiLayout, UiView, UiDerive,
+    Bounds, BoxConstraints, Cid, Color, Component, Renderer, Size, UiLayout, UiView, UiDerive,
 };
 
-pub struct Rectangle;
-
 #[derive(Default, Clone, Copy, PartialEq)]
-pub struct Props {
+pub struct Rectangle {
     pub(crate) color: Color,
 }
 
-impl Properties for Props {
-    type Component = Rectangle;
-}
-
-impl Props {
+impl Rectangle {
     pub fn color(mut self, color: Color) -> Self {
         self.color = color;
         self
@@ -21,22 +15,21 @@ impl Props {
 }
 
 impl Component for Rectangle {
-    type Props = Props;
-    type State = Props;
+    type State = Rectangle;
     type Msg = ();
     type Event = ();
 
-    fn init(props: &Self::Props) -> Self::State {
+    fn init(props: &Self) -> Self::State {
         *props
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
         if props != state {
             *state = *props;
         }
     }
 
-    fn view(_: &Self::Props, _: &Self::State, _: &mut UiView<Self>) {}
+    fn view(_: &Self, _: &Self::State, _: &mut UiView<Self>) {}
 
     fn layout(
         _state: &Self::State,

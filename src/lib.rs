@@ -8,7 +8,7 @@ pub use self::builder::ContentBuilder;
 
 mod component;
 use self::component::ComponentPointer;
-pub use self::component::{Component, Properties};
+pub use self::component::Component;
 
 mod constraints;
 pub use self::constraints::BoxConstraints;

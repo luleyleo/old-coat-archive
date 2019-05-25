@@ -1,20 +1,14 @@
 use crate::*;
 
-pub struct Padding;
-
 #[derive(Default, Clone, Copy, Debug)]
-pub struct PaddingProps {
+pub struct Padding {
     top: Scalar,
     right: Scalar,
     bottom: Scalar,
     left: Scalar,
 }
 
-impl Properties for PaddingProps {
-    type Component = Padding;
-}
-
-impl PaddingProps {
+impl Padding {
     pub fn all(self, value: Scalar) -> Self {
         self.top(value).right(value).bottom(value).left(value)
     }
@@ -41,12 +35,11 @@ impl PaddingProps {
 }
 
 impl Component for Padding {
-    type Props = PaddingProps;
-    type State = Self::Props;
+    type State = Self;
     type Msg = ();
     type Event = ();
 
-    fn init(props: &Self::Props) -> Self::State {
+    fn init(props: &Self) -> Self::State {
         *props
     }
 

@@ -3,13 +3,8 @@
 use coat::backend::winit::{AppEvent, Window};
 use coat::*;
 
-struct DevApp;
-
 #[derive(Default)]
-struct Props;
-impl Properties for Props {
-    type Component = DevApp;
-}
+struct DevApp;
 
 struct State {
     hellos: usize,
@@ -22,12 +17,11 @@ enum Msg {
 }
 
 impl Component for DevApp {
-    type Props = Props;
     type State = State;
     type Msg = Msg;
     type Event = AppEvent;
 
-    fn init(_props: &Self::Props) -> Self::State {
+    fn init(_props: &Self) -> Self::State {
         Self::State { hellos: 0, hovered: false }
     }
 
@@ -43,7 +37,7 @@ impl Component for DevApp {
         }
     }
 
-    fn view(_: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
+    fn view(_: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         iids!(FirstRect, SecondRect, InnerRect, HelloText);
 
         let the_color = if state.hovered {

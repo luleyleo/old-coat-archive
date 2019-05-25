@@ -1,21 +1,14 @@
 use crate::*;
 
+#[derive(Default)]
 pub struct Stack;
 
-#[derive(Default)]
-pub struct StackProps;
-
-impl Properties for StackProps {
-    type Component = Stack;
-}
-
 impl Component for Stack {
-    type Props = StackProps;
     type State = ();
     type Msg = ();
     type Event = ();
 
-    fn init(_props: &Self::Props) -> Self::State {}
+    fn init(_props: &Self) -> Self::State {}
 
     fn layout(
         _state: &Self::State,

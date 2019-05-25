@@ -4,36 +4,30 @@ use crate::{
 };
 use std::any::Any;
 
-pub trait Properties: Default + Sized {
-    type Component: Component<Props = Self>;
-
-    /// Adds the resulting component to the tree
-    fn set<Ancestor: Component>(
-        self,
-        id: Iid,
-        ui: &mut UiView<Ancestor>,
-    ) -> ContentBuilder<Self::Component, Ancestor> {
-        ui.add(self, id)
-    }
-}
-
-pub trait Component: Sized {
-    type Props: Properties + Sized;
+pub trait Component: Default + Sized {
     type State: Sized + 'static;
     type Msg: Sized + 'static;
     type Event: Sized + 'static;
 
-    fn new() -> Self::Props {
-        Self::Props::default()
+    fn new() -> Self {
+        Self::default()
     }
 
-    fn init(props: &Self::Props) -> Self::State;
+    fn set<Ancestor: Component>(
+        self,
+        id: Iid,
+        ui: &mut UiView<Ancestor>,
+    ) -> ContentBuilder<Self, Ancestor> {
+        ui.add(self, id)
+    }
+
+    fn init(props: &Self) -> Self::State;
 
     #[allow(unused_variables)]
     fn update(msg: Self::Msg, state: Mut<Self::State>, ui: &mut UiUpdate) {}
 
     #[allow(unused_variables)]
-    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {}
+    fn view(props: &Self, state: &Self::State, ui: &mut UiView<Self>) {}
 
     #[allow(unused_variables)]
     fn layout(
@@ -58,7 +52,7 @@ pub trait Component: Sized {
     fn input(input: &mut UiInput<Self>) {}
 
     #[allow(unused_variables)]
-    fn derive_state(props: &Self::Props, state: &mut Self::State, ui: &mut UiDerive<Self>) {}
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {}
 
     #[allow(unused_variables)]
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}

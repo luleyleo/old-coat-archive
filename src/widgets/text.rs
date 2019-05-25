@@ -1,5 +1,5 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Properties, Renderer,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Renderer,
     Size, TextLayout, UiDerive, UiLayout,
 };
 
@@ -36,10 +36,6 @@ impl<'a> Text<'a> {
     }
 }
 
-impl<'a> Properties for Text<'a> {
-    type Component = Self;
-}
-
 pub struct TextState {
     content: String,
     size: FontSize,
@@ -50,12 +46,11 @@ pub struct TextState {
 pub type TextEvent = TextLayout;
 
 impl<'a> Component for Text<'a> {
-    type Props = Text<'a>;
     type State = TextState;
     type Msg = ();
     type Event = TextEvent;
 
-    fn init(props: &Self::Props) -> Self::State {
+    fn init(props: &Self) -> Self::State {
         TextState {
             content: String::default(),
             size: props.size,
@@ -64,7 +59,7 @@ impl<'a> Component for Text<'a> {
         }
     }
 
-    fn derive_state(props: &Self::Props, state: &mut Self::State, ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {
         let mut changed = false;
         if props.content != state.content {
             state.content.replace_range(.., props.content);
