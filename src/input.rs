@@ -18,11 +18,21 @@ impl Input {
         self.events.push((event, false));
     }
 
-    pub fn iter_new_events(&mut self) -> impl Iterator<Item = (&Event, &mut bool)> {
+    /// Only iterates events that have not been handled yet.
+    /// If the `&mut bool` gets set to `true` the event is considered handled.
+    pub fn iter_fresh_events(&mut self) -> impl Iterator<Item = (&Event, &mut bool)> {
         self.events
             .iter_mut()
             .filter(|ev| ev.1 == false)
             .map(|ev| (&ev.0, &mut ev.1))
+    }
+
+    /// Only iterates events that have been handled already.
+    pub fn iter_spoiled_events(&mut self) -> impl Iterator<Item = &Event> {
+        self.events
+            .iter_mut()
+            .filter(|ev| ev.1 == true)
+            .map(|ev| &ev.0)
     }
 
     pub fn iter_all_events(&mut self) -> impl Iterator<Item = (&Event, bool)> {

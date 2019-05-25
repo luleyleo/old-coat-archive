@@ -42,4 +42,5 @@ pub enum Event {
         position: Position,
         index: u64,
     },
+    SomeFutureEvent,
 }

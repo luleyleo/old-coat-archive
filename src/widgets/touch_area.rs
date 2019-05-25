@@ -64,8 +64,20 @@ impl Component for TouchArea {
     }
 
     fn input(ui: &mut UiInput<Self>) {
-        // TODO: This should also emit an `Exited` event for already handled events
-        for (event, handled) in ui.input.iter_new_events() {
+        for event in ui.input.iter_spoiled_events() {
+            match event {
+                Event::MouseInput {..}
+                | Event::CursorMoved {..}
+                | Event::Touch {..} => {
+                    // Something else has been interacted with :(
+                    // This can happen (theoretically) when another
+                    // `TouchArea` appears above this one.
+                    ui.messages.send(TouchAreaEvent::Exited);
+                }
+                _ => ()
+            }
+        }
+        for (event, handled) in ui.input.iter_fresh_events() {
             match event {
                 Event::MouseInput {
                     position,
@@ -75,21 +87,22 @@ impl Component for TouchArea {
                     if ui.bounds.contains(position) {
                         if *pressed {
                             ui.messages.send(TouchAreaEvent::Pressed(*button));
-                            *handled = true;
                         } else {
                             ui.messages.send(TouchAreaEvent::Released(*button));
-                            *handled = true;
                         }
+                        *handled = true;
                     }
                 }
                 Event::CursorMoved { position } => {
                     let position = if ui.bounds.contains(position) {
+                        *handled = true;
                         Some(*position)
                     } else {
                         None
                     };
                     ui.messages.send(TouchAreaEvent::Moved(position));
                 }
+                // TODO: Implement `Event::Touch` handling
                 _ => (),
             }
         }
