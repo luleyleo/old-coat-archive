@@ -83,13 +83,13 @@ impl std::hash::Hash for Iid {
 #[macro_export]
 macro_rules! iid {
     () => {
-        Iid::new(None, {
+        $crate::Iid::new(None, {
             struct UnnamedIdentifier;
             std::any::TypeId::of::<UnnamedIdentifier>()
         })
     };
     ($id:ident) => {
-        Iid::new(Some(stringify!($id)), {
+        $crate::Iid::new(Some(stringify!($id)), {
             struct $id;
             std::any::TypeId::of::<$id>()
         })
@@ -108,12 +108,12 @@ macro_rules! iid {
 #[macro_export]
 macro_rules! iids {
     ($($id:ident),*,) => {
-        ids!($($id),*);
+        $crate::ids!($($id),*);
     };
     ($($id:ident),*) => {
         $(
             #[allow(non_snake_case)]
-            let $id: Iid = iid!($id);
+            let $id: $crate::Iid = $crate::iid!($id);
         )*
     };
 }
