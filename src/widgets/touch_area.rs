@@ -76,7 +76,7 @@ impl Component for TouchArea {
                         ui.messages.send(TouchAreaEvent::Exited);
                     }
                 }
-                _ => ()
+                _ => (),
             }
         }
         for (event, handled) in ui.input.iter_fresh_events() {

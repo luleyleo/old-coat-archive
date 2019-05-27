@@ -1,6 +1,6 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Renderer,
-    Size, TextLayout, UiDerive, UiLayout,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Renderer, Size,
+    TextLayout, UiDerive, UiLayout,
 };
 
 pub struct Text<'a> {
@@ -149,4 +149,3 @@ pub fn render_text(state: &TextState, bounds: Bounds, renderer: &mut Renderer) {
     // TODO: This is DANGEROUS! It should check for webrenders MAX_TEXT_RUN_LENGTH
     renderer.builder.push_iter(glyphs);
 }
-

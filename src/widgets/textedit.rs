@@ -1,5 +1,5 @@
+use crate::widgets::text::{render_text, TextState};
 use crate::*;
-use crate::widgets::text::{TextState, render_text};
 
 pub struct TextEdit<'a> {
     content: &'a str,

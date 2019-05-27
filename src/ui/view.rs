@@ -1,5 +1,5 @@
 use crate::component::ComponentPointerTrait;
-use crate::{Cid, Component, ContentBuilder, Iid, TypeIds, UiData, UiDerive, Renderer};
+use crate::{Cid, Component, ContentBuilder, Iid, Renderer, TypeIds, UiData, UiDerive};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -25,7 +25,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             parent,
             cid,
             marker: PhantomData,
-            renderer
+            renderer,
         }
     }
 

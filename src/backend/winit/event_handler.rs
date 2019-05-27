@@ -1,4 +1,4 @@
-use crate::{Event, ButtonState, MouseButton, Position, Scalar, VirtualKeyCode};
+use crate::{ButtonState, Event, MouseButton, Position, Scalar, VirtualKeyCode};
 
 pub struct EventHandler {
     cursor: Position,
@@ -40,7 +40,7 @@ impl EventHandler {
                         state,
                         keycode,
                         modifiers,
-                    })
+                    });
                 }
                 winit::WindowEvent::ReceivedCharacter(c) => {
                     return Some(Event::CharacterInput(c));

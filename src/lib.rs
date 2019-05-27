@@ -7,8 +7,8 @@ mod builder;
 pub use self::builder::ContentBuilder;
 
 mod component;
-use self::component::ComponentPointer;
 pub use self::component::Component;
+use self::component::ComponentPointer;
 
 mod constraints;
 pub use self::constraints::BoxConstraints;
@@ -18,7 +18,7 @@ pub use self::ids::{Cid, Iid};
 
 pub mod ui;
 use self::ui::{full_debug_name_of, TypeIds, UiData, UiInputBase, UiRender};
-pub use self::ui::{UiInput, UiLayout, UiUpdate, UiView, UiDerive};
+pub use self::ui::{UiDerive, UiInput, UiLayout, UiUpdate, UiView};
 
 mod mutable;
 pub use self::mutable::Mut;
@@ -37,10 +37,12 @@ pub use self::color::Color;
 
 mod input;
 use self::input::Input;
-pub use self::input::{Event, ButtonState, ModifiersState, MouseButton, TouchPhase, VirtualKeyCode};
+pub use self::input::{
+    ButtonState, Event, ModifiersState, MouseButton, TouchPhase, VirtualKeyCode,
+};
 
 mod text;
-pub use self::text::{TextLayout, LayoutGlyph};
+pub use self::text::{LayoutGlyph, TextLayout};
 
 mod font;
 pub use self::font::{Font, FontSize, FontWeight};

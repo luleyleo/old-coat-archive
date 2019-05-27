@@ -1,9 +1,8 @@
 use crate::backend::winit::DEFAULT_FONT_NAME;
-use crate::{Font, FontSize, Position, Size, Bounds, TextLayout, LayoutGlyph};
+use crate::{Bounds, Font, FontSize, LayoutGlyph, Position, Size, TextLayout};
 use fnv::FnvHashMap as HashMap;
 use webrender::api::{
-    AddFont, AddFontInstance, FontInstanceKey, FontKey,  RenderApi,
-    ResourceUpdate,
+    AddFont, AddFontInstance, FontInstanceKey, FontKey, RenderApi, ResourceUpdate,
 };
 
 pub(crate) struct LoadedFont {
@@ -94,12 +93,7 @@ impl FontManager {
         }
     }
 
-    pub fn layout<'a>(
-        &mut self,
-        text: &str,
-        font: Option<&Font>,
-        size: FontSize,
-    ) -> TextLayout {
+    pub fn layout<'a>(&mut self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
         let size = size as f32;
         let scale = rusttype::Scale {
             // TODO: Fix glyph overlapping without additional x-scaling
@@ -107,24 +101,25 @@ impl FontManager {
             x: size * 1.2,
             y: size,
         };
-        let point = rusttype::Point {
-            x: 0.0,
-            y: 0.0,
-        };
+        let point = rusttype::Point { x: 0.0, y: 0.0 };
         let font = &self.fonts[font.unwrap_or(self.default_font())].rusttype;
-        let glyphs: Vec<LayoutGlyph> = font.layout(text, scale, point).map(|glyph| {
-            let index = glyph.id().0;
-            let pos = glyph.position();
-            let dim = glyph.scale();
-            let point = Position::new(pos.x, pos.y + size);
-            let size = Size::new(dim.x, dim.y);
-            LayoutGlyph {
-                index,
-                bounds: Bounds::new(point, size),
-            }
-        }).collect();
+        let glyphs: Vec<LayoutGlyph> = font
+            .layout(text, scale, point)
+            .map(|glyph| {
+                let index = glyph.id().0;
+                let pos = glyph.position();
+                let dim = glyph.scale();
+                let point = Position::new(pos.x, pos.y + size);
+                let size = Size::new(dim.x, dim.y);
+                LayoutGlyph {
+                    index,
+                    bounds: Bounds::new(point, size),
+                }
+            })
+            .collect();
 
-        let size = glyphs.last()
+        let size = glyphs
+            .last()
             .map(|glyph| Size::new(glyph.bounds.max_x(), glyph.bounds.max_y()))
             .unwrap_or(Size::zero());
 

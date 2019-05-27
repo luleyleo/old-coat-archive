@@ -1,4 +1,4 @@
-use crate::{Component, webrender::FontManager, Font, FontSize, TextLayout};
+use crate::{webrender::FontManager, Component, Font, FontSize, TextLayout};
 
 pub struct UiDerive<'a, C: Component> {
     events: &'a mut Vec<C::Event>,
@@ -20,12 +20,7 @@ impl<'a, C: Component> UiDerive<'a, C> {
         self.needs_update = true;
     }
 
-    pub fn layout(
-        &mut self,
-        text: &str,
-        font: Option<&Font>,
-        size: FontSize,
-    ) -> TextLayout {
+    pub fn layout(&mut self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
         self.fonts.layout(text, font, size)
     }
 }

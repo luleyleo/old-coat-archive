@@ -54,13 +54,16 @@ impl Component for App {
                 .spacing(10.0)
                 .set(iid!(), ui)
                 .add(|| {
-                    Constrained::new().max_height(185.0).set(iid!(), ui).add(|| {
-                        Button::new()
-                            .label("Hallo!")
-                            .enabled(state.active == ActiveButton::First)
-                            .set(iid!(), ui)
-                            .on_event(ui, |_| Some(Msg::Activate(ActiveButton::Second)));
-                    });
+                    Constrained::new()
+                        .max_height(185.0)
+                        .set(iid!(), ui)
+                        .add(|| {
+                            Button::new()
+                                .label("Hallo!")
+                                .enabled(state.active == ActiveButton::First)
+                                .set(iid!(), ui)
+                                .on_event(ui, |_| Some(Msg::Activate(ActiveButton::Second)));
+                        });
 
                     Button::new()
                         .label("Welt!")

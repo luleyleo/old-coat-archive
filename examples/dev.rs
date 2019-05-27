@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
 use coat::backend::winit::{AppEvent, Window};
-use coat::widgets::*;
 use coat::layouts::*;
-use coat::{Component, UiUpdate, UiView, Mut, Color, MouseButton, Size, iid, iids};
+use coat::widgets::*;
+use coat::{iid, iids, Color, Component, MouseButton, Mut, Size, UiUpdate, UiView};
 
 #[derive(Default)]
 struct DevApp;
@@ -26,7 +26,11 @@ impl Component for DevApp {
     type Event = AppEvent;
 
     fn init(_props: &Self) -> Self::State {
-        Self::State { hellos: 0, hovered: false, text: String::from("Woop!") }
+        Self::State {
+            hellos: 0,
+            hovered: false,
+            text: String::from("Woop!"),
+        }
     }
 
     fn update(msg: Self::Msg, mut state: Mut<Self::State>, _ui: &mut UiUpdate) {
@@ -92,9 +96,7 @@ impl Component for DevApp {
                             .on_event(ui, hello_handler)
                             .add(|| {
                                 Stack::new().set(iid!(), ui).add(|| {
-                                    Rectangle::new()
-                                        .color(the_color)
-                                        .set(InnerRect, ui);
+                                    Rectangle::new().color(the_color).set(InnerRect, ui);
 
                                     Text::new()
                                         .content("Hello world!")

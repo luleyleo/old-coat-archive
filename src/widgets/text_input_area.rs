@@ -1,4 +1,7 @@
-use crate::{Component, Event, Mut, UiInput, UiUpdate, UiView, TouchArea, TouchAreaEvent, ButtonState, VirtualKeyCode, iid};
+use crate::{
+    iid, ButtonState, Component, Event, Mut, TouchArea, TouchAreaEvent, UiInput, UiUpdate, UiView,
+    VirtualKeyCode,
+};
 
 #[derive(Default)]
 pub struct TextInputArea;
@@ -30,9 +33,7 @@ impl Component for TextInputArea {
     type Event = TextInputAreaEvent;
 
     fn init(_: &Self) -> Self::State {
-        TextInputAreaState {
-            focused: false,
-        }
+        TextInputAreaState { focused: false }
     }
 
     fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
@@ -40,9 +41,11 @@ impl Component for TextInputArea {
         match msg {
             Focus => state.focused = true,
             Unfocus => state.focused = false,
-            Edit(event) => if state.focused {
-                ui.emit(event);
-            },
+            Edit(event) => {
+                if state.focused {
+                    ui.emit(event);
+                }
+            }
         }
     }
 
@@ -60,19 +63,18 @@ impl Component for TextInputArea {
         for (event, _) in ui.input.iter_all_events() {
             match event {
                 // TODO: Should pressing ESC also unfocus?
-                Event::MouseInput { position, .. }
-                | Event::Touch { position, .. } => {
+                Event::MouseInput { position, .. } | Event::Touch { position, .. } => {
                     if !ui.bounds.contains(position) {
                         ui.messages.send(TextInputAreaMsg::Unfocus);
                     }
                 }
-                _ => ()
+                _ => (),
             }
         }
 
         for (event, consumed) in ui.input.iter_fresh_events() {
-            use TextInputAreaMsg::Edit;
             use TextInputAreaEvent::*;
+            use TextInputAreaMsg::Edit;
 
             match event {
                 Event::CharacterInput(c) => {
@@ -92,11 +94,11 @@ impl Component for TextInputArea {
                                 ui.messages.send(Edit(Delete));
                                 *consumed = true;
                             }
-                            _ => ()
+                            _ => (),
                         }
                     }
                 }
-                _ => ()
+                _ => (),
             }
         }
     }
