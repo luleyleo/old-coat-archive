@@ -37,7 +37,7 @@ impl Component for TextInputArea {
 
     fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
         use TextInputAreaMsg::*;
-        match dbg!(msg) {
+        match msg {
             Focus => state.focused = true,
             Unfocus => state.focused = false,
             Edit(event) => if state.focused {

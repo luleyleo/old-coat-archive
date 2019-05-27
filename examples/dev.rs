@@ -39,7 +39,7 @@ impl Component for DevApp {
                 state.hovered = active;
             }
             Msg::Edit(event) => {
-                event.apply(dbg!(&mut state.text));
+                event.apply(&mut state.text);
             }
         }
     }
