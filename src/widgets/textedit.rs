@@ -38,8 +38,6 @@ pub struct TextEditState {
     text: TextState,
 }
 
-// TODO: Handle the case where this is not beeing applied
-/// IMPORTANT: This is *expected* to be applied!
 pub enum TextEditEvent {
     Insertion(char),
     Deletion,
