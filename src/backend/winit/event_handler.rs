@@ -1,4 +1,4 @@
-use crate::{ButtonState, Event, MouseButton, Position, Scalar, VirtualKeyCode};
+use crate::{Event, MouseButton, Position, Scalar};
 
 pub struct EventHandler {
     cursor: Position,

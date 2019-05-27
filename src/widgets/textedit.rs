@@ -99,7 +99,7 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
+    fn update(msg: Self::Msg, _state: Mut<Self::State>, ui: &mut UiUpdate) {
         match msg {
             TextEditMsg::Insertion(ch) => {
                 ui.emit(TextEditEvent::Insertion(ch));
@@ -110,7 +110,7 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn view(_props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
+    fn view(_props: &Self, _state: &Self::State, ui: &mut UiView<Self>) {
         use crate::widgets::TextInputAreaEvent::*;
         TextInputArea::new()
             .set(iid!(), ui)
