@@ -26,10 +26,10 @@ pub use self::mutable::Mut;
 pub mod backend;
 pub use self::backend::*;
 
-mod layouts;
+pub mod layouts;
 pub use self::layouts::*;
 
-mod widgets;
+pub mod widgets;
 pub use self::widgets::*;
 
 mod color;
