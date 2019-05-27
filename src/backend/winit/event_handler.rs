@@ -1,4 +1,4 @@
-use crate::{Event, ButtonState, MouseButton, Position, Scalar};
+use crate::{Event, ButtonState, MouseButton, Position, Scalar, VirtualKeyCode};
 
 pub struct EventHandler {
     cursor: Position,
@@ -30,7 +30,17 @@ impl EventHandler {
                     });
                 }
                 winit::WindowEvent::KeyboardInput { input, .. } => {
-                    // TODO: Any buttons
+                    // TODO: Those are the same .... for now
+                    let state = unsafe { std::mem::transmute(input.state) };
+                    let keycode = unsafe { std::mem::transmute(input.virtual_keycode) };
+                    let modifiers = unsafe { std::mem::transmute(input.modifiers) };
+
+                    return Some(Event::Keyboard {
+                        scancode: input.scancode,
+                        state,
+                        keycode,
+                        modifiers,
+                    })
                 }
                 winit::WindowEvent::ReceivedCharacter(c) => {
                     return Some(Event::CharacterInput(c));

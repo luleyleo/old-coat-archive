@@ -49,7 +49,7 @@ pub enum Event {
     Keyboard {
         scancode: u32,
         state: ButtonState,
-        keycode: VirtualKeyCode,
+        keycode: Option<VirtualKeyCode>,
         modifiers: ModifiersState,
     },
     SomeFutureEventPleaseUseAn_,

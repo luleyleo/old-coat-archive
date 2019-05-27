@@ -24,6 +24,9 @@ pub trait Component: Default + Sized {
     fn init(props: &Self) -> Self::State;
 
     #[allow(unused_variables)]
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {}
+
+    #[allow(unused_variables)]
     fn update(msg: Self::Msg, state: Mut<Self::State>, ui: &mut UiUpdate) {}
 
     #[allow(unused_variables)]
@@ -50,9 +53,6 @@ pub trait Component: Default + Sized {
 
     #[allow(unused_variables)]
     fn input(input: &mut UiInput<Self>) {}
-
-    #[allow(unused_variables)]
-    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {}
 
     #[allow(unused_variables)]
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}

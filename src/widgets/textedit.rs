@@ -1,97 +1,143 @@
 use crate::*;
-type Range = std::ops::Range<usize>;
+use crate::widgets::text::{TextState, render_text};
 
-pub type TextEdit<'a> = TextEditProps<'a>;
+pub struct TextEdit<'a> {
+    content: &'a str,
+    size: FontSize,
+    font: Option<Font>,
+}
 
-#[derive(Default)]
-pub struct TextEditProps<'a> {
-    text: &'a str,
+impl<'a> Default for TextEdit<'a> {
+    fn default() -> Self {
+        Self {
+            content: "",
+            size: 12,
+            font: None,
+        }
+    }
+}
+
+impl<'a> TextEdit<'a> {
+    pub fn content(mut self, content: &'a str) -> Self {
+        self.content = content;
+        self
+    }
+
+    pub fn size(mut self, size: FontSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn font(mut self, font: Font) -> Self {
+        self.font = Some(font);
+        self
+    }
 }
 
 pub struct TextEditState {
-    text: String,
-    cursor: Range,
+    text: TextState,
 }
 
+// TODO: Handle the case where this is not beeing applied
+/// IMPORTANT: This is *expected* to be applied!
 pub enum TextEditEvent {
-    Insertion {
-        range: Range,
-        text: String,
-    },
-    Deletion {
-        range: Range,
-    }
+    Insertion(char),
+    Deletion,
 }
 
 impl TextEditEvent {
     pub fn apply(self, target: &mut String) {
         use TextEditEvent::*;
         match self {
-            Insertion { range, text } => {
-                target.replace_range(range, &text);
+            Insertion(ch) => {
+                target.push(ch);
             }
-            Deletion { range } => {
-                target.replace_range(range, "");
+            Deletion => {
+                target.pop();
             }
         }
     }
 }
 
 pub enum TextEditMsg {
-    Insertion {
-        text: String
-    },
-    Deletion {
-        range: Range
-    },
-    Selection {
-        range: Range
-    }
-}
-
-impl<'a> Properties for TextEditProps<'a> {
-    type Component = TextEdit<'a>;
+    Insertion(char),
+    Deletion,
 }
 
 impl<'a> Component for TextEdit<'a> {
-    type Props = TextEditProps<'a>;
     type State = TextEditState;
     type Msg = TextEditMsg;
     type Event = TextEditEvent;
 
-    fn init(props: &Self::Props) -> Self::State {
+    fn init(props: &Self) -> Self::State {
         TextEditState {
-            text: props.text.to_string(),
-            cursor: 0..0,
+            text: TextState {
+                content: String::default(),
+                size: props.size,
+                font: props.font.clone(),
+                layout: TextLayout::default(),
+            },
+        }
+    }
+
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {
+        let mut changed = false;
+        if props.content != state.text.content {
+            state.text.content.replace_range(.., props.content);
+            changed = true;
+        }
+        if props.size != state.text.size {
+            state.text.size = props.size;
+            changed = true;
+        }
+        if props.font != state.text.font {
+            state.text.font = props.font.clone();
+            changed = true;
+        }
+        if changed {
+            state.text.layout = ui.layout(props.content, props.font.as_ref(), props.size);
         }
     }
 
     fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
         match msg {
-            TextEditMsg::Selection { range } => {
-                state.cursor = range;
+            TextEditMsg::Insertion(ch) => {
+                ui.emit(TextEditEvent::Insertion(ch));
             }
-            TextEditMsg::Insertion { text } => {
-                let cursor = state.cursor.clone();
-                state.text.replace_range(cursor.clone(), &text);
-                ui.emit(TextEditEvent::Insertion {
-                    range: cursor,
-                    text: text,
-                });
-            }
-            TextEditMsg::Deletion { range } => {
-                state.text.replace_range(range.clone(), "");
-                ui.emit(TextEditEvent::Deletion { range });
+            TextEditMsg::Deletion => {
+                ui.emit(TextEditEvent::Deletion);
             }
         }
     }
 
-    fn view(props: &Self::Props, state: &Self::State, ui: &mut UiView<Self>) {
-        TouchArea::new()
-            .set(iid!(), ui);
+    fn view(_props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
+        use crate::widgets::TextInputAreaEvent::*;
+        TextInputArea::new()
+            .set(iid!(), ui)
+            .on(ui, |event| match dbg!(event) {
+                Add(ch) => Some(TextEditMsg::Insertion(ch)),
+                Backspace => Some(TextEditMsg::Deletion),
+                Delete => Some(TextEditMsg::Deletion),
+            });
+    }
+
+    fn layout(state: &Self::State, children: &[Cid], _: BoxConstraints, ui: &mut UiLayout) -> Size {
+        if children.len() != 1 {
+            let name = ui.full_debug_name();
+            log::error!(
+                "The primitive Component {} has content attached to it but it will be ignored",
+                name
+            );
+        }
+
+        // TODO: Some sort of ellipsis or so if the constraints are to small
+        let size = state.text.layout.size;
+        ui.size(children[0], BoxConstraints::new_tight(size));
+
+        size
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
-        // Render some text
+        render_text(&state.text, bounds, renderer);
     }
 }

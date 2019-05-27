@@ -76,17 +76,19 @@ impl Component for TextInputArea {
 
             match event {
                 Event::CharacterInput(c) => {
-                    ui.messages.send(Edit(Add(*c)));
-                    *consumed = true;
+                    if !c.is_control() {
+                        ui.messages.send(Edit(Add(*c)));
+                        *consumed = true;
+                    }
                 }
                 Event::Keyboard { state, keycode, .. } => {
                     if state == &ButtonState::Pressed {
                         match keycode {
-                            VirtualKeyCode::Backspace => {
+                            Some(VirtualKeyCode::Backspace) => {
                                 ui.messages.send(Edit(Backspace));
                                 *consumed = true;
                             }
-                            VirtualKeyCode::Delete => {
+                            Some(VirtualKeyCode::Delete) => {
                                 ui.messages.send(Edit(Delete));
                                 *consumed = true;
                             }
