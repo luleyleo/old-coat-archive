@@ -66,13 +66,15 @@ impl Component for TouchArea {
     fn input(ui: &mut UiInput<Self>) {
         for event in ui.input.iter_spoiled_events() {
             match event {
-                Event::MouseInput {..}
-                | Event::CursorMoved {..}
-                | Event::Touch {..} => {
-                    // Something else has been interacted with :(
-                    // This can happen (theoretically) when another
-                    // `TouchArea` appears above this one.
-                    ui.messages.send(TouchAreaEvent::Exited);
+                Event::MouseInput { position, .. }
+                | Event::CursorMoved { position, .. }
+                | Event::Touch { position, .. } => {
+                    if ui.bounds.contains(position) {
+                        // Something else has been interacted with :(
+                        // This can happen (theoretically) when another
+                        // `TouchArea` appears above this one.
+                        ui.messages.send(TouchAreaEvent::Exited);
+                    }
                 }
                 _ => ()
             }
