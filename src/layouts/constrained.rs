@@ -10,6 +10,16 @@ pub struct Constrained {
 }
 
 impl Constrained {
+    pub fn max(self, max_size: Size) -> Self {
+        self.max_width(max_size.width)
+            .max_height(max_size.height)
+    }
+
+    pub fn min(self, min_size: Size) -> Self {
+        self.min_width(min_size.width)
+            .min_height(min_size.height)
+    }
+
     pub fn min_width(mut self, min_width: Scalar) -> Self {
         self.min_width = Some(min_width);
         self
