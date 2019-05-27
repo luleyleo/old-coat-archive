@@ -114,7 +114,7 @@ impl<'a> Component for TextEdit<'a> {
         use crate::widgets::TextInputAreaEvent::*;
         TextInputArea::new()
             .set(iid!(), ui)
-            .on(ui, |event| match event {
+            .on_event(ui, |event| match event {
                 Add(ch) => Some(TextEditMsg::Insertion(ch)),
                 Backspace => Some(TextEditMsg::Deletion),
                 Delete => Some(TextEditMsg::Deletion),

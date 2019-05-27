@@ -30,7 +30,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
     }
 
     /// This will construct a `UiView` with the same date but for a different component.
-    fn another<'b, AComp: Component>(&'b mut self, cid: Cid) -> UiView<'b, AComp> {
+    fn another<AComp: Component>(&mut self, cid: Cid) -> UiView<AComp> {
         UiView {
             data: self.data,
             parent: self.parent.clone(),
@@ -136,7 +136,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
     /// Note: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
     /// This will only be called by a `ContentBuilder` to guarantee type safety.
-    pub(crate) fn on<Emitter, Handler>(&mut self, emitter: Cid, handler: Handler)
+    pub(crate) fn on_event<Emitter, Handler>(&mut self, emitter: Cid, handler: Handler)
     where
         Emitter: Component,
         Handler: Fn(Emitter::Event) -> Option<Comp::Msg>,

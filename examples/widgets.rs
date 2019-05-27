@@ -59,14 +59,14 @@ impl Component for App {
                             .label("Hallo!")
                             .enabled(state.active == ActiveButton::First)
                             .set(iid!(), ui)
-                            .on(ui, |_| Some(Msg::Activate(ActiveButton::Second)));
+                            .on_event(ui, |_| Some(Msg::Activate(ActiveButton::Second)));
                     });
 
                     Button::new()
                         .label("Welt!")
                         .enabled(state.active == ActiveButton::Second)
                         .set(iid!(), ui)
-                        .on(ui, |_| Some(Msg::Activate(ActiveButton::First)));
+                        .on_event(ui, |_| Some(Msg::Activate(ActiveButton::First)));
                 });
         });
     }
@@ -148,7 +148,7 @@ impl<'a> Component for Button<'a> {
 
         TouchArea::new()
             .set(iid!(), ui)
-            .on(ui, |e| match e {
+            .on_event(ui, |e| match e {
                 TouchAreaEvent::Moved(pos) => Some(ButtonMsg::Hovered(pos.is_some())),
                 TouchAreaEvent::Pressed(_) => Some(ButtonMsg::Pressed(true)),
                 TouchAreaEvent::Released(_) => Some(ButtonMsg::Pressed(false)),

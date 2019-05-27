@@ -75,7 +75,7 @@ impl Component for DevApp {
                                     .content(&state.text)
                                     .size(14)
                                     .set(iid!(), ui)
-                                    .on(ui, |event| Some(Msg::Edit(event)));
+                                    .on_event(ui, |event| Some(Msg::Edit(event)));
                             });
                         });
                     });
@@ -89,7 +89,7 @@ impl Component for DevApp {
                     Padding::new().all(20.0).set(iid!(), ui).add(|| {
                         TouchArea::new()
                             .set(ButtonWrap, ui)
-                            .on(ui, hello_handler)
+                            .on_event(ui, hello_handler)
                             .add(|| {
                                 Stack::new().set(iid!(), ui).add(|| {
                                     Rectangle::new()
