@@ -37,10 +37,10 @@ impl<'a> Text<'a> {
 }
 
 pub struct TextState {
-    content: String,
-    size: FontSize,
-    font: Option<Font>,
-    layout: TextLayout,
+    pub(crate) content: String,
+    pub(crate) size: FontSize,
+    pub(crate) font: Option<Font>,
+    pub(crate) layout: TextLayout,
 }
 
 pub type TextEvent = TextLayout;
@@ -99,49 +99,54 @@ impl<'a> Component for Text<'a> {
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
-        use webrender::api::{
-            ColorF, FontInstanceFlags, FontRenderMode, GlyphInstance, GlyphOptions, LayoutPoint,
-            LayoutPrimitiveInfo, SpecificDisplayItem, TextDisplayItem,
-        };
-
-        let default_font = renderer.font_manager.default_font().clone();
-        let font = state.font.as_ref().unwrap_or(&default_font);
-
-        let fm = &mut renderer.font_manager;
-        let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
-        let mut dim = state.layout.size;
-
-        let wr_glyph = |g: &LayoutGlyph| GlyphInstance {
-            index: g.index,
-            point: LayoutPoint::from_untyped(&(bounds.origin + g.bounds.origin.to_vector())),
-        };
-        let glyphs = state.layout.glyphs.iter().map(wr_glyph);
-
-        if dim.width > bounds.size.width || dim.height > bounds.size.height {
-            dim = bounds.size;
-            // TODO: log with debug name of the component
-            log::warn!("Text overflow while rendering \"{}\"", state.content);
-        }
-        let pos = bounds.origin;
-        let info = LayoutPrimitiveInfo::new(euclid::rect(pos.x, pos.y, dim.width, dim.height));
-
-        let mut text_flags = FontInstanceFlags::empty();
-        text_flags.set(FontInstanceFlags::SUBPIXEL_BGR, true);
-        text_flags.set(FontInstanceFlags::LCD_VERTICAL, true);
-        let text_options = GlyphOptions {
-            render_mode: FontRenderMode::Subpixel,
-            flags: text_flags,
-        };
-
-        let item = SpecificDisplayItem::Text(TextDisplayItem {
-            color: ColorF::WHITE,
-            font_key,
-            glyph_options: Some(text_options),
-        });
-
-        // TODO: Will no longer work with newer webrender
-        renderer.builder.push_item(&item, &info);
-        // TODO: This is DANGEROUS! It should check for webrenders MAX_TEXT_RUN_LENGTH
-        renderer.builder.push_iter(glyphs);
+        render_text(state, bounds, renderer);
     }
 }
+
+pub fn render_text(state: &TextState, bounds: Bounds, renderer: &mut Renderer) {
+    use webrender::api::{
+        ColorF, FontInstanceFlags, FontRenderMode, GlyphInstance, GlyphOptions, LayoutPoint,
+        LayoutPrimitiveInfo, SpecificDisplayItem, TextDisplayItem,
+    };
+
+    let default_font = renderer.font_manager.default_font().clone();
+    let font = state.font.as_ref().unwrap_or(&default_font);
+
+    let fm = &mut renderer.font_manager;
+    let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
+    let mut dim = state.layout.size;
+
+    let wr_glyph = |g: &LayoutGlyph| GlyphInstance {
+        index: g.index,
+        point: LayoutPoint::from_untyped(&(bounds.origin + g.bounds.origin.to_vector())),
+    };
+    let glyphs = state.layout.glyphs.iter().map(wr_glyph);
+
+    if dim.width > bounds.size.width || dim.height > bounds.size.height {
+        dim = bounds.size;
+        // TODO: log with debug name of the component
+        log::warn!("Text overflow while rendering \"{}\"", state.content);
+    }
+    let pos = bounds.origin;
+    let info = LayoutPrimitiveInfo::new(euclid::rect(pos.x, pos.y, dim.width, dim.height));
+
+    let mut text_flags = FontInstanceFlags::empty();
+    text_flags.set(FontInstanceFlags::SUBPIXEL_BGR, true);
+    text_flags.set(FontInstanceFlags::LCD_VERTICAL, true);
+    let text_options = GlyphOptions {
+        render_mode: FontRenderMode::Subpixel,
+        flags: text_flags,
+    };
+
+    let item = SpecificDisplayItem::Text(TextDisplayItem {
+        color: ColorF::WHITE,
+        font_key,
+        glyph_options: Some(text_options),
+    });
+
+    // TODO: Will no longer work with newer webrender
+    renderer.builder.push_item(&item, &info);
+    // TODO: This is DANGEROUS! It should check for webrenders MAX_TEXT_RUN_LENGTH
+    renderer.builder.push_iter(glyphs);
+}
+
