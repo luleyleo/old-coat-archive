@@ -1,8 +1,4 @@
-// pub use winit::Event;
-// pub use winit::ModifiersState;
-// pub use winit::VirtualKeyCode as Key;
-
-use crate::Position;
+use crate::{Position, VirtualKeyCode};
 
 #[derive(Default, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub struct ModifiersState {
@@ -21,6 +17,12 @@ pub enum MouseButton {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
+pub enum ButtonState {
+    Pressed,
+    Released,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum TouchPhase {
     Started,
     Moved,
@@ -32,15 +34,23 @@ pub enum Event {
     CursorMoved {
         position: Position,
     },
+    // TODO: Think of a better name (MouseClick?)
     MouseInput {
         position: Position,
         button: MouseButton,
         pressed: bool,
     },
     Touch {
-        phase: TouchPhase,
         position: Position,
+        phase: TouchPhase,
         index: u64,
     },
-    SomeFutureEvent,
+    CharacterInput(char),
+    Keyboard {
+        scancode: u32,
+        state: ButtonState,
+        keycode: VirtualKeyCode,
+        modifiers: ModifiersState,
+    },
+    SomeFutureEventPleaseUseAn_,
 }

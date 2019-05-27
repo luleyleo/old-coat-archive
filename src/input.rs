@@ -1,6 +1,9 @@
 mod event;
 pub use self::event::*;
 
+mod key_code;
+pub use self::key_code::VirtualKeyCode;
+
 pub struct Input {
     events: Vec<(Event, bool)>,
 }

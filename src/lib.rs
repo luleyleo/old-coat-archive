@@ -37,7 +37,7 @@ pub use self::color::Color;
 
 mod input;
 use self::input::Input;
-pub use self::input::{Event, ModifiersState, MouseButton, TouchPhase};
+pub use self::input::{Event, ButtonState, ModifiersState, MouseButton, TouchPhase, VirtualKeyCode};
 
 mod text;
 pub use self::text::{TextLayout, LayoutGlyph};

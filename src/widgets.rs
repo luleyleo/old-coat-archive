@@ -9,3 +9,6 @@ pub use self::text::Text;
 
 mod touch_area;
 pub use self::touch_area::{TouchArea, TouchAreaEvent};
+
+mod text_input_area;
+pub use self::text_input_area::{TextInputArea, TextInputAreaEvent};
