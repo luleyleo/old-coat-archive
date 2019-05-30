@@ -142,11 +142,11 @@ impl<'a> Component for Button<'a> {
     }
 
     fn view(props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
-        let background = match 0 {
-            _ if !props.enabled => Color::rgb(0.3, 0.3, 0.3),
-            _ if state.pressed => Color::rgb(0.2, 0.2, 0.6),
-            _ if state.hovered => Color::rgb(0.4, 0.4, 0.8),
-            _ => Color::rgb(0.3, 0.3, 0.7),
+        let background = match () {
+            () if !props.enabled => Color::rgb(0.3, 0.3, 0.3),
+            () if state.pressed => Color::rgb(0.2, 0.2, 0.6),
+            () if state.hovered => Color::rgb(0.4, 0.4, 0.8),
+            () => Color::rgb(0.3, 0.3, 0.7),
         };
 
         TouchArea::new()
