@@ -1,4 +1,3 @@
-use crate::widgets::text::{render_text, TextState};
 use crate::*;
 
 pub struct TextEdit<'a> {
@@ -35,7 +34,10 @@ impl<'a> TextEdit<'a> {
 }
 
 pub struct TextEditState {
-    text: TextState,
+    pub content: String,
+    pub size: FontSize,
+    pub font: Option<Font>,
+    pub layout: TextLayout,
 }
 
 pub enum TextEditEvent {
@@ -69,31 +71,29 @@ impl<'a> Component for TextEdit<'a> {
 
     fn init(props: &Self) -> Self::State {
         TextEditState {
-            text: TextState {
-                content: String::default(),
-                size: props.size,
-                font: props.font.clone(),
-                layout: TextLayout::default(),
-            },
+            content: String::default(),
+            size: props.size,
+            font: props.font.clone(),
+            layout: TextLayout::default(),
         }
     }
 
     fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {
         let mut changed = false;
-        if props.content != state.text.content {
-            state.text.content.replace_range(.., props.content);
+        if props.content != state.content {
+            state.content.replace_range(.., props.content);
             changed = true;
         }
-        if props.size != state.text.size {
-            state.text.size = props.size;
+        if props.size != state.size {
+            state.size = props.size;
             changed = true;
         }
-        if props.font != state.text.font {
-            state.text.font = props.font.clone();
+        if props.font != state.font {
+            state.font = props.font.clone();
             changed = true;
         }
         if changed {
-            state.text.layout = ui.layout(props.content, props.font.as_ref(), props.size);
+            state.layout = ui.layout(props.content, props.font.as_ref(), props.size);
         }
     }
 
@@ -108,8 +108,14 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn view(_props: &Self, _state: &Self::State, ui: &mut UiView<Self>) {
+    fn view(_props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         use crate::widgets::TextInputAreaEvent::*;
+
+        Glyphs::new()
+            .size(state.size)
+            .text(&state.layout)
+            .set(iid!(), ui);
+
         TextInputArea::new()
             .set(iid!(), ui)
             .on_event(ui, |event| match event {
@@ -119,8 +125,13 @@ impl<'a> Component for TextEdit<'a> {
             });
     }
 
-    fn layout(state: &Self::State, children: &[Cid], _: BoxConstraints, ui: &mut UiLayout) -> Size {
-        if children.len() != 1 {
+    fn layout(
+        state: &Self::State,
+        children: &[Cid],
+        constraints: BoxConstraints,
+        ui: &mut UiLayout,
+    ) -> Size {
+        if children.len() != 2 {
             let name = ui.full_debug_name();
             log::error!(
                 "The primitive Component {} has content attached to it but it will be ignored",
@@ -129,13 +140,10 @@ impl<'a> Component for TextEdit<'a> {
         }
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
-        let size = state.text.layout.size;
+        let size = constraints.check_size(state.layout.size);
         ui.size(children[0], BoxConstraints::new_tight(size));
+        ui.size(children[1], BoxConstraints::new_tight(size));
 
         size
-    }
-
-    fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
-        render_text(&state.text, bounds, renderer);
     }
 }

@@ -37,7 +37,7 @@ impl Component for DevApp {
         match msg {
             Msg::SayHello => {
                 state.hellos += 1;
-                println!("{}th hello!", state.hellos);
+                println!("{}th: {}", state.hellos, state.text);
             }
             Msg::Active(active) => {
                 state.hovered = active;

@@ -1,6 +1,9 @@
 mod rectangle;
 pub use self::rectangle::Rectangle;
 
+mod glyphs;
+pub use self::glyphs::Glyphs;
+
 mod text;
 pub use self::text::Text;
 

@@ -1,6 +1,6 @@
 use crate::{Bounds, Position, Size};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TextLayout {
     pub size: Size,
     pub glyphs: Vec<LayoutGlyph>,
@@ -15,7 +15,7 @@ impl Default for TextLayout {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LayoutGlyph {
     pub index: u32,
     pub bounds: Bounds,
