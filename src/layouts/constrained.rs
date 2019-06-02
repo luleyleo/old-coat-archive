@@ -83,7 +83,7 @@ impl Component for Constrained {
         }
         if let Some(max_width) = state.max_width {
             if let Some(imposed_max_width) = constraints.max_width {
-                if max_width < imposed_max_width {
+                if max_width <= imposed_max_width {
                     constraints = constraints.max_width(max_width);
                 } else {
                     log::warn!(
@@ -98,7 +98,7 @@ impl Component for Constrained {
         }
         if let Some(max_height) = state.max_height {
             if let Some(imposed_max_height) = constraints.max_height {
-                if max_height < imposed_max_height {
+                if max_height <= imposed_max_height {
                     constraints = constraints.max_height(max_height);
                 } else {
                     log::warn!(
