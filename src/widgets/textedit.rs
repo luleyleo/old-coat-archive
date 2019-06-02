@@ -102,6 +102,17 @@ impl<'a> Component for TextEdit<'a> {
             .text(&state.layout)
             .set(iid!(), ui);
 
+        let x_offset = state.layout.size.width + 2.0;
+        Offset::new().x(x_offset).set(iid!(), ui).add(|| {
+            let height = state.layout.size.height;
+            let width = 2.0;
+            Constrained::new().max_width(width).max_height(height).set(iid!(), ui).add(|| {
+                Rectangle::new()
+                    .color(Color::rgb(0.0, 0.0, 0.0))
+                    .set(iid!(Cursor), ui);
+            });
+        });
+
         TextInputArea::new()
             .set(iid!(), ui)
             .on_event(ui, |event| match event {
@@ -117,7 +128,8 @@ impl<'a> Component for TextEdit<'a> {
         constraints: BoxConstraints,
         ui: &mut UiLayout,
     ) -> Size {
-        if children.len() != 2 {
+        const CHILD_COUNT:usize = 3;
+        if children.len() != CHILD_COUNT {
             let name = ui.full_debug_name();
             log::error!(
                 "The primitive Component {} has content attached to it but it will be ignored",
@@ -127,8 +139,9 @@ impl<'a> Component for TextEdit<'a> {
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
         let size = constraints.check_size(state.layout.size);
-        ui.size(children[0], BoxConstraints::new_tight(size));
-        ui.size(children[1], BoxConstraints::new_tight(size));
+        for child in 0..CHILD_COUNT { 
+            ui.size(children[child], BoxConstraints::new_tight(size));
+        }
 
         size
     }
