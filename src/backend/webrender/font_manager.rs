@@ -108,9 +108,10 @@ impl FontManager {
             .map(|glyph| {
                 let index = glyph.id().0;
                 let pos = glyph.position();
-                let dim = glyph.scale();
+                let height = glyph.scale().y;
+                let width = glyph.unpositioned().h_metrics().advance_width;
                 let point = Position::new(pos.x, pos.y + size);
-                let size = Size::new(dim.x, dim.y);
+                let size = Size::new(width, height);
                 LayoutGlyph {
                     index,
                     bounds: Bounds::new(point, size),
