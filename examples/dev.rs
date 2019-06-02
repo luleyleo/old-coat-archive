@@ -3,7 +3,7 @@
 use coat::backend::winit::{AppEvent, Window};
 use coat::layouts::*;
 use coat::widgets::*;
-use coat::{iid, iids, Color, Component, MouseButton, Mut, Size, UiUpdate, UiView};
+use coat::{iid, iids, Buffer, BufferUpdate, Color, Component, MouseButton, Mut, Size, UiUpdate, UiView};
 
 #[derive(Default)]
 struct DevApp;
@@ -11,13 +11,13 @@ struct DevApp;
 struct State {
     hellos: usize,
     hovered: bool,
-    text: String,
+    text: Buffer,
 }
 
 enum Msg {
     SayHello,
     Active(bool),
-    Edit(TextEditEvent),
+    Edit(BufferUpdate),
 }
 
 impl Component for DevApp {
@@ -29,7 +29,7 @@ impl Component for DevApp {
         Self::State {
             hellos: 0,
             hovered: false,
-            text: String::from("Woop!"),
+            text: Buffer::from("Woop!".to_owned()),
         }
     }
 
@@ -37,13 +37,13 @@ impl Component for DevApp {
         match msg {
             Msg::SayHello => {
                 state.hellos += 1;
-                println!("{}th: {}", state.hellos, state.text);
+                println!("{}th: {}", state.hellos, state.text.text());
             }
             Msg::Active(active) => {
                 state.hovered = active;
             }
-            Msg::Edit(event) => {
-                event.apply(&mut state.text);
+            Msg::Edit(update) => {
+                state.text.update(update);
             }
         }
     }
@@ -76,7 +76,7 @@ impl Component for DevApp {
                                     .set(iid!(), ui);
 
                                 TextEdit::new()
-                                    .content(&state.text)
+                                    .buffer(&state.text)
                                     .size(14)
                                     .set(iid!(), ui)
                                     .on_event(ui, |event| Some(Msg::Edit(event)));

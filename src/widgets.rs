@@ -8,7 +8,7 @@ mod text;
 pub use self::text::Text;
 
 mod textedit;
-pub use self::textedit::{TextEdit, TextEditEvent};
+pub use self::textedit::TextEdit;
 
 mod touch_area;
 pub use self::touch_area::{TouchArea, TouchAreaEvent};

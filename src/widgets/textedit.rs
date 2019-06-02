@@ -1,7 +1,7 @@
 use crate::*;
 
 pub struct TextEdit<'a> {
-    content: &'a str,
+    buffer: Option<&'a Buffer>,
     size: FontSize,
     font: Option<Font>,
 }
@@ -9,7 +9,7 @@ pub struct TextEdit<'a> {
 impl<'a> Default for TextEdit<'a> {
     fn default() -> Self {
         Self {
-            content: "",
+            buffer: None,
             size: 12,
             font: None,
         }
@@ -17,8 +17,8 @@ impl<'a> Default for TextEdit<'a> {
 }
 
 impl<'a> TextEdit<'a> {
-    pub fn content(mut self, content: &'a str) -> Self {
-        self.content = content;
+    pub fn buffer(mut self, buffer: &'a Buffer) -> Self {
+        self.buffer = Some(buffer);
         self
     }
 
@@ -40,25 +40,6 @@ pub struct TextEditState {
     pub layout: TextLayout,
 }
 
-pub enum TextEditEvent {
-    Insertion(char),
-    Deletion,
-}
-
-impl TextEditEvent {
-    pub fn apply(self, target: &mut String) {
-        use TextEditEvent::*;
-        match self {
-            Insertion(ch) => {
-                target.push(ch);
-            }
-            Deletion => {
-                target.pop();
-            }
-        }
-    }
-}
-
 pub enum TextEditMsg {
     Insertion(char),
     Deletion,
@@ -67,7 +48,7 @@ pub enum TextEditMsg {
 impl<'a> Component for TextEdit<'a> {
     type State = TextEditState;
     type Msg = TextEditMsg;
-    type Event = TextEditEvent;
+    type Event = BufferUpdate;
 
     fn init(props: &Self) -> Self::State {
         TextEditState {
@@ -80,30 +61,35 @@ impl<'a> Component for TextEdit<'a> {
 
     fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {
         let mut changed = false;
-        if props.content != state.content {
-            state.content.replace_range(.., props.content);
-            changed = true;
-        }
-        if props.size != state.size {
-            state.size = props.size;
-            changed = true;
-        }
-        if props.font != state.font {
-            state.font = props.font.clone();
-            changed = true;
+        if let Some(buffer) = props.buffer {
+            if buffer.text() != state.content {
+                state.content.replace_range(.., buffer.text());
+                changed = true;
+            }
+            if props.size != state.size {
+                state.size = props.size;
+                changed = true;
+            }
+            if props.font != state.font {
+                state.font = props.font.clone();
+                changed = true;
+            }
+        } else {
+            changed = !state.content.is_empty();
+            state.content.clear();
         }
         if changed {
-            state.layout = ui.layout(props.content, props.font.as_ref(), props.size);
+            state.layout = ui.layout(&state.content, props.font.as_ref(), props.size);
         }
     }
 
     fn update(msg: Self::Msg, _state: Mut<Self::State>, ui: &mut UiUpdate) {
         match msg {
             TextEditMsg::Insertion(ch) => {
-                ui.emit(TextEditEvent::Insertion(ch));
+                ui.emit(BufferUpdate::Insert(ch));
             }
             TextEditMsg::Deletion => {
-                ui.emit(TextEditEvent::Deletion);
+                ui.emit(BufferUpdate::Delete(-1));
             }
         }
     }
