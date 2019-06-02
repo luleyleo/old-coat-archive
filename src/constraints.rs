@@ -41,6 +41,23 @@ impl BoxConstraints {
         self
     }
 
+    pub fn tighten(self, size: Size) -> Self {
+        self.tighten_width(size.width)
+            .tighten_height(size.height)
+    }
+
+    pub fn tighten_width(mut self, width: Scalar) -> Self {
+        self.min_width -= width;
+        self.max_width.map(|it| it - width);
+        self
+    }
+
+    pub fn tighten_height(mut self, height: Scalar) -> Self {
+        self.min_height -= height;
+        self.max_height.map(|it| it - height);
+        self
+    }
+
     pub fn check_width(&self, width: Scalar) -> Scalar {
         if width < self.min_width {
             self.min_width
