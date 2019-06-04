@@ -31,15 +31,19 @@ impl Component for Offset {
         *state = *props;
     }
 
-    fn layout(state: &Self, children: &[Cid], constraints: BoxConstraints, ui: &mut UiLayout) -> Size {
+    fn layout(
+        state: &Self,
+        children: &[Cid],
+        constraints: BoxConstraints,
+        ui: &mut UiLayout,
+    ) -> Size {
         let constraints = constraints.tighten(Size::new(state.x, state.y));
         let mut largest = Size::zero();
         for child in children {
-            let size = ui.size(*child, constraints); 
+            let size = ui.size(*child, constraints);
             largest = largest.max(size);
             ui.position(*child, Position::new(state.x, state.y));
         }
         return largest;
     }
-}    
-
+}

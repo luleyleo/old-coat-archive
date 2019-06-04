@@ -82,7 +82,9 @@ impl std::hash::Hash for Iid {
 /// ```
 #[macro_export]
 macro_rules! iid {
-    () => { iid!(Unnamed) };
+    () => {
+        iid!(Unnamed)
+    };
     ($id:ident) => {
         $crate::Iid::new(Some(stringify!($id)), {
             #[allow(non_camel_case_types)]

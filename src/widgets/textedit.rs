@@ -106,11 +106,15 @@ impl<'a> Component for TextEdit<'a> {
         Offset::new().x(x_offset).set(iid!(), ui).add(|| {
             let height = state.layout.size.height;
             let width = 2.0;
-            Constrained::new().max_width(width).max_height(height).set(iid!(), ui).add(|| {
-                Rectangle::new()
-                    .color(Color::rgb(0.0, 0.0, 0.0))
-                    .set(iid!(Cursor), ui);
-            });
+            Constrained::new()
+                .max_width(width)
+                .max_height(height)
+                .set(iid!(), ui)
+                .add(|| {
+                    Rectangle::new()
+                        .color(Color::rgb(0.0, 0.0, 0.0))
+                        .set(iid!(Cursor), ui);
+                });
         });
 
         TextInputArea::new()
@@ -128,7 +132,7 @@ impl<'a> Component for TextEdit<'a> {
         constraints: BoxConstraints,
         ui: &mut UiLayout,
     ) -> Size {
-        const CHILD_COUNT:usize = 3;
+        const CHILD_COUNT: usize = 3;
         if children.len() != CHILD_COUNT {
             let name = ui.full_debug_name();
             log::error!(
@@ -139,7 +143,7 @@ impl<'a> Component for TextEdit<'a> {
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
         let size = constraints.check_size(state.layout.size);
-        for child in 0..CHILD_COUNT { 
+        for child in 0..CHILD_COUNT {
             ui.size(children[child], BoxConstraints::new_tight(size));
         }
 

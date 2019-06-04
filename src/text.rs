@@ -38,7 +38,9 @@ impl Buffer {
                 self.cursor += 1;
             }
             Delete(direction) => {
-                if direction == 0 { return }
+                if direction == 0 {
+                    return;
+                }
                 let len = self.text.len() as isize;
                 let (start, end) = {
                     let cursor = self.cursor as isize;
@@ -52,7 +54,7 @@ impl Buffer {
                     // Remember that `.min` and `.max` are weird
                     (
                         raw.0.max(0).min(len) as usize,
-                        raw.1.max(0).min(len) as usize
+                        raw.1.max(0).min(len) as usize,
                     )
                 };
                 self.text.replace_range(start..end, "");

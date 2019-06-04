@@ -42,8 +42,7 @@ impl BoxConstraints {
     }
 
     pub fn tighten(self, size: Size) -> Self {
-        self.tighten_width(size.width)
-            .tighten_height(size.height)
+        self.tighten_width(size.width).tighten_height(size.height)
     }
 
     pub fn tighten_width(mut self, width: Scalar) -> Self {

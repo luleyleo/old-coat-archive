@@ -3,7 +3,9 @@
 use coat::backend::winit::{AppEvent, Window};
 use coat::layouts::*;
 use coat::widgets::*;
-use coat::{iid, iids, Buffer, BufferUpdate, Color, Component, MouseButton, Mut, Size, UiUpdate, UiView};
+use coat::{
+    iid, iids, Buffer, BufferUpdate, Color, Component, MouseButton, Mut, Size, UiUpdate, UiView,
+};
 
 #[derive(Default)]
 struct DevApp;
