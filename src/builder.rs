@@ -23,13 +23,13 @@ impl<Parent: Component, Ancestor: Component> ContentBuilder<Parent, Ancestor> {
         }
     }
 
-    pub fn on_event(
+    pub fn map_events(
         self,
         ui: &mut UiView<Ancestor>,
         handler: impl Fn(Parent::Event) -> Option<Ancestor::Msg>,
     ) -> Self {
         if let Some(_parent) = self.parent.get() {
-            ui.on_event::<Parent, _>(self.ancestor, handler);
+            ui.map_events::<Parent, _>(self.ancestor, handler);
         }
         self
     }

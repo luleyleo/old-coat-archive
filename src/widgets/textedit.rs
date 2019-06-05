@@ -119,7 +119,7 @@ impl<'a> Component for TextEdit<'a> {
 
         TextInputArea::new()
             .set(iid!(), ui)
-            .on_event(ui, |event| match event {
+            .map_events(ui, |event| match event {
                 Add(ch) => Some(TextEditMsg::Insertion(ch)),
                 Backspace => Some(TextEditMsg::Deletion),
                 Delete => Some(TextEditMsg::Deletion),

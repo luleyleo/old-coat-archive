@@ -53,7 +53,7 @@ impl Component for TextInputArea {
         use TextInputAreaMsg::*;
         TouchArea::new()
             .set(iid!(), ui)
-            .on_event(ui, |event| match event {
+            .map_events(ui, |event| match event {
                 TouchAreaEvent::Pressed(_) => Some(Focus),
                 _ => None,
             });
