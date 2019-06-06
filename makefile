@@ -10,6 +10,9 @@ check-dev:
 build:
 	cargo build
 
+format:
+	cargo fmt
+
 dev:
 	$(DBG_FLAGS) cargo run --example dev
 
