@@ -4,6 +4,13 @@ pub struct TextEdit<'a> {
     buffer: Option<&'a Buffer>,
     size: FontSize,
     font: Option<Font>,
+    cursor: CursorStyle,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct CursorStyle {
+    width: Scalar,
+    color: Color,
 }
 
 impl<'a> Default for TextEdit<'a> {
@@ -12,6 +19,10 @@ impl<'a> Default for TextEdit<'a> {
             buffer: None,
             size: 12,
             font: None,
+            cursor: CursorStyle {
+                width: 2.0,
+                color: Color::rgb(0.1, 0.1, 0.1),
+            },
         }
     }
 }
@@ -31,6 +42,11 @@ impl<'a> TextEdit<'a> {
         self.font = Some(font);
         self
     }
+
+    pub fn style(mut self, style: CursorStyle) -> Self {
+        self.cursor = style;
+        self
+    }
 }
 
 pub struct TextEditState {
@@ -38,6 +54,7 @@ pub struct TextEditState {
     pub size: FontSize,
     pub font: Option<Font>,
     pub layout: TextLayout,
+    pub cursor: CursorStyle,
 }
 
 pub enum TextEditMsg {
@@ -56,6 +73,7 @@ impl<'a> Component for TextEdit<'a> {
             size: props.size,
             font: props.font.clone(),
             layout: TextLayout::default(),
+            cursor: props.cursor,
         }
     }
 
@@ -78,6 +96,10 @@ impl<'a> Component for TextEdit<'a> {
             changed = !state.content.is_empty();
             state.content.clear();
         }
+        if props.cursor != state.cursor {
+            state.cursor = props.cursor;
+            changed = true;
+        }
         if changed {
             state.layout = ui.layout(&state.content, props.font.as_ref(), props.size);
         }
@@ -94,7 +116,7 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn view(_props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
+    fn view(props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         use crate::widgets::TextInputAreaEvent::*;
 
         Glyphs::new()
@@ -102,17 +124,16 @@ impl<'a> Component for TextEdit<'a> {
             .text(&state.layout)
             .set(iid!(), ui);
 
-        let x_offset = state.layout.size.width + 2.0;
-        Offset::new().x(x_offset).set(iid!(), ui).add(|| {
+        let x_offset = state.layout.size.width;
+        Offset::new().x(x_offset + props.cursor.width).set(iid!(), ui).add(|| {
             let height = state.layout.size.height;
-            let width = 2.0;
             Constrained::new()
-                .max_width(width)
+                .max_width(props.cursor.width)
                 .max_height(height)
                 .set(iid!(), ui)
                 .add(|| {
                     Rectangle::new()
-                        .color(Color::rgb(0.0, 0.0, 0.0))
+                        .color(props.cursor.color)
                         .set(iid!(Cursor), ui);
                 });
         });
@@ -140,6 +161,8 @@ impl<'a> Component for TextEdit<'a> {
                 name
             );
         }
+
+        let constraints = constraints.min_width(constraints.min_width.max(state.cursor.width));
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
         let size = constraints.check_size(state.layout.size);
