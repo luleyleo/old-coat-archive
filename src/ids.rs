@@ -1,5 +1,3 @@
-use std::any::TypeId;
-
 /// A "Component Identifier"
 ///
 /// This is the id used to reference a components data
@@ -44,15 +42,16 @@ impl Cid {
 #[derive(Clone, Copy, Debug)]
 pub struct Iid {
     pub(crate) name: Option<&'static str>,
-    pub(crate) id: TypeId,
+    pub(crate) id: IidSecret,
 }
+pub(crate) type IidSecret = (u32, u32);
 
 impl Iid {
     /// **Don't use this**
     ///
     /// `Iid`s should be created using `iids!()` and `iid()` but this has to
     /// be public to make the macros work from other crates
-    pub fn new(name: Option<&'static str>, id: TypeId) -> Self {
+    pub const fn new(name: Option<&'static str>, id: IidSecret) -> Self {
         Iid { name, id }
     }
 }
@@ -86,11 +85,10 @@ macro_rules! iid {
         iid!(Unnamed)
     };
     ($id:ident) => {
-        $crate::Iid::new(Some(stringify!($id)), {
-            #[allow(non_camel_case_types)]
-            struct $id;
-            std::any::TypeId::of::<$id>()
-        })
+        $crate::Iid::new(Some(stringify!($id)), (line!(), column!()))
+    };
+    ($id:ident; $offset:expr) => {
+        $crate::Iid::new(Some(stringify!($id)), (line!(), column!() + $offset))
     };
 }
 
@@ -105,13 +103,15 @@ macro_rules! iid {
 /// ```
 #[macro_export]
 macro_rules! iids {
-    ($($id:ident),*,) => {
-        $crate::ids!($($id),*);
+    ($id:ident, $($ids:ident),*) => {
+        $crate::iids!(0; $id, $($ids),*);
     };
-    ($($id:ident),*) => {
-        $(
-            #[allow(non_snake_case)]
-            let $id: $crate::Iid = $crate::iid!($id);
-        )*
+    ($offset:expr; $id:ident) => {
+        #[allow(non_upper_case_globals)]
+        const $id: $crate::Iid = $crate::iid!($id; $offset);
+    };
+    ($offset:expr; $id:ident, $($ids:ident),*) => {
+        $crate::iids!($offset; $id);
+        $crate::iids!($offset + 1; $($ids),*);
     };
 }

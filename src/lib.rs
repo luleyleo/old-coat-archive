@@ -14,6 +14,7 @@ mod constraints;
 pub use self::constraints::BoxConstraints;
 
 mod ids;
+use self::ids::IidSecret;
 pub use self::ids::{Cid, Iid};
 
 pub mod ui;

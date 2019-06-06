@@ -1,4 +1,4 @@
-use crate::{Cid, Component, ComponentPointer, Position, Size};
+use crate::{Cid, Component, ComponentPointer, IidSecret, Position, Size};
 use fnv::FnvHashMap;
 use smallvec::SmallVec;
 use std::any::{Any, TypeId};
@@ -20,7 +20,7 @@ pub(crate) struct UiData {
     pub(crate) children: Vec<Vec<Cid>>,
     /// Similar to `UiData::children` but maps the per-component
     /// child identifier to the associated `Cid` used to index the `UiData`.
-    pub(crate) creations: Vec<FnvHashMap<TypeId, Cid>>,
+    pub(crate) creations: Vec<FnvHashMap<IidSecret, Cid>>,
     /// Stores a `Component`s `Position` relative to its parent
     pub(crate) position: Vec<Position>,
     /// Stores the `Component`s final `Size` that fits its `BoxConstraints`
