@@ -1,5 +1,5 @@
 use crate::backend::winit::DEFAULT_FONT_NAME;
-use crate::{Bounds, Font, FontSize, LayoutGlyph, Position, Size, TextLayout};
+use crate::{Bounds, Font, FontSize, LayoutGlyph, Position, Scalar, Size, TextLayout};
 use fnv::FnvHashMap as HashMap;
 use webrender::api::{
     AddFont, AddFontInstance, FontInstanceKey, FontKey, RenderApi, ResourceUpdate,
@@ -101,8 +101,13 @@ impl FontManager {
             x: size * 1.2,
             y: size,
         };
-        let point = rusttype::Point { x: 0.0, y: 0.0 };
         let font = &self.fonts[font.unwrap_or(self.default_font())].rusttype;
+        let vmetrics = font.v_metrics(scale);
+        // NOTE: The descent offset compensates for ignoring the baseline
+        let point = rusttype::Point {
+            x: 0.0,
+            y: vmetrics.descent,
+        };
         let glyphs: Vec<LayoutGlyph> = font
             .layout(text, scale, point)
             .map(|glyph| {
@@ -119,10 +124,12 @@ impl FontManager {
             })
             .collect();
 
+        // NOTE: The descent is usually negative
+        let height = (vmetrics.descent.abs() + vmetrics.ascent.abs()) as Scalar;
         let size = glyphs
             .last()
-            .map(|glyph| Size::new(glyph.bounds.max_x(), glyph.bounds.max_y()))
-            .unwrap_or(Size::zero());
+            .map(|glyph| Size::new(glyph.bounds.max_x(), height))
+            .unwrap_or(Size::new(0.0, height));
 
         TextLayout { size, glyphs }
     }
