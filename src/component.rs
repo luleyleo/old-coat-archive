@@ -52,7 +52,7 @@ pub trait Component: Default + Sized {
     }
 
     #[allow(unused_variables)]
-    fn input(input: &mut UiInput<Self>) {}
+    fn input(state: &Self::State, input: &mut UiInput<Self>) {}
 
     #[allow(unused_variables)]
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {}
@@ -113,8 +113,10 @@ where
     }
 
     fn dyn_input(input: &mut UiInputBase) {
+        let state: &Box<Any> = input.state[input.cid.get()].as_ref().unwrap();
+        let state: &Self::State = state.downcast_ref().unwrap();
         let mut input = UiInput::new(input);
-        Self::input(&mut input);
+        Self::input(state, &mut input);
     }
 }
 

@@ -59,7 +59,7 @@ impl Component for TextInputArea {
             });
     }
 
-    fn input(ui: &mut UiInput<Self>) {
+    fn input(_state: &Self::State, ui: &mut UiInput<Self>) {
         use crate::{KeyboardEvent, MouseEvent, TouchEvent};
 
         for (event, _) in ui.input.iter_all_events() {

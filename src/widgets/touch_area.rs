@@ -63,7 +63,7 @@ impl Component for TouchArea {
         }
     }
 
-    fn input(ui: &mut UiInput<Self>) {
+    fn input(_state: &Self::State, ui: &mut UiInput<Self>) {
         use crate::{ButtonState, MouseEvent, TouchEvent};
 
         for event in ui.input.iter_spoiled_events() {

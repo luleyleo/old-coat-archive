@@ -67,9 +67,10 @@ pub(crate) struct UiInputBase<'a> {
     children: &'a Vec<Vec<Cid>>,
     position: &'a Vec<Position>,
     size: &'a Vec<Size>,
+    pub state: &'a Vec<Option<Box<Any>>>,
     messages: &'a mut Vec<Option<Box<Any>>>,
     input: &'a mut Input,
-    cid: Cid,
+    pub cid: Cid,
 }
 
 impl<'a> UiInputBase<'a> {
@@ -80,6 +81,7 @@ impl<'a> UiInputBase<'a> {
             children: &data.children,
             position: &data.position,
             size: &data.size,
+            state: &data.state,
             messages: &mut data.messages,
             input,
             cid: Cid::invalid(),
