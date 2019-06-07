@@ -59,8 +59,7 @@ pub struct TextEditState {
 
 pub enum TextEditMsg {
     Insert(char),
-    Delete,
-    Backspace,
+    Keyboard(KeyboardEvent),
 }
 
 impl<'a> Component for TextEdit<'a> {
@@ -111,11 +110,8 @@ impl<'a> Component for TextEdit<'a> {
             TextEditMsg::Insert(ch) => {
                 ui.emit(BufferUpdate::Insert(ch));
             }
-            TextEditMsg::Backspace => {
-                ui.emit(BufferUpdate::Delete(-1));
-            }
-            TextEditMsg::Delete => {
-                ui.emit(BufferUpdate::Delete(1));
+            TextEditMsg::Keyboard(event) => {
+                ui.emit(BufferUpdate::Keyboard(event));
             }
         }
     }
@@ -126,8 +122,24 @@ impl<'a> Component for TextEdit<'a> {
             .text(&state.layout)
             .set(iid!(), ui);
 
-        let x_offset = state.layout.size.width;
-        Offset::new().x(x_offset + props.cursor.width).set(iid!(), ui).add(|| {
+        let x_offset = if let Some(buffer) = props.buffer {
+            if buffer.cursor() > 0 {
+                state
+                    .layout
+                    .glyphs
+                    .iter()
+                    .skip(buffer.cursor() - 1)
+                    .next()
+                    .map(|glyph| glyph.bounds.origin.x + glyph.bounds.size.width)
+                    .unwrap_or(0.0)
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        };
+
+        Offset::new().x(x_offset).set(iid!(), ui).add(|| {
             let height = state.layout.size.height;
             Constrained::new()
                 .max_width(props.cursor.width)
@@ -140,19 +152,11 @@ impl<'a> Component for TextEdit<'a> {
                 });
         });
 
-
-        use VirtualKeyCode as Code;
         KeyArea::new()
-            .filter(|event| {
-                event.keycode == Some(Code::Backspace) || event.keycode == Some(Code::Delete)
-            })
+            .filter(Buffer::event_filter)
             .set(iid!(), ui)
             .map_events(ui, |event| match event {
-                KeyAreaEvent::Key(event) => match event.keycode {
-                    Some(Code::Backspace) => Some(TextEditMsg::Backspace),
-                    Some(Code::Delete) => Some(TextEditMsg::Delete),
-                    _ => unreachable!(),
-                },
+                KeyAreaEvent::Key(event) => Some(TextEditMsg::Keyboard(event)),
                 KeyAreaEvent::Text(ch) => Some(TextEditMsg::Insert(ch)),
                 KeyAreaEvent::Focus(_) => None,
             });
