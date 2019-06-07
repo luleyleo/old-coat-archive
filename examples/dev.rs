@@ -31,7 +31,7 @@ impl Component for DevApp {
         Self::State {
             hellos: 0,
             hovered: false,
-            text: Buffer::from("Woop!".to_owned()),
+            text: Buffer::from("Edit me!".to_owned()),
         }
     }
 
@@ -70,11 +70,11 @@ impl Component for DevApp {
                             .color(Color::rgb(0.7, 0.3, 0.7))
                             .set(iid!(), ui);
 
-                        let btn_size = Size::new(100.0, 30.0);
-                        Constrained::new().max(btn_size).set(iid!(), ui).add(|| {
+                        let box_size = Size::new(150.0, 30.0);
+                        Constrained::new().max(box_size).set(iid!(), ui).add(|| {
                             Stack::new().set(iid!(), ui).add(|| {
                                 Rectangle::new()
-                                    .color(Color::rgb(0.3, 0.7, 0.3))
+                                    .color(Color::rgb(0.3, 0.3, 0.5))
                                     .set(iid!(), ui);
 
                                 TextEdit::new()
