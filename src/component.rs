@@ -44,7 +44,7 @@ pub trait Component: Default + Sized {
         } else {
             if children.len() > 1 {
                 let name = ui.full_debug_name();
-                log::error!("The default layout function is beeing applied to {} which hosts multiple children while this layout function only considers the first one", name);
+                log::error!("The default layout function is being applied to {} which hosts multiple children while this layout function only considers the first one", name);
             }
             let child = children[0];
             ui.size(child, constraints)
