@@ -13,5 +13,5 @@ pub use self::textedit::TextEdit;
 mod touch_area;
 pub use self::touch_area::{TouchArea, TouchAreaEvent};
 
-mod text_input_area;
-pub use self::text_input_area::{TextInputArea, TextInputAreaEvent};
+mod key_area;
+pub use self::key_area::{KeyArea, KeyAreaEvent, KeyAreaFilter};

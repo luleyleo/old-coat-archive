@@ -30,18 +30,21 @@ pub enum TouchPhase {
     Cancelled,
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct MouseEvent {
     pub position: Position,
     pub button: MouseButton,
     pub state: ButtonState,
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct TouchEvent {
     pub position: Position,
     pub phase: TouchPhase,
     pub index: u64,
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct KeyboardEvent {
     pub scancode: u32,
     pub keycode: Option<VirtualKeyCode>,

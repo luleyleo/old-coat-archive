@@ -58,8 +58,9 @@ pub struct TextEditState {
 }
 
 pub enum TextEditMsg {
-    Insertion(char),
-    Deletion,
+    Insert(char),
+    Delete,
+    Backspace,
 }
 
 impl<'a> Component for TextEdit<'a> {
@@ -107,18 +108,19 @@ impl<'a> Component for TextEdit<'a> {
 
     fn update(msg: Self::Msg, _state: Mut<Self::State>, ui: &mut UiUpdate) {
         match msg {
-            TextEditMsg::Insertion(ch) => {
+            TextEditMsg::Insert(ch) => {
                 ui.emit(BufferUpdate::Insert(ch));
             }
-            TextEditMsg::Deletion => {
+            TextEditMsg::Backspace => {
                 ui.emit(BufferUpdate::Delete(-1));
+            }
+            TextEditMsg::Delete => {
+                ui.emit(BufferUpdate::Delete(1));
             }
         }
     }
 
     fn view(props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
-        use crate::widgets::TextInputAreaEvent::*;
-
         Glyphs::new()
             .size(state.size)
             .text(&state.layout)
@@ -138,12 +140,21 @@ impl<'a> Component for TextEdit<'a> {
                 });
         });
 
-        TextInputArea::new()
+
+        use VirtualKeyCode as Code;
+        KeyArea::new()
+            .filter(|event| {
+                event.keycode == Some(Code::Backspace) || event.keycode == Some(Code::Delete)
+            })
             .set(iid!(), ui)
             .map_events(ui, |event| match event {
-                Add(ch) => Some(TextEditMsg::Insertion(ch)),
-                Backspace => Some(TextEditMsg::Deletion),
-                Delete => Some(TextEditMsg::Deletion),
+                KeyAreaEvent::Key(event) => match event.keycode {
+                    Some(Code::Backspace) => Some(TextEditMsg::Backspace),
+                    Some(Code::Delete) => Some(TextEditMsg::Delete),
+                    _ => unreachable!(),
+                },
+                KeyAreaEvent::Text(ch) => Some(TextEditMsg::Insert(ch)),
+                KeyAreaEvent::Focus(_) => None,
             });
     }
 
