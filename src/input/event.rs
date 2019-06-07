@@ -30,27 +30,33 @@ pub enum TouchPhase {
     Cancelled,
 }
 
+pub struct MouseEvent {
+    pub position: Position,
+    pub button: MouseButton,
+    pub state: ButtonState,
+}
+
+pub struct TouchEvent {
+    pub position: Position,
+    pub phase: TouchPhase,
+    pub index: u64,
+}
+
+pub struct KeyboardEvent {
+    pub scancode: u32,
+    pub keycode: Option<VirtualKeyCode>,
+    pub state: ButtonState,
+    pub modifiers: ModifiersState,
+}
+
 pub enum Event {
-    CursorMoved {
-        position: Position,
-    },
-    // TODO: Think of a better name (MouseClick?)
-    MouseInput {
-        position: Position,
-        button: MouseButton,
-        pressed: bool,
-    },
-    Touch {
-        position: Position,
-        phase: TouchPhase,
-        index: u64,
-    },
-    CharacterInput(char),
-    Keyboard {
-        scancode: u32,
-        state: ButtonState,
-        keycode: Option<VirtualKeyCode>,
-        modifiers: ModifiersState,
-    },
+    Cursor(Position),
+    Mouse(MouseEvent),
+    Touch(TouchEvent),
+    Keyboard(KeyboardEvent),
+    Character(char),
+
+    /// There are probably going to be more events
+    /// and #[not_exhaustive] is not stable yet
     SomeFutureEventPleaseUseAn_,
 }

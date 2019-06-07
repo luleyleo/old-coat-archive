@@ -64,11 +64,13 @@ impl Component for TouchArea {
     }
 
     fn input(ui: &mut UiInput<Self>) {
+        use crate::{ButtonState, MouseEvent, TouchEvent};
+
         for event in ui.input.iter_spoiled_events() {
             match event {
-                Event::MouseInput { position, .. }
-                | Event::CursorMoved { position, .. }
-                | Event::Touch { position, .. } => {
+                Event::Mouse(MouseEvent { position, .. })
+                | Event::Cursor(position)
+                | Event::Touch(TouchEvent { position, .. }) => {
                     if ui.bounds.contains(position) {
                         // Something else has been interacted with :(
                         // This can happen (theoretically) when another
@@ -81,13 +83,13 @@ impl Component for TouchArea {
         }
         for (event, handled) in ui.input.iter_fresh_events() {
             match event {
-                Event::MouseInput {
+                Event::Mouse(MouseEvent {
                     position,
                     button,
-                    pressed,
-                } => {
+                    state,
+                }) => {
                     if ui.bounds.contains(position) {
-                        if *pressed {
+                        if *state == ButtonState::Pressed {
                             ui.messages.send(TouchAreaEvent::Pressed(*button));
                         } else {
                             ui.messages.send(TouchAreaEvent::Released(*button));
@@ -95,7 +97,7 @@ impl Component for TouchArea {
                         *handled = true;
                     }
                 }
-                Event::CursorMoved { position } => {
+                Event::Cursor(position) => {
                     let position = if ui.bounds.contains(position) {
                         *handled = true;
                         Some(*position)

@@ -60,10 +60,13 @@ impl Component for TextInputArea {
     }
 
     fn input(ui: &mut UiInput<Self>) {
+        use crate::{KeyboardEvent, MouseEvent, TouchEvent};
+
         for (event, _) in ui.input.iter_all_events() {
             match event {
                 // TODO: Should pressing ESC also unfocus?
-                Event::MouseInput { position, .. } | Event::Touch { position, .. } => {
+                Event::Mouse(MouseEvent { position, .. })
+                | Event::Touch(TouchEvent { position, .. }) => {
                     if !ui.bounds.contains(position) {
                         ui.messages.send(TextInputAreaMsg::Unfocus);
                     }
@@ -77,13 +80,13 @@ impl Component for TextInputArea {
             use TextInputAreaMsg::Edit;
 
             match event {
-                Event::CharacterInput(c) => {
+                Event::Character(c) => {
                     if !c.is_control() {
                         ui.messages.send(Edit(Add(*c)));
                         *consumed = true;
                     }
                 }
-                Event::Keyboard { state, keycode, .. } => {
+                Event::Keyboard(KeyboardEvent { state, keycode, .. }) => {
                     if state == &ButtonState::Pressed {
                         match keycode {
                             Some(VirtualKeyCode::Backspace) => {

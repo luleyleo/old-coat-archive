@@ -39,7 +39,8 @@ pub use self::color::Color;
 mod input;
 use self::input::Input;
 pub use self::input::{
-    ButtonState, Event, ModifiersState, MouseButton, TouchPhase, VirtualKeyCode,
+    ButtonState, Event, KeyboardEvent, ModifiersState, MouseButton, MouseEvent, TouchEvent,
+    TouchPhase, VirtualKeyCode,
 };
 
 mod text;
