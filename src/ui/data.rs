@@ -44,7 +44,7 @@ pub(crate) struct UiData {
 impl UiData {
     pub(crate) fn fresh_id(&mut self) -> Cid {
         let id = Cid::new(self.id_count);
-        log::trace!("Allocated {:?}", id);
+        log::trace!("Allocated new id {:?}", id);
         self.id_count += 1;
 
         self.typeids.push(TypeIds::void());

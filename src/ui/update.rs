@@ -1,5 +1,4 @@
 use crate::{Cid, Component, ComponentPointer, Font, Renderer, TypeIds, UiData};
-use log::{trace, warn};
 use std::any::{Any, TypeId};
 
 pub struct UiUpdate<'a> {
@@ -43,7 +42,7 @@ impl<'a> UiUpdate<'a> {
                 return;
             }
         }
-        warn!("Tried to bubble a message but the targeted Component does not exist");
+        log::warn!("Tried to bubble a message but the targeted Component does not exist");
     }
 
     pub fn add_font(&mut self, font: &Font, data: impl Into<Vec<u8>>) {
@@ -64,10 +63,10 @@ impl<'a> UiUpdate<'a> {
 
     pub(crate) fn run(data: &'a mut UiData, renderer: &'a mut Renderer, root: Cid) -> bool {
         if data.is_fresh(root) {
-            trace!("Skipping `UiUpdate`");
+            log::trace!("Skipping `UiUpdate`");
             return true;
         }
-        trace!("Running `UiUpdate`");
+        log::trace!("Running `UiUpdate`");
 
         let mut ui = UiUpdate {
             typeids: &data.typeids,
@@ -88,14 +87,12 @@ impl<'a> UiUpdate<'a> {
 
     fn visit(&mut self, cid: Cid) {
         {
-            trace!("Detaching the `state` of {:?} in order to `update`", cid);
             let mut messages = self.messages[cid.get()].take().unwrap();
             let mut state = self.state[cid.get()].take().unwrap();
 
             let pointer = self.pointer[cid.get()];
             (pointer.update)(&mut messages, &mut state, self);
 
-            trace!("Reataching the `state` of {:?} after `update`ing", cid);
             self.messages[cid.get()] = Some(messages);
             self.state[cid.get()] = Some(state);
         }

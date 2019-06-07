@@ -112,12 +112,6 @@ impl Component for Constrained {
             }
         }
 
-        log::trace!(
-            "BoxConstraints for `Constrained` layout {} are {:?}",
-            ui.full_debug_name(),
-            constraints,
-        );
-
         ui.size(children[0], constraints)
     }
 }

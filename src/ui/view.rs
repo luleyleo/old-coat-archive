@@ -43,7 +43,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
     pub(crate) fn run(data: &'a mut UiData, renderer: &'a mut Renderer, app_id: Cid, props: Comp) {
         log::trace!("Running `UiView`");
         if data.typeids[app_id.get()] == TypeIds::void() {
-            log::trace!("Initializing Root Component with {:?}", app_id);
+            log::trace!("Initializing root component with {:?}", app_id);
             data.typeids[app_id.get()] = TypeIds::of::<Comp>();
             data.name[app_id.get()] = "Root";
             data.pointer[app_id.get()] = Comp::pointer();
@@ -51,24 +51,14 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             data.messages[app_id.get()] = Some(Box::new(Vec::<Comp::Msg>::new()));
             data.events[app_id.get()] = Box::new(Vec::<Comp::Event>::new());
 
-            log::trace!("View set: {}", data.full_debug_name_of(app_id));
+            log::trace!("Root component set: {}", data.full_debug_name_of(app_id));
         }
 
-        log::trace!(
-            "Detaching the `state` of Root with {:?} to setup the `view`",
-            app_id
-        );
         let state = data.state[app_id.get()].take().unwrap();
-
         {
             let mut ui = UiView::new(data, renderer, app_id);
             Comp::view(&props, state.downcast_ref().unwrap(), &mut ui);
         }
-
-        log::trace!(
-            "Reataching the `state` of Root with {:?} after setting up the `view`",
-            app_id
-        );
         data.state[app_id.get()] = Some(state);
     }
 
@@ -86,7 +76,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             .cloned()
             .unwrap_or_else(|| {
                 let cid = self.data.fresh_id();
-                log::trace!("Initializing {} Component with {:?}", name, cid);
+                log::trace!("Initializing component \"{}\" with {:?}", name, cid);
                 self.data.creations[self.cid.get()].insert(tid, cid);
 
                 let parent = self.parent.get().unwrap_or(self.cid);
@@ -100,13 +90,15 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
                 self.data.messages[cid.get()] = Some(Box::new(Vec::<NewComp::Msg>::new()));
                 self.data.events[cid.get()] = Box::new(Vec::<NewComp::Event>::new());
 
-                log::trace!("View set: {}", self.data.full_debug_name_of(cid));
+                log::trace!(
+                    "Initial component set: {}",
+                    self.data.full_debug_name_of(cid)
+                );
 
                 cid
             });
-        log::trace!("Detaching the `state` of {:?} to setup the `view`", cid);
-        let mut state = self.data.state[cid.get()].take().unwrap();
 
+        let mut state = self.data.state[cid.get()].take().unwrap();
         {
             let current_parent = self.parent.get();
             self.parent.set(Some(cid));
@@ -124,17 +116,12 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
 
             self.parent.set(current_parent);
         }
-
-        log::trace!(
-            "Reataching the `state` of {:?} after setting up the `view`",
-            cid
-        );
         self.data.state[cid.get()] = Some(state);
 
         ContentBuilder::new(cid, self.parent.clone())
     }
 
-    /// Note: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
+    /// TODO: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
     /// This will only be called by a `ContentBuilder` to guarantee type safety.
     pub(crate) fn map_events<Emitter, Handler>(&mut self, emitter: Cid, handler: Handler)
     where

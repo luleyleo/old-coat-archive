@@ -69,7 +69,6 @@ impl Component for Padding {
         constraints.max_width = width;
         constraints.max_height = height;
 
-        log::trace!("Padding with {:?}", constraints);
         let size = ui.size(children[0], constraints);
         let position = Position::new(state.left, state.top);
         ui.position(children[0], position);

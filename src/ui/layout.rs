@@ -42,12 +42,6 @@ impl<'a> UiLayout<'a> {
         self.current = previous;
 
         let size = constraints.check_size(proposed);
-        log::trace!(
-            "Sized {} to {:?}",
-            crate::full_debug_name_of(self.parent, self.name, child),
-            size
-        );
-
         self.size[child.get()] = size;
 
         size

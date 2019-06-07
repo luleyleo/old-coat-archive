@@ -17,7 +17,6 @@ impl<'a> UiRender<'a> {
         let position = self.data.position[cid.get()] + offset.to_vector();
         let size = self.data.size[cid.get()];
         let bounds = Bounds::new(position, size);
-        log::trace!("Rendering {:?} at {:?} with {:?}", cid, position, size);
 
         {
             let state = self.data.state[cid.get()].as_ref().unwrap();
