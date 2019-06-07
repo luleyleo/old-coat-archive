@@ -67,11 +67,11 @@ impl Window {
 
         let mut dpr = window.get_hidpi_factor() as f32;
 
-        let mut fresh = true;
         let mut input = Input::new();
         let mut ehandler = EventHandler::new();
         let mut data = UiData::default();
         let app_id = data.fresh_id();
+        let mut resized = false;
 
         let mut renderer = Webrenderer::new(eventloop.create_proxy(), gl.clone(), dpr);
         // TODO: pass `Size` directly
@@ -94,7 +94,7 @@ impl Window {
                         WindowEvent::Resized(lsize) => {
                             self.size = Size::new(lsize.width as f32, lsize.height as f32);
                             renderer.resize(self.size, dpr);
-                            fresh = true;
+                            resized = true;
                         }
                         WindowEvent::HiDpiFactorChanged(new_dpr) => {
                             dpr = (*new_dpr) as f32;
@@ -109,22 +109,18 @@ impl Window {
                 }
             }
 
-            {
-                UiInput::<Comp>::run(&mut data, &mut input, app_id);
-                input.clear_events();
-
-                if fresh | UiUpdate::run(&mut data, &mut renderer, app_id) {
-                    fresh = false;
-
+            // This is where everything happens!
+            if UiInput::<Comp>::run(&mut data, &mut input, app_id) || resized {
+                if UiUpdate::run(&mut data, &mut renderer, app_id) || resized {
                     UiView::<Comp>::run(&mut data, &mut renderer, app_id, Comp::default());
-
                     UiLayout::run(&mut data, app_id, self.size);
-
                     UiRender::run(&data, &mut renderer, app_id);
                     renderer.render();
                 }
             }
 
+            resized = false;
+            input.clear_events();
             renderer.flush();
             window.swap_buffers().ok();
         }

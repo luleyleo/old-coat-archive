@@ -112,11 +112,14 @@ where
         Self::render(state, bounds, renderer);
     }
 
-    fn dyn_input(input: &mut UiInputBase) {
-        let state: &Box<Any> = input.state[input.cid.get()].as_ref().unwrap();
+    fn dyn_input(base: &mut UiInputBase) {
+        let state: &Box<Any> = base.state[base.cid.get()].as_ref().unwrap();
         let state: &Self::State = state.downcast_ref().unwrap();
-        let mut input = UiInput::new(input);
+        let mut input = UiInput::new(base);
         Self::input(state, &mut input);
+        if !input.messages.is_empty() {
+            base.needs_update();
+        }
     }
 }
 

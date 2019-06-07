@@ -7,6 +7,10 @@ impl<'a, C: Component> Messages<'a, C> {
     pub fn send(&mut self, msg: C::Msg) {
         self.0.push(msg);
     }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 pub struct UiInput<'a, C: Component> {
@@ -19,15 +23,16 @@ impl<'a, C> UiInput<'a, C>
 where
     C: Component,
 {
-    pub(crate) fn run(data: &'a mut UiData, input: &'a mut Input, root: Cid) {
+    pub(crate) fn run(data: &'a mut UiData, input: &'a mut Input, root: Cid) -> bool {
         if data.is_fresh(root) {
             log::trace!("Skipping `UiInput`");
-            return;
+            return true;
         }
         log::trace!("Running `UiInput`");
 
         let mut ui = UiInputBase::new(data, input);
         ui.visit(root);
+        return ui.needs_update;
     }
 
     pub(crate) fn new(base: &'a mut UiInputBase) -> Self {
@@ -71,6 +76,7 @@ pub(crate) struct UiInputBase<'a> {
     messages: &'a mut Vec<Option<Box<Any>>>,
     input: &'a mut Input,
     pub cid: Cid,
+    needs_update: bool,
 }
 
 impl<'a> UiInputBase<'a> {
@@ -85,7 +91,12 @@ impl<'a> UiInputBase<'a> {
             messages: &mut data.messages,
             input,
             cid: Cid::invalid(),
+            needs_update: false,
         }
+    }
+
+    pub fn needs_update(&mut self) {
+        self.needs_update = true;
     }
 
     fn visit(&mut self, cid: Cid) {
