@@ -121,7 +121,7 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
         ContentBuilder::new(cid, self.parent.clone())
     }
 
-    /// TODO: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
+    /// NOTE: This function can fail as `C` is not guaranteed to be the correct type for `emitter`
     /// This will only be called by a `ContentBuilder` to guarantee type safety.
     pub(crate) fn map_events<Emitter, Handler>(&mut self, emitter: Cid, handler: Handler)
     where
