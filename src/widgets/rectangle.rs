@@ -1,6 +1,4 @@
-use crate::{
-    Bounds, BoxConstraints, Cid, Color, Component, Renderer, Size, UiDerive, UiLayout, UiView,
-};
+use crate::{Bounds, BoxConstraints, Cid, Color, Component, Renderer, Size, UiDerive, UiLayout};
 
 #[derive(Default, Clone, Copy, PartialEq)]
 pub struct Rectangle {
@@ -29,8 +27,6 @@ impl Component for Rectangle {
         }
     }
 
-    fn view(_: &Self, _: &Self::State, _: &mut UiView<Self>) {}
-
     fn layout(
         _state: &Self::State,
         children: &[Cid],
@@ -45,13 +41,10 @@ impl Component for Rectangle {
             );
         }
 
-        if let Some(width) = constraints.max_width {
-            if let Some(height) = constraints.max_height {
-                return Size::new(width, height);
-            }
-        }
-
-        Size::zero()
+        Size::new(
+            constraints.max_width.unwrap_or(constraints.min_width),
+            constraints.max_height.unwrap_or(constraints.min_height),
+        )
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
