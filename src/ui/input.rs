@@ -1,4 +1,7 @@
-use crate::{component::ComponentPointer, Bounds, Cid, Component, Input, Position, Size, UiData};
+use crate::{
+    component::ComponentPointer, find_focus_state, Bounds, Cid, Component, FocusState, Input,
+    Position, Size, UiData,
+};
 use std::any::Any;
 
 pub struct Messages<'a, C: Component>(&'a mut Vec<C::Msg>);
@@ -14,6 +17,9 @@ impl<'a, C: Component> Messages<'a, C> {
 }
 
 pub struct UiInput<'a, C: Component> {
+    cid: Cid,
+    children: &'a Vec<Vec<Cid>>,
+    focused: &'a Option<Cid>,
     pub messages: Messages<'a, C>,
     pub input: &'a mut Input,
     pub bounds: Bounds,
@@ -55,9 +61,21 @@ where
         let bounds = Bounds::new(position, base.size[base.cid.get()]);
 
         UiInput {
+            cid: base.cid,
+            children: &base.children,
+            focused: &base.focused,
+
             messages,
             input: base.input,
             bounds,
+        }
+    }
+
+    pub fn focus_state(&self) -> FocusState {
+        if let Some(focused) = self.focused {
+            find_focus_state(self.cid, *focused, &self.children)
+        } else {
+            FocusState::None
         }
     }
 
@@ -74,6 +92,8 @@ pub(crate) struct UiInputBase<'a> {
     size: &'a Vec<Size>,
     pub state: &'a Vec<Option<Box<Any>>>,
     messages: &'a mut Vec<Option<Box<Any>>>,
+    focused: &'a Option<Cid>,
+
     input: &'a mut Input,
     pub cid: Cid,
     needs_update: bool,
@@ -89,6 +109,8 @@ impl<'a> UiInputBase<'a> {
             size: &data.size,
             state: &data.state,
             messages: &mut data.messages,
+            focused: &data.focused,
+
             input,
             cid: Cid::invalid(),
             needs_update: false,

@@ -9,6 +9,7 @@ pub struct UiUpdate<'a> {
     messages: &'a mut Vec<Option<Box<Any>>>,
     events: &'a mut Vec<Box<Any>>,
     state: &'a mut Vec<Option<Box<Any>>>,
+    focused: &'a mut Option<Cid>,
     renderer: &'a mut Renderer,
     cid: Cid,
     needs_update: bool,
@@ -25,6 +26,14 @@ impl<'a> UiUpdate<'a> {
             log::error!("Tried to emit a event of the wrong type");
             // TODO: This should not be possible
         }
+    }
+
+    pub fn aquire_focus(&mut self) {
+        *self.focused = Some(self.cid);
+    }
+
+    pub fn lose_focus(&mut self) {
+        *self.focused = None;
     }
 
     /// TODO: Can this be removed?
@@ -76,6 +85,7 @@ impl<'a> UiUpdate<'a> {
             messages: &mut data.messages,
             events: &mut data.events,
             state: &mut data.state,
+            focused: &mut data.focused,
             renderer: renderer,
             cid: root,
             needs_update: false,

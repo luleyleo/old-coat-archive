@@ -1,5 +1,6 @@
 mod data;
-pub(crate) use self::data::{full_debug_name_of, TypeIds, UiData};
+pub use self::data::FocusState;
+pub(crate) use self::data::{find_focus_state, full_debug_name_of, TypeIds, UiData};
 
 mod view;
 pub use self::view::UiView;

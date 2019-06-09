@@ -37,8 +37,41 @@ pub(crate) struct UiData {
     /// Cache events. Similar to `messages` this is a `Vec<Vec<Component::Event>>`
     pub(crate) events: Vec<Box<Any>>,
 
+    /// The focused component, whether or not this is being honored depends on
+    /// the specific component.
+    pub(crate) focused: Option<Cid>,
+
     /// The next `Cid` that will be allocated when needed
     id_count: usize,
+}
+
+/// The focus state of a component.
+/// None -> The focus is outside the component
+/// Owns -> The component is focused
+/// Contains -> A child component of infinite depth owns the focus
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FocusState {
+    None,
+    Owns,
+    Contains,
+}
+
+pub(crate) fn find_focus_state(of: Cid, focused: Cid, children: &Vec<Vec<Cid>>) -> FocusState {
+    use FocusState::*;
+    let cid = of;
+
+    if focused == cid {
+        return Owns;
+    }
+
+    for child in &children[cid.get()] {
+        match find_focus_state(*child, focused, children) {
+            Owns | Contains => return Contains,
+            None => continue,
+        }
+    }
+
+    return None;
 }
 
 impl UiData {

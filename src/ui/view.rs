@@ -1,5 +1,8 @@
 use crate::component::ComponentPointerTrait;
-use crate::{Cid, Component, ContentBuilder, Iid, Renderer, TypeIds, UiData, UiDerive};
+use crate::{
+    find_focus_state, Cid, Component, ContentBuilder, FocusState, Iid, Renderer, TypeIds, UiData,
+    UiDerive,
+};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -18,6 +21,14 @@ pub struct UiView<'a, Comp: Component> {
 }
 
 impl<'a, Comp: Component> UiView<'a, Comp> {
+    pub fn focus_state(&self) -> FocusState {
+        if let Some(focused) = self.data.focused {
+            find_focus_state(self.cid, focused, &self.data.children)
+        } else {
+            FocusState::None
+        }
+    }
+
     pub(crate) fn new(data: &'a mut UiData, renderer: &'a mut Renderer, cid: Cid) -> Self {
         let parent = Rc::new(Cell::new(None));
         UiView {

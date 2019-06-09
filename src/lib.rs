@@ -18,8 +18,8 @@ use self::ids::IidSecret;
 pub use self::ids::{Cid, Iid};
 
 pub mod ui;
-use self::ui::{full_debug_name_of, TypeIds, UiData, UiInputBase, UiRender};
-pub use self::ui::{UiDerive, UiInput, UiLayout, UiUpdate, UiView};
+use self::ui::{find_focus_state, full_debug_name_of, TypeIds, UiData, UiInputBase, UiRender};
+pub use self::ui::{FocusState, UiDerive, UiInput, UiLayout, UiUpdate, UiView};
 
 mod mutable;
 pub use self::mutable::Mut;

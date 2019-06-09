@@ -1,4 +1,4 @@
-use crate::{Component, KeyboardEvent, Mut, UiDerive, UiInput, UiUpdate};
+use crate::{Component, FocusState, KeyboardEvent, Mut, UiDerive, UiInput, UiUpdate};
 
 pub struct KeyArea {
     filter: KeyAreaFilter,
@@ -25,8 +25,6 @@ pub type Interest = bool;
 pub type KeyAreaFilter = fn(event: &KeyboardEvent) -> Interest;
 
 pub struct KeyAreaState {
-    // TODO: This should be handled by a service
-    focused: bool,
     filter: KeyAreaFilter,
 }
 
@@ -52,7 +50,6 @@ impl Component for KeyArea {
 
     fn init(props: &Self) -> Self::State {
         KeyAreaState {
-            focused: false,
             filter: props.filter,
         }
     }
@@ -61,15 +58,15 @@ impl Component for KeyArea {
         state.filter = props.filter;
     }
 
-    fn update(msg: Self::Msg, mut state: Mut<Self::State>, ui: &mut UiUpdate) {
+    fn update(msg: Self::Msg, _state: Mut<Self::State>, ui: &mut UiUpdate) {
         use KeyAreaMsg::*;
         match msg {
             Focus => {
-                state.focused = true;
+                ui.aquire_focus();
                 ui.emit(KeyAreaEvent::Focus(true));
             }
             Unfocus => {
-                state.focused = false;
+                ui.lose_focus();
                 ui.emit(KeyAreaEvent::Focus(false));
             }
             Key(event) => {
@@ -84,16 +81,18 @@ impl Component for KeyArea {
     fn input(state: &Self::State, ui: &mut UiInput<Self>) {
         use crate::{Event, MouseEvent, TouchEvent};
 
+        let focused = ui.focus_state() == FocusState::Owns;
+
         for (event, _) in ui.input.iter_all_events() {
             match event {
                 // TODO: Should pressing ESC also unfocus?
                 Event::Mouse(MouseEvent { position, .. })
                 | Event::Touch(TouchEvent { position, .. }) => {
                     if ui.bounds.contains(position) {
-                        if !state.focused {
+                        if !focused {
                             ui.messages.send(KeyAreaMsg::Focus);
                         }
-                    } else if state.focused {
+                    } else if focused {
                         ui.messages.send(KeyAreaMsg::Unfocus);
                     }
                 }
@@ -101,7 +100,7 @@ impl Component for KeyArea {
             }
         }
 
-        if state.focused {
+        if focused {
             for (event, consumed) in ui.input.iter_fresh_events() {
                 match event {
                     Event::Character(ch) => {
