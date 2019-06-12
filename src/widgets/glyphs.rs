@@ -56,7 +56,7 @@ impl Component for Glyphs<'_> {
         }
     }
 
-    fn derive_state(props: &Self, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, _ui: &UiDerive) {
         if props.size != state.size {
             state.size = props.size;
         }

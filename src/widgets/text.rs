@@ -57,7 +57,7 @@ impl<'a> Component for Text<'a> {
         }
     }
 
-    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &UiDerive) {
         let mut changed = false;
         if props.content != state.content {
             state.content.replace_range(.., props.content);

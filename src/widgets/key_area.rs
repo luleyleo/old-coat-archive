@@ -54,7 +54,7 @@ impl Component for KeyArea {
         }
     }
 
-    fn derive_state(props: &Self, state: &mut Self::State, _ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, _ui: &UiDerive) {
         state.filter = props.filter;
     }
 

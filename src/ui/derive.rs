@@ -1,26 +1,15 @@
-use crate::{webrender::FontManager, Component, Font, FontSize, TextLayout};
+use crate::{webrender::FontManager, Font, FontSize, TextLayout};
 
-pub struct UiDerive<'a, C: Component> {
-    events: &'a mut Vec<C::Event>,
-    fonts: &'a mut FontManager,
-    needs_update: bool,
+pub struct UiDerive<'a> {
+    fonts: &'a FontManager,
 }
 
-impl<'a, C: Component> UiDerive<'a, C> {
-    pub fn new(events: &'a mut Vec<C::Event>, fonts: &'a mut FontManager) -> Self {
-        UiDerive {
-            events,
-            fonts,
-            needs_update: false,
-        }
+impl<'a> UiDerive<'a> {
+    pub fn new(fonts: &'a FontManager) -> Self {
+        UiDerive { fonts }
     }
 
-    pub fn emit(&mut self, event: C::Event) {
-        self.events.push(event);
-        self.needs_update = true;
-    }
-
-    pub fn layout(&mut self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
+    pub fn layout(&self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
         self.fonts.layout(text, font, size)
     }
 }

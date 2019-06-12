@@ -93,7 +93,7 @@ impl FontManager {
         }
     }
 
-    pub fn layout<'a>(&mut self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
+    pub fn layout<'a>(&self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
         let size = size as f32;
         let scale = rusttype::Scale {
             // TODO: Fix glyph overlapping without additional x-scaling

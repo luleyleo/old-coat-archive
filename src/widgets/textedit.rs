@@ -77,7 +77,7 @@ impl<'a> Component for TextEdit<'a> {
         }
     }
 
-    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &UiDerive) {
         let mut changed = false;
         if let Some(buffer) = props.buffer {
             if buffer.text() != state.content {

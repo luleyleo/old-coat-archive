@@ -24,7 +24,7 @@ pub trait Component: Default + Sized {
     fn init(props: &Self) -> Self::State;
 
     #[allow(unused_variables)]
-    fn derive_state(props: &Self, state: &mut Self::State, ui: &mut UiDerive<Self>) {}
+    fn derive_state(props: &Self, state: &mut Self::State, ui: &UiDerive) {}
 
     #[allow(unused_variables)]
     fn update(msg: Self::Msg, state: Mut<Self::State>, ui: &mut UiUpdate) {}

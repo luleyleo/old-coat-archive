@@ -115,11 +115,10 @@ impl<'a, Comp: Component> UiView<'a, Comp> {
             self.parent.set(Some(cid));
 
             {
-                let events = self.data.events[cid.get()].downcast_mut().unwrap();
                 let state = state.downcast_mut().unwrap();
-                let renderer = &mut self.renderer.font_manager;
-                let mut ui = UiDerive::new(events, renderer);
-                NewComp::derive_state(&props, state, &mut ui);
+                let font_manager = &mut self.renderer.font_manager;
+                let ui = UiDerive::new(font_manager);
+                NewComp::derive_state(&props, state, &ui);
             }
 
             let mut ui = self.another(cid);

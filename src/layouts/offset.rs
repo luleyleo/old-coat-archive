@@ -27,7 +27,7 @@ impl Component for Offset {
         *props
     }
 
-    fn derive_state(props: &Self, state: &mut Self, _ui: &mut UiDerive<Self>) {
+    fn derive_state(props: &Self, state: &mut Self, _ui: &UiDerive) {
         *state = *props;
     }
 
