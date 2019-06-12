@@ -4,7 +4,7 @@ use coat::*;
 fn main() {
     env_logger::init();
 
-    Window::new().title("Widgets").run::<App>();
+    Window::new().title("dev: Widgets").run::<App>();
 }
 
 //========================//

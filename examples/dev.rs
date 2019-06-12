@@ -125,5 +125,5 @@ fn hello_handler(event: TouchAreaEvent) -> Option<Msg> {
 fn main() {
     env_logger::init();
 
-    Window::new().title("Dev App").run::<DevApp>();
+    Window::new().title("dev: App").run::<DevApp>();
 }
