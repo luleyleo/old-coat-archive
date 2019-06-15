@@ -1,5 +1,5 @@
 use crate::backend::winit::DEFAULT_FONT_NAME;
-use crate::{Bounds, Font, FontSize, LayoutGlyph, Position, Scalar, Size, TextLayout};
+use crate::{Bounds, Font, FontSize, LayoutGlyph, Position, Scalar, Size, TextLayout, LayoutLine};
 use fnv::FnvHashMap as HashMap;
 use webrender::api::{
     AddFont, AddFontInstance, FontInstanceKey, FontKey, RenderApi, ResourceUpdate,
@@ -93,7 +93,7 @@ impl FontManager {
         }
     }
 
-    pub fn layout<'a>(&self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
+    pub fn layout<'a>(&self, text: &str, font: Option<&Font>, size: FontSize, buffer: &mut TextLayout) {
         let size = size as f32;
         let scale = rusttype::Scale {
             // TODO: Fix glyph overlapping without additional x-scaling
@@ -108,7 +108,7 @@ impl FontManager {
             x: 0.0,
             y: vmetrics.descent,
         };
-        let glyphs: Vec<LayoutGlyph> = font
+        let glyphs = font
             .layout(text, scale, point)
             .map(|glyph| {
                 let index = glyph.id().0;
@@ -121,16 +121,19 @@ impl FontManager {
                     index,
                     bounds: Bounds::new(point, size),
                 }
-            })
-            .collect();
+            });
+        let glyphs_begin = buffer.glyphs.len();
+        buffer.glyphs.extend(glyphs);
+        let glyphs_end = buffer.glyphs.len();
 
         // NOTE: The descent is usually negative
-        let height = (vmetrics.descent.abs() + vmetrics.ascent.abs()) as Scalar;
-        let size = glyphs
-            .last()
-            .map(|glyph| Size::new(glyph.bounds.max_x(), height))
-            .unwrap_or(Size::new(0.0, height));
-
-        TextLayout { size, glyphs }
+        let line_height = (vmetrics.descent.abs() + vmetrics.ascent.abs()) as Scalar;
+        let line_width = buffer.glyphs .last() .map(|glyph| glyph.bounds.max_x()) .unwrap_or(0.0);
+        let offset = buffer.lines.last().map(|line| line.y_offset + line.size.height).unwrap_or(0.0);
+        buffer.lines.push(LayoutLine {
+            y_offset: offset,
+            size: Size::new(line_width, line_height),
+            glyphs: glyphs_begin..glyphs_end,
+        });
     }
 }

@@ -1,18 +1,18 @@
 use crate::{
-    Bounds, BoxConstraints, Cid, Component, Font, FontSize, LayoutGlyph, Renderer, Size,
-    TextLayout, UiDerive, UiLayout,
+    Bounds, BoxConstraints, Cid, Component, Font, FontSize, Renderer, Size,
+    LayoutGlyph, UiDerive, UiLayout,
 };
 
 pub struct Glyphs<'a> {
     size: FontSize,
     font: Option<Font>,
-    layout: Option<&'a TextLayout>,
+    layout: Option<&'a [LayoutGlyph]>,
 }
 
 pub struct GlyphsState {
     size: FontSize,
     font: Option<Font>,
-    layout: TextLayout,
+    layout: Vec<LayoutGlyph>,
 }
 
 impl Default for Glyphs<'_> {
@@ -26,7 +26,7 @@ impl Default for Glyphs<'_> {
 }
 
 impl<'a> Glyphs<'a> {
-    pub fn text(mut self, text: &'a TextLayout) -> Self {
+    pub fn text(mut self, text: &'a [LayoutGlyph]) -> Self {
         self.layout = Some(text);
         self
     }
@@ -42,13 +42,24 @@ impl<'a> Glyphs<'a> {
     }
 }
 
+impl GlyphsState {
+    fn content_size(&self) -> Size {
+        if self.layout.is_empty() {
+            Size::zero()
+        } else {
+            let bounds = self.layout.last().unwrap().bounds;
+            Size::new(bounds.max_x(), bounds.max_y())
+        }
+    }
+}
+
 impl Component for Glyphs<'_> {
     type State = GlyphsState;
     type Msg = ();
     type Event = ();
 
     fn init(props: &Self) -> Self::State {
-        let layout = props.layout.cloned().unwrap_or_default();
+        let layout = props.layout.unwrap_or(&[]).iter().cloned().collect();
         GlyphsState {
             size: props.size,
             font: props.font.clone(),
@@ -64,7 +75,8 @@ impl Component for Glyphs<'_> {
             state.font = props.font.clone();
         }
         if props.layout != Some(&state.layout) {
-            state.layout = props.layout.cloned().unwrap_or_default();
+            let layout = props.layout.unwrap_or(&[]).iter().cloned().collect();
+            state.layout = layout;
         }
     }
 
@@ -81,7 +93,8 @@ impl Component for Glyphs<'_> {
                 name
             );
         }
-        state.layout.size
+
+        state.content_size()
     }
 
     fn render(state: &Self::State, bounds: Bounds, renderer: &mut Renderer) {
@@ -95,13 +108,13 @@ impl Component for Glyphs<'_> {
 
         let fm = &mut renderer.font_manager;
         let font_key = fm.instance(font, state.size, &renderer.api).unwrap();
-        let mut dim = state.layout.size;
+        let mut dim = state.content_size();
 
         let wr_glyph = |g: &LayoutGlyph| GlyphInstance {
             index: g.index,
             point: LayoutPoint::from_untyped(&(bounds.origin + g.bounds.origin.to_vector())),
         };
-        let glyphs = state.layout.glyphs.iter().map(wr_glyph);
+        let glyphs = state.layout.iter().map(wr_glyph);
 
         if dim.width > bounds.size.width || dim.height > bounds.size.height {
             dim = bounds.size;

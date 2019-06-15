@@ -3,13 +3,13 @@ use crate::{
     UiLayout, UiView,
 };
 
-pub struct Text<'a> {
+pub struct Line<'a> {
     content: &'a str,
     size: FontSize,
     font: Option<Font>,
 }
 
-impl<'a> Default for Text<'a> {
+impl<'a> Default for Line<'a> {
     fn default() -> Self {
         Self {
             content: "",
@@ -19,7 +19,7 @@ impl<'a> Default for Text<'a> {
     }
 }
 
-impl<'a> Text<'a> {
+impl<'a> Line<'a> {
     pub fn content(mut self, content: &'a str) -> Self {
         self.content = content;
         self
@@ -36,20 +36,20 @@ impl<'a> Text<'a> {
     }
 }
 
-pub struct TextState {
+pub struct LineState {
     pub content: String,
     pub size: FontSize,
     pub font: Option<Font>,
     pub layout: TextLayout,
 }
 
-impl<'a> Component for Text<'a> {
-    type State = TextState;
+impl<'a> Component for Line<'a> {
+    type State = LineState;
     type Msg = ();
     type Event = ();
 
     fn init(props: &Self) -> Self::State {
-        TextState {
+        LineState {
             content: String::default(),
             size: props.size,
             font: props.font.clone(),
@@ -72,7 +72,6 @@ impl<'a> Component for Text<'a> {
             changed = true;
         }
         if changed {
-            state.layout.clear();
             ui.layout(props.content, props.font.as_ref(), props.size, &mut state.layout);
         }
     }
@@ -92,7 +91,7 @@ impl<'a> Component for Text<'a> {
         }
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
-        let size = constraints.check_size(state.layout.size());
+        let size = constraints.check_size(state.layout.size);
         ui.size(children[0], BoxConstraints::new_tight(size));
 
         size
@@ -101,7 +100,7 @@ impl<'a> Component for Text<'a> {
     fn view(_props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         Glyphs::new()
             .size(state.size)
-            .text(&state.layout.glyphs[state.layout.lines[0].glyphs.clone()])
+            .text(&state.layout)
             .set(iid!(), ui);
     }
 }

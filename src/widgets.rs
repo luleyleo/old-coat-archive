@@ -4,6 +4,9 @@ pub use self::rectangle::Rectangle;
 mod glyphs;
 pub use self::glyphs::Glyphs;
 
+// mod line;
+// pub use self::line::Line;
+
 mod text;
 pub use self::text::Text;
 

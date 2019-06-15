@@ -9,7 +9,7 @@ impl<'a> UiDerive<'a> {
         UiDerive { fonts }
     }
 
-    pub fn layout(&self, text: &str, font: Option<&Font>, size: FontSize) -> TextLayout {
-        self.fonts.layout(text, font, size)
+    pub fn layout(&self, text: &str, font: Option<&Font>, size: FontSize, buffer: &mut TextLayout) {
+        self.fonts.layout(text, font, size, buffer)
     }
 }

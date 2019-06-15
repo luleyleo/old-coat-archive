@@ -101,7 +101,7 @@ impl<'a> Component for TextEdit<'a> {
             changed = true;
         }
         if changed {
-            state.layout = ui.layout(&state.content, props.font.as_ref(), props.size);
+            ui.layout(&state.content, props.font.as_ref(), props.size, &mut state.layout);
         }
     }
 
@@ -119,7 +119,7 @@ impl<'a> Component for TextEdit<'a> {
     fn view(props: &Self, state: &Self::State, ui: &mut UiView<Self>) {
         Glyphs::new()
             .size(state.size)
-            .text(&state.layout)
+            .text(&state.layout.glyphs[state.layout.lines[0].glyphs.clone()])
             .set(iid!(), ui);
 
         let x_offset = if let Some(buffer) = props.buffer {
@@ -140,7 +140,7 @@ impl<'a> Component for TextEdit<'a> {
         };
 
         Offset::new().x(x_offset).set(iid!(), ui).add(|| {
-            let height = state.layout.size.height;
+            let height = state.layout.size().height;
             Constrained::new()
                 .max_width(props.cursor.width)
                 .max_height(height)
@@ -180,7 +180,7 @@ impl<'a> Component for TextEdit<'a> {
         let constraints = constraints.min_width(constraints.min_width.max(state.cursor.width));
 
         // TODO: Some sort of ellipsis or so if the constraints are to small
-        let size = constraints.check_size(state.layout.size);
+        let size = constraints.check_size(state.layout.size());
         for child in 0..CHILD_COUNT {
             ui.size(children[child], BoxConstraints::new_tight(size));
         }

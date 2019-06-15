@@ -44,7 +44,7 @@ pub use self::input::{
 };
 
 mod text;
-pub use self::text::{Buffer, BufferUpdate, LayoutGlyph, TextLayout};
+pub use self::text::{Buffer, BufferUpdate, LayoutGlyph, TextLayout, LayoutLine};
 
 mod font;
 pub use self::font::{Font, FontSize, FontWeight};

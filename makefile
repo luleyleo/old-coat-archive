@@ -19,3 +19,6 @@ dev:
 widgets:
 	$(DBG_FLAGS) cargo run --example widgets
 
+text:
+	$(DBG_FLAGS) cargo run --example text
+
